@@ -105,3 +105,14 @@ aws sts get-caller-identity
 
 - If the configured S3 bucket is public, upload with `aws s3 cp` and share the plain object URL `https://$AWS_S3_BUCKET_NAME.s3.amazonaws.com/<key>` instead of generating a presigned URL.
 Do not hardcode AWS credentials or bucket secrets in the repository.
+
+## Cursor Cloud specific instructions
+
+- **Dependency refresh on startup:** run `CLOUD_AGENT_SKIP_ENTERPRISE=true bash .cursor/scripts/cloud-agent-install.sh` when the `mattermost/enterprise` sibling checkout is not present (private repo). With the multi-repo environment, omit the skip so `verify_enterprise_checkout` can succeed.
+- **Docker permissions:** if `docker ps` returns permission denied, use `sg docker -c '<command>'` or confirm the `ubuntu` user is in the `docker` group and the daemon is running (`sudo service docker start`). `cloud-agent-start.sh` can time out even when Docker works after manual start.
+- **Minimal local stack:** `cd server && sg docker -c "ENABLED_DOCKER_SERVICES='postgres redis' make start-docker"` then `ENABLED_DOCKER_SERVICES='postgres redis' RUN_SERVER_IN_BACKGROUND=true make run` (or `make run-server` in tmux). See ports **8065** (server) and **9005** (webapp dev server).
+- **Go version:** match `server/.go-version` (install under `/usr/local/go` if the VM image Go is older). If `go.dev` downloads fail, use `https://dl.google.com/go/go<version>.linux-amd64.tar.gz`.
+- **Node version:** match `.nvmrc` (`nvm use 24.11` after sourcing `~/.nvm/nvm.sh`).
+- **Seeded admin for API/UI checks:** after `make run-server`, create `cursoradmin` / `Password123!` and team `cursorteam` with the `mmctl` commands above, then `mmctl --local team users add cursorteam cursoradmin` before posting to `town-square`.
+- **Lint/tests (representative):** `cd webapp && make check-types`; `cd server && go test -short ./public/model/...` (or `make gotestsum` then `make test-server-quick` once `bin/gotestsum` exists). Full Playwright/docker E2E flows live under `e2e-tests/` (see `e2e-tests/README.md`).
+- **Headless UI automation:** webpack dev bundles may hit the HTML meta CSP (`script-src 'self'`) in Playwright; use `bypassCSP: true` and a desktop user agent, or validate via API (`/api/v4/system/ping`, login + posts) when the UI shell is blocked.
