@@ -10,8 +10,12 @@ import type {TeamType} from '@mattermost/types/teams';
 
 import {CategoryTypes} from 'mattermost-redux/constants/channel_categories';
 
-import {act, renderWithContext, screen} from 'tests/react_testing_utils';
-import {DraggingStates, DraggingStateTypes} from 'utils/constants';
+import {openModal} from 'actions/views/modals';
+
+import EditCategoryModal from 'components/edit_category_modal';
+
+import {act, renderWithContext, screen, userEvent} from 'tests/react_testing_utils';
+import {DraggingStates, DraggingStateTypes, ModalIdentifiers} from 'utils/constants';
 import {TestHelper} from 'utils/test_helper';
 
 import {SidebarList as SidebarListComponent} from './sidebar_list';
@@ -57,7 +61,22 @@ jest.mock('components/common/scrollbars', () => {
 
 jest.mock('components/sidebar/sidebar_category', () => () => <div data-testid='sidebar-category'/>);
 
+jest.mock('actions/views/modals', () => ({
+    openModal: jest.fn(),
+}));
+
+const mockDispatch = jest.fn();
+
+jest.mock('react-redux', () => ({
+    ...jest.requireActual('react-redux') as typeof import('react-redux'),
+    useDispatch: () => mockDispatch,
+}));
+
 describe('SidebarList', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     const intl = {
         formatMessage: ({defaultMessage}: {defaultMessage: string}) => defaultMessage,
     } as any;
@@ -393,5 +412,47 @@ describe('SidebarList', () => {
 
         instance.onDragEnd(channelResult);
         expect(baseProps.actions.moveChannelsInSidebar).toHaveBeenCalledWith(channelResult.destination!.droppableId, channelResult.destination!.index, channelResult.draggableId);
+    });
+
+    test('should render create category button when unread filter is disabled', () => {
+        renderWithContext(
+            <SidebarListComponent
+                {...baseProps}
+                intl={intl}
+                isUnreadFilterEnabled={false}
+            />,
+        );
+
+        expect(screen.getByRole('button', {name: /create new category/i})).toBeInTheDocument();
+    });
+
+    test('should hide create category button when unread filter is enabled', () => {
+        renderWithContext(
+            <SidebarListComponent
+                {...baseProps}
+                intl={intl}
+                isUnreadFilterEnabled={true}
+            />,
+        );
+
+        expect(screen.queryByRole('button', {name: /create new category/i})).not.toBeInTheDocument();
+    });
+
+    test('should open create category modal when create category button is clicked', async () => {
+        renderWithContext(
+            <SidebarListComponent
+                {...baseProps}
+                intl={intl}
+                isUnreadFilterEnabled={false}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: /create new category/i}));
+
+        expect(openModal).toHaveBeenCalledWith({
+            modalId: ModalIdentifiers.EDIT_CATEGORY,
+            dialogType: EditCategoryModal,
+        });
+        expect(mockDispatch).toHaveBeenCalled();
     });
 });

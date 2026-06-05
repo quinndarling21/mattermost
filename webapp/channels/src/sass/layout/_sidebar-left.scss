@@ -213,13 +213,30 @@ $sidebarOpacityAnimationDuration: 0.15s;
             }
         }
 
-        &__addChannelsCtaLhsButton {
+        &__addChannelsCtaLhsButton,
+        &__createCategoryLhsButton {
             border: none;
             background: none;
 
             div {
                 display: flex;
                 margin-left: 15px;
+            }
+        }
+
+        &__createCategoryLhsButton {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            padding: 6px 16px;
+            color: rgba(var(--sidebar-text-rgb), 0.64);
+            font-size: 12px;
+            font-weight: 600;
+            gap: 5px;
+
+            &:hover {
+                background-color: var(--sidebar-text-hover-bg);
+                color: var(--sidebar-text);
             }
         }
 
@@ -488,6 +505,11 @@ $sidebarOpacityAnimationDuration: 0.15s;
         min-height: 0;
         flex: 1;
         flex-direction: column;
+
+        > [data-simplebar] {
+            flex: 1;
+            min-height: 0;
+        }
     }
 
     .SidebarCategory_newLabel {
@@ -666,15 +688,22 @@ $sidebarOpacityAnimationDuration: 0.15s;
         }
     }
 
+    .SidebarChannelNavigator_inviteUsersSticky,
+    .SidebarChannelNavigator_createCategorySticky {
+        display: flex;
+        width: 100%;
+        flex-shrink: 0;
+        justify-content: space-evenly;
+        padding: 8px 0;
+        border-top: 1px solid rgba(var(--sidebar-text-rgb), 0.08);
+        background-color: var(--sidebar-bg);
+    }
+
     .SidebarChannelNavigator_inviteUsersSticky {
         position: absolute;
         z-index: 2;
         bottom: 0;
-        display: flex;
-        width: 100%;
-        justify-content: space-evenly;
         padding: 16px;
-        background-color: var(--sidebar-bg);
 
         button {
             min-width: 100%;
@@ -698,6 +727,11 @@ $sidebarOpacityAnimationDuration: 0.15s;
                 color: var(--sidebar-text);
             }
         }
+    }
+
+    #createCategoryCta {
+        display: flex;
+        width: 100%;
     }
 
     .SidebarChannelGroupHeader_groupButton {
