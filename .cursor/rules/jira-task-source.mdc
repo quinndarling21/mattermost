@@ -1,0 +1,8 @@
+---
+description: Use the Mattermost Jira board as the source of truth for engineering tasks
+alwaysApply: true
+---
+
+# Jira
+
+- When the user mentions Jira in this repository, look in the `Mattermost` project (`MAT`) on `fe-anysphere-demo.atlassian.net`.
