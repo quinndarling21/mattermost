@@ -36,6 +36,30 @@ exports[`SidebarList should match snapshot 1`] = `
         />
       </div>
     </div>
+    <button
+      aria-label="Create new category"
+      class="style--none intro-links color--link cursor--pointer"
+      id="createCategoryButton"
+    >
+      <div
+        aria-hidden="true"
+        class="SidebarChannelNavigator__createCategoryLhsButton"
+      >
+        <svg
+          fill="rgba(var(--sidebar-text-rgb), 0.64)"
+          height="20"
+          version="1.1"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 12H14V10H16V12H18V14H16V16H14V14H12V12M22 8V18C22 19.11 21.11 20 20 20H4C2.89 20 2 19.11 2 18V6C2 4.89 2.89 4 4 4H10L12 6H20C21.11 6 22 6.89 22 8M20 8H4V18H20V8Z"
+          />
+        </svg>
+        Create new category
+      </div>
+    </button>
   </div>
 </div>
 `;

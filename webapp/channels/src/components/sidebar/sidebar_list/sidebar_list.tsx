@@ -21,6 +21,7 @@ import {makeAsyncComponent} from 'components/async_load';
 import Scrollbars from 'components/common/scrollbars';
 import MarkAllAsReadModal from 'components/mark_all_as_read_modal';
 import type {Props as MarkAllAsReadModalProps} from 'components/mark_all_as_read_modal';
+import CreateCategoryButton from 'components/sidebar/create_category_button';
 import SidebarCategory from 'components/sidebar/sidebar_category';
 
 import {findNextUnreadChannelId} from 'utils/channel_utils';
@@ -591,6 +592,7 @@ export class SidebarList extends React.PureComponent<Props, State> {
                     >
                         {channelList}
                     </Scrollbars>
+                    <CreateCategoryButton/>
                 </div>
             </>
         );
