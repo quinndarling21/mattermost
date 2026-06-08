@@ -108,14 +108,15 @@ Do not hardcode AWS credentials or bucket secrets in the repository.
 
 ## Cursor Cloud specific instructions
 
-- Before `make start-docker` or `make run`, confirm Docker works with `docker info`. If the daemon is down, run `bash .cursor/scripts/cloud-agent-start.sh`. If you see `permission denied` on `/var/run/docker.sock`, fix group access (`sudo usermod -aG docker "$USER"` and re-login) or use `sudo chmod g+rw /var/run/docker.sock`.
-- Put Node 24.11 on `PATH` before server/webapp commands. The install hook uses nvm; in a fresh shell:
+- Before `make start-docker` or `make run`, confirm Docker works with `docker info`. If the daemon is down, run `bash .cursor/scripts/cloud-agent-start.sh`. If you see `permission denied` on `/var/run/docker.sock`, fix group access (`sudo usermod -aG docker "$USER"` and re-login) or use `sudo chmod g+rw /var/run/docker.sock`. After `usermod`, existing shells may still lack the `docker` group; wrap Docker/Makefile commands in `sg docker -c '...'` until you start a new login shell.
+- If the Cloud image was not built from `.cursor/Dockerfile`, Docker/Go may be missing. Install Docker via `.cursor/Dockerfile` apt steps, then install Go 1.26.3 from `https://dl.google.com/go/go1.26.3.linux-amd64.tar.gz` under `/usr/local/go` when `go.dev` TLS fails.
+- Put Go 1.26.3 and Node 24.11 on `PATH` before server/webapp commands. `/usr/local/go/bin` must precede `/usr/bin/go` (the distro Go is too old). The install hook uses nvm; in a fresh shell:
 
   ```bash
   export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
   nvm use 24.11.1
-  export PATH="$NVM_DIR/versions/node/v24.11.1/bin:$HOME/go/bin:$PATH"
+  export PATH="$NVM_DIR/versions/node/v24.11.1/bin:/usr/local/go/bin:$HOME/go/bin:$PATH"
   ```
 
 - Team Edition dev works without the sibling `enterprise` checkout. If the install hook fails on enterprise verification, set `CLOUD_AGENT_SKIP_ENTERPRISE=true` (runtime still uses `server/enterprise` source-available code).
