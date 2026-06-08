@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG GO_VERSION=1.25.9
+ARG GO_VERSION=1.26.3
 ARG NODE_VERSION=24.11.1
 ARG NVM_VERSION=0.40.3
 ARG AGENT_BROWSER_VERSION=0.27.0
@@ -155,7 +155,7 @@ RUN { \
       echo 'export NVM_DIR="$HOME/.nvm"'; \
       echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'; \
       echo 'export GOPATH="$HOME/go"'; \
-      echo 'export PATH="$NVM_DIR/versions/node/v24.11.1/bin:/usr/local/go/bin:$GOPATH/bin:$PATH"'; \
+      echo "export PATH=\"\$NVM_DIR/versions/node/v${NODE_VERSION}/bin:/usr/local/go/bin:\$GOPATH/bin:\$PATH\""; \
     } >> /home/ubuntu/.bashrc && \
     chown ubuntu:ubuntu /home/ubuntu/.bashrc
 
