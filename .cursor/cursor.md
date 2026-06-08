@@ -121,3 +121,5 @@ Do not hardcode AWS credentials or bucket secrets in the repository.
 - Team Edition dev works without the sibling `enterprise` checkout. If the install hook fails on enterprise verification, set `CLOUD_AGENT_SKIP_ENTERPRISE=true` (runtime still uses `server/enterprise` source-available code).
 - Use tmux for long-running `make run` / `make run-server` sessions so the stack survives beyond a single shell command.
 - Quick verification commands after startup: `curl http://127.0.0.1:8065/api/v4/system/ping`, `cd server && make validate-go-version vet`, `cd server && make test-public`, `cd webapp && npm run test --workspace platform/client`.
+- If `agent-browser install` fails to download Chrome, use the Playwright browsers installed by `cd e2e-tests/playwright && npm ci` and set `export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"` before `agent-browser` commands.
+- If `docker info` still reports permission denied after group fixes, `sudo chmod 666 /var/run/docker.sock` works without a re-login in ephemeral Cloud shells.
