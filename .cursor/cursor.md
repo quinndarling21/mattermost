@@ -105,3 +105,19 @@ aws sts get-caller-identity
 
 - If the configured S3 bucket is public, upload with `aws s3 cp` and share the plain object URL `https://$AWS_S3_BUCKET_NAME.s3.amazonaws.com/<key>` instead of generating a presigned URL.
 Do not hardcode AWS credentials or bucket secrets in the repository.
+
+## Cursor Cloud specific instructions
+
+- Before `make start-docker` or `make run`, confirm Docker works with `docker info`. If the daemon is down, run `bash .cursor/scripts/cloud-agent-start.sh`. If you see `permission denied` on `/var/run/docker.sock`, fix group access (`sudo usermod -aG docker "$USER"` and re-login) or use `sudo chmod g+rw /var/run/docker.sock`.
+- Put Node 24.11 on `PATH` before server/webapp commands. The install hook uses nvm; in a fresh shell:
+
+  ```bash
+  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  nvm use 24.11.1
+  export PATH="$NVM_DIR/versions/node/v24.11.1/bin:$HOME/go/bin:$PATH"
+  ```
+
+- Team Edition dev works without the sibling `enterprise` checkout. If the install hook fails on enterprise verification, set `CLOUD_AGENT_SKIP_ENTERPRISE=true` (runtime still uses `server/enterprise` source-available code).
+- Use tmux for long-running `make run` / `make run-server` sessions so the stack survives beyond a single shell command.
+- Quick verification commands after startup: `curl http://127.0.0.1:8065/api/v4/system/ping`, `cd server && make validate-go-version vet`, `cd server && make test-public`, `cd webapp && npm run test --workspace platform/client`.
