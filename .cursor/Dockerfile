@@ -112,12 +112,16 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gh && \
     rm -rf /var/lib/apt/lists/*
 
+# Download Go from dl.google.com (Google's canonical Go mirror) rather than
+# go.dev. The Cloud Agent build network enforces an SNI egress allowlist, and
+# go.dev is NOT on it (it fails the TLS handshake with SSL_ERROR_SYSCALL), while
+# dl.google.com is allowlisted and serves identical tarballs.
 RUN case "$(dpkg --print-architecture)" in \
       amd64) go_arch=amd64 ;; \
       arm64) go_arch=arm64 ;; \
       *) echo "Unsupported Go architecture: $(dpkg --print-architecture)" >&2; exit 1 ;; \
     esac && \
-    curl --retry 3 --retry-delay 5 -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${go_arch}.tar.gz" -o /tmp/go.tgz && \
+    curl --retry 5 --retry-delay 5 --retry-all-errors -fsSL "https://dl.google.com/go/go${GO_VERSION}.linux-${go_arch}.tar.gz" -o /tmp/go.tgz && \
     rm -rf /usr/local/go && \
     tar -C /usr/local -xzf /tmp/go.tgz && \
     ln -sfnT /usr/local/go/bin/go /usr/local/bin/go && \
