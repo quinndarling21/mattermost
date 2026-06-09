@@ -108,7 +108,8 @@ Do not hardcode AWS credentials or bucket secrets in the repository.
 
 ## Cursor Cloud specific instructions
 
-- Before `make start-docker` or `make run`, confirm Docker works with `docker info`. If the daemon is down, run `bash .cursor/scripts/cloud-agent-start.sh`. If you see `permission denied` on `/var/run/docker.sock`, fix group access (`sudo usermod -aG docker "$USER"` and re-login) or use `sudo chmod g+rw /var/run/docker.sock`.
+- Before `make start-docker` or `make run`, confirm Docker works with `docker info`. If the daemon is down, run `bash .cursor/scripts/cloud-agent-start.sh`. If you see `permission denied` on `/var/run/docker.sock`, fix group access (`sudo usermod -aG docker "$USER"` and re-login) or use `sudo chmod g+rw /var/run/docker.sock`. In some Cloud VMs, `usermod` does not take effect until a new login; `sudo chmod 666 /var/run/docker.sock` is a reliable same-session workaround.
+- For browser demos, set `AGENT_BROWSER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable` when `agent-browser install` cannot download Chromium (system Chrome is preinstalled in the Cloud image).
 - Put Node 24.11 on `PATH` before server/webapp commands. The install hook uses nvm; in a fresh shell:
 
   ```bash
