@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -158,6 +158,39 @@ describe('tabs are properly rendered', () => {
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
         expect(screen.queryAllByText('plugin B Settings')).toHaveLength(2);
         expect(screen.queryByText('plugin A Settings')).not.toBeInTheDocument();
+    });
+});
+
+describe('settings search', () => {
+    it('renders the search input and filters matching tabs', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        const searchInput = screen.getByTestId('userSettingsSidebarSearch');
+        expect(searchInput).toBeInTheDocument();
+        expect(searchInput).toHaveAttribute('placeholder', 'Find settings');
+
+        fireEvent.change(searchInput, {target: {value: 'theme'}});
+
+        expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
+        expect(screen.queryByTestId('notifications-tab-button')).not.toBeInTheDocument();
+    });
+
+    it('shows an empty state when no settings match', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        fireEvent.change(screen.getByTestId('userSettingsSidebarSearch'), {target: {value: 'notexistingword'}});
+
+        expect(screen.getByTestId('userSettingsSidebarNoResults')).toBeInTheDocument();
+    });
+
+    it('clears the search when the clear button is clicked', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        fireEvent.change(screen.getByTestId('userSettingsSidebarSearch'), {target: {value: 'theme'}});
+        fireEvent.click(screen.getByTestId('input-clear'));
+
+        expect(screen.getByTestId('notifications-tab-button')).toBeInTheDocument();
+        expect(screen.queryByTestId('userSettingsSidebarNoResults')).not.toBeInTheDocument();
     });
 });
 

@@ -30,6 +30,8 @@ import {AnnouncementBarMessages, AnnouncementBarTypes, AcceptedProfileImageTypes
 import {getUserPropertyFieldLabel} from 'utils/properties';
 import {validHttpUrl} from 'utils/url';
 import * as Utils from 'utils/utils';
+import {isUserSettingsSectionVisible} from 'utils/user_settings_search';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import type {GlobalState} from 'types/store';
 
@@ -171,6 +173,7 @@ export type Props = {
     samlPositionAttributeSet?: boolean;
     ldapPictureAttributeSet?: boolean;
     enableCustomProfileAttributes: boolean;
+    searchFilter?: UserSettingsSearchFilter;
 }
 
 type State = {
@@ -581,7 +584,16 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         };
     }
 
+    isSectionVisible(section: string) {
+        const searchFilter = this.props.searchFilter ?? {query: '', matchingSections: null};
+        return isUserSettingsSectionVisible('profile', section, searchFilter);
+    }
+
     createEmailSection() {
+        if (!this.isSectionVisible('email')) {
+            return null;
+        }
+
         const {formatMessage} = this.props.intl;
 
         const active = this.props.activeSection === 'email';
@@ -936,6 +948,10 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
     }
 
     createNameSection = () => {
+        if (!this.isSectionVisible('name')) {
+            return null;
+        }
+
         const user = this.props.user;
         const {formatMessage} = this.props.intl;
 
@@ -1105,6 +1121,10 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
     };
 
     createNicknameSection = () => {
+        if (!this.isSectionVisible('nickname')) {
+            return null;
+        }
+
         const user = this.props.user;
         const {formatMessage} = this.props.intl;
 
@@ -1216,6 +1236,10 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
     };
 
     createUsernameSection = () => {
+        if (!this.isSectionVisible('username')) {
+            return null;
+        }
+
         const {formatMessage} = this.props.intl;
 
         const active = this.props.activeSection === 'username';
@@ -1323,6 +1347,10 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
     };
 
     createPositionSection = () => {
+        if (!this.isSectionVisible('position')) {
+            return null;
+        }
+
         const user = this.props.user;
         const {formatMessage} = this.props.intl;
 
@@ -1685,6 +1713,10 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
     };
 
     createPictureSection = () => {
+        if (!this.isSectionVisible('picture')) {
+            return null;
+        }
+
         const user = this.props.user;
         const {formatMessage} = this.props.intl;
 

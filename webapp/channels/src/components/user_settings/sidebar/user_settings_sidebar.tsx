@@ -6,11 +6,14 @@ import {FormattedMessage} from 'react-intl';
 
 import type {PreferencesType} from '@mattermost/types/preferences';
 
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
+
 import LimitVisibleGMsDMs from './limit_visible_gms_dms';
 import ShowUnreadsCategory from './show_unreads_category';
 
 import SettingDesktopHeader from '../headers/setting_desktop_header';
 import SettingMobileHeader from '../headers/setting_mobile_header';
+import UserSettingsSearchSection from '../search/user_settings_search_section';
 
 export interface Props {
     updateSection: (section: string) => void;
@@ -20,9 +23,12 @@ export interface Props {
     adminMode?: boolean;
     userId: string;
     userPreferences?: PreferencesType;
+    searchFilter?: UserSettingsSearchFilter;
 }
 
 export default function UserSettingsSidebar(props: Props): JSX.Element {
+    const searchFilter = props.searchFilter ?? {query: '', matchingSections: null};
+
     return (
         <div
             id='sidebarSettings'
@@ -53,23 +59,35 @@ export default function UserSettingsSidebar(props: Props): JSX.Element {
                 />
 
                 <div className='divider-dark first'/>
-                <ShowUnreadsCategory
-                    active={props.activeSection === 'showUnreadsCategory'}
-                    updateSection={props.updateSection}
-                    areAllSectionsInactive={props.activeSection === ''}
-                    adminMode={props.adminMode}
-                    userId={props.userId}
-                    userPreferences={props.userPreferences}
-                />
+                <UserSettingsSearchSection
+                    tab='sidebar'
+                    section='showUnreadsCategory'
+                    searchFilter={searchFilter}
+                >
+                    <ShowUnreadsCategory
+                        active={props.activeSection === 'showUnreadsCategory'}
+                        updateSection={props.updateSection}
+                        areAllSectionsInactive={props.activeSection === ''}
+                        adminMode={props.adminMode}
+                        userId={props.userId}
+                        userPreferences={props.userPreferences}
+                    />
+                </UserSettingsSearchSection>
                 <div className='divider-dark'/>
-                <LimitVisibleGMsDMs
-                    active={props.activeSection === 'limitVisibleGMsDMs'}
-                    updateSection={props.updateSection}
-                    areAllSectionsInactive={props.activeSection === ''}
-                    adminMode={props.adminMode}
-                    userId={props.userId}
-                    userPreferences={props.userPreferences}
-                />
+                <UserSettingsSearchSection
+                    tab='sidebar'
+                    section='limitVisibleGMsDMs'
+                    searchFilter={searchFilter}
+                >
+                    <LimitVisibleGMsDMs
+                        active={props.activeSection === 'limitVisibleGMsDMs'}
+                        updateSection={props.updateSection}
+                        areAllSectionsInactive={props.activeSection === ''}
+                        adminMode={props.adminMode}
+                        userId={props.userId}
+                        userPreferences={props.userPreferences}
+                    />
+                </UserSettingsSearchSection>
                 <div className='divider-dark'/>
             </div>
         </div>
