@@ -48,7 +48,9 @@ jobs:
         if: steps.key.outputs.present == 'true'
         run: |
           curl https://cursor.com/install -fsS | bash
+          # The installer location has varied between releases; add both.
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
 
       - name: Run Cursor rules compliance check
         id: check
@@ -59,7 +61,8 @@ jobs:
           CURSOR_MODEL: ${{ vars.CURSOR_RULES_MODEL }}
           BASE_REF: origin/${{ github.base_ref }}
         run: |
-          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          # Full (non-shallow) base fetch so the BASE...HEAD merge-base resolves.
+          git fetch --no-tags origin "${{ github.base_ref }}"
           bash tools/cursor-rules-check/check-rules.sh
 
       - name: Upload compliance report
@@ -71,7 +74,10 @@ jobs:
           if-no-files-found: ignore
 
       - name: Post or update PR comment
+        # Fork PRs run with a read-only token, so commenting may be denied.
+        # Keep the check non-blocking: never fail the job on a comment error.
         if: steps.key.outputs.present == 'true'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
