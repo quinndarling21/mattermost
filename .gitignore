@@ -185,3 +185,6 @@ docker-compose.override.yaml
 server/prev-report.xml
 server/prev-gotestsum.json
 server/shard-*.txt
+
+# Cursor rules compliance check output
+.cursor-rules-report/

@@ -1,0 +1,104 @@
+name: Cursor Rules Compliance
+
+# Non-blocking pre-merge check that uses the Cursor CLI (headless mode) to flag
+# changes that may break the repository's Cursor rules (.cursor/rules/*.mdc).
+#
+# This check NEVER blocks a merge: findings surface as PR annotations, a sticky
+# PR comment, and a job summary. The job reports success even when violations
+# are found. Configure a CURSOR_API_KEY repository/org secret to enable it;
+# without the secret the job is a no-op.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: cursor-rules-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  cursor-rules:
+    name: Cursor rules compliance (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check for Cursor API key
+        id: key
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          if [ -n "$CURSOR_API_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Cursor rules check skipped::Set the CURSOR_API_KEY secret to enable the Cursor rules compliance check."
+          fi
+
+      - name: Install Cursor CLI
+        if: steps.key.outputs.present == 'true'
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run Cursor rules compliance check
+        id: check
+        if: steps.key.outputs.present == 'true'
+        continue-on-error: true
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          CURSOR_MODEL: ${{ vars.CURSOR_RULES_MODEL }}
+          BASE_REF: origin/${{ github.base_ref }}
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          bash tools/cursor-rules-check/check-rules.sh
+
+      - name: Upload compliance report
+        if: steps.key.outputs.present == 'true'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: cursor-rules-report
+          path: .cursor-rules-report/
+          if-no-files-found: ignore
+
+      - name: Post or update PR comment
+        if: steps.key.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          report=".cursor-rules-report/report.md"
+          if [ ! -f "$report" ]; then
+            echo "No report produced; skipping comment."
+            exit 0
+          fi
+          marker="<!-- cursor-rules-compliance -->"
+          {
+            echo "$marker"
+            cat "$report"
+            echo
+            echo "_Advisory only — this check does not block merge. [What is this?](tools/cursor-rules-check/README.md)_"
+          } > comment-body.md
+
+          existing="$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            --jq ".[] | select(.body | contains(\"${marker}\")) | .id" | head -n1)"
+
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/${REPO}/issues/comments/${existing}" \
+              -F body=@comment-body.md >/dev/null
+            echo "Updated existing comment ${existing}."
+          else
+            gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+              -F body=@comment-body.md >/dev/null
+            echo "Created new comment."
+          fi
