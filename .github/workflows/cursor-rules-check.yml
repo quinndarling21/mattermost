@@ -1,6 +1,6 @@
 name: Cursor Rules Compliance
 
-# Non-blocking pre-merge check that uses the Cursor CLI (headless mode) to flag
+# Non-blocking pre-merge check that uses the Cursor SDK (@cursor/sdk) to flag
 # changes that may break the repository's Cursor rules (.cursor/rules/*.mdc).
 #
 # This check NEVER blocks a merge: findings surface as PR annotations, a sticky
@@ -44,13 +44,18 @@ jobs:
             echo "::notice title=Cursor rules check skipped::Set the CURSOR_API_KEY secret to enable the Cursor rules compliance check."
           fi
 
-      - name: Install Cursor CLI
+      - name: Set up Node.js
         if: steps.key.outputs.present == 'true'
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          # The installer location has varied between releases; add both.
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tools/cursor-rules-check/package-lock.json
+
+      - name: Install Cursor rules check dependencies
+        if: steps.key.outputs.present == 'true'
+        working-directory: tools/cursor-rules-check
+        run: npm ci
 
       - name: Run Cursor rules compliance check
         id: check
@@ -59,11 +64,11 @@ jobs:
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           CURSOR_MODEL: ${{ vars.CURSOR_RULES_MODEL }}
-          BASE_REF: origin/${{ github.base_ref }}
         run: |
           # Full (non-shallow) base fetch so the BASE...HEAD merge-base resolves.
           git fetch --no-tags origin "${{ github.base_ref }}"
-          bash tools/cursor-rules-check/check-rules.sh
+          npm --prefix tools/cursor-rules-check run check -- \
+            --base "origin/${{ github.base_ref }}" --head HEAD
 
       - name: Upload compliance report
         if: steps.key.outputs.present == 'true'

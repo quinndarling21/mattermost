@@ -21,16 +21,16 @@ if [ -z "${CURSOR_API_KEY:-}" ]; then
 fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-SCRIPT="${REPO_ROOT}/tools/cursor-rules-check/check-rules.sh"
+TOOL_DIR="${REPO_ROOT}/tools/cursor-rules-check"
 
-if [ ! -x "${SCRIPT}" ] && [ ! -f "${SCRIPT}" ]; then
-    echo "[cursor-rules] check-rules.sh not found; skipping." >&2
+if [ ! -d "${TOOL_DIR}/node_modules" ]; then
+    echo "[cursor-rules] dependencies not installed (run: npm --prefix ${TOOL_DIR} ci); skipping." >&2
     exit 0
 fi
 
 echo "[cursor-rules] Checking staged changes against Cursor rules (advisory)..." >&2
 # --staged: evaluate the index. Never block the commit.
-bash "${SCRIPT}" --staged || true
+npm --prefix "${TOOL_DIR}" run --silent check -- --staged || true
 
 REPORT="${REPO_ROOT}/.cursor-rules-report/report.md"
 if [ -f "${REPORT}" ]; then
