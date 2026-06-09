@@ -53,6 +53,18 @@
                 line-height: 88px;
             }
 
+            .login-body-cloud-demo-badge {
+                width: fit-content;
+                padding: 6px 12px;
+                border: 1px solid rgba(var(--button-bg-rgb), 0.28);
+                border-radius: 999px;
+                background: rgba(var(--button-bg-rgb), 0.08);
+                color: var(--button-bg);
+                font-size: 13px;
+                font-weight: 600;
+                line-height: 18px;
+            }
+
             .login-body-message-svg {
                 position: relative;
                 align-self: flex-end;
