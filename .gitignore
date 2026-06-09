@@ -172,6 +172,8 @@ docker-compose.override.yaml
 !.cursor/rules/**
 !.cursor/skills/
 !.cursor/skills/**
+!.cursor/skills/mattermost-pull-request/
+!.cursor/skills/mattermost-pull-request/**
 !.cursor/README.md
 !.cursor/cursor.md
 !.cursor/Dockerfile
