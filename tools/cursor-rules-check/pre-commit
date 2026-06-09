@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Optional local pre-commit hook for Cursor rules compliance.
+#
+# Install with:
+#   ln -sf ../../tools/cursor-rules-check/pre-commit .git/hooks/pre-commit
+#
+# This hook is intentionally non-blocking: it prints any findings but always
+# allows the commit to proceed (exit 0). It only runs when a CURSOR_API_KEY is
+# available, and can be disabled per-commit with CURSOR_RULES_SKIP=1.
+
+set -euo pipefail
+
+if [ "${CURSOR_RULES_SKIP:-0}" = "1" ]; then
+    exit 0
+fi
+
+if [ -z "${CURSOR_API_KEY:-}" ]; then
+    echo "[cursor-rules] CURSOR_API_KEY not set; skipping rules compliance check." >&2
+    exit 0
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="${REPO_ROOT}/tools/cursor-rules-check/check-rules.sh"
+
+if [ ! -x "${SCRIPT}" ] && [ ! -f "${SCRIPT}" ]; then
+    echo "[cursor-rules] check-rules.sh not found; skipping." >&2
+    exit 0
+fi
+
+echo "[cursor-rules] Checking staged changes against Cursor rules (advisory)..." >&2
+# --staged: evaluate the index. Never block the commit.
+bash "${SCRIPT}" --staged || true
+
+REPORT="${REPO_ROOT}/.cursor-rules-report/report.md"
+if [ -f "${REPORT}" ]; then
+    echo "----------------------------------------" >&2
+    cat "${REPORT}" >&2
+    echo "----------------------------------------" >&2
+    echo "[cursor-rules] Advisory only — commit not blocked." >&2
+fi
+
+exit 0
