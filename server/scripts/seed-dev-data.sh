@@ -49,6 +49,33 @@ export MAX_WAIT_SECONDS="${MAX_WAIT_SECONDS:-90}"
 
 log() { printf '[seed-dev-data] %s\n' "$*" >&2; }
 
+seed_marker_team_exists() {
+    local teams_json
+
+    if ! teams_json="$("$MMCTL" team list --local --json 2>/dev/null)"; then
+        return 1
+    fi
+
+    SEED_MARKER_TEAM="$SEED_MARKER_TEAM" python3 -c '
+import json
+import os
+import sys
+
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+
+teams = data if isinstance(data, list) else [data]
+marker = os.environ["SEED_MARKER_TEAM"]
+for team in teams:
+    if isinstance(team, dict) and team.get("name") == marker:
+        sys.exit(0)
+
+sys.exit(1)
+' <<< "$teams_json"
+}
+
 if [ ! -x "$MMCTL" ]; then
     log "mmctl not found at $MMCTL, building it..."
     make mmctl-build
@@ -63,7 +90,7 @@ fi
 # Posts are not idempotent, so when asked, skip if the data is already present
 # (detected by the marker team) to avoid duplicating messages on every startup.
 if [ "$IF_EMPTY" = "true" ]; then
-    if "$MMCTL" team list --local --format plain --json=false 2>/dev/null | grep -qx "$SEED_MARKER_TEAM"; then
+    if seed_marker_team_exists; then
         log "Seed data already present (team '$SEED_MARKER_TEAM' exists), skipping."
         exit 0
     fi
