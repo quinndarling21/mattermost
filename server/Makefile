@@ -1,4 +1,4 @@
-.PHONY: build package run stop run-client run-server run-node run-haserver stop-haserver stop-client stop-server restart restart-server restart-client restart-haserver start-docker update-docker clean-dist clean nuke check-style check-client-style check-server-style check-unit-tests test dist run-client-tests setup-run-client-tests cleanup-run-client-tests test-client build-linux build-osx build-freebsd build-windows package-prep package-linux package-osx package-windows internal-test-web-client vet run-server-for-web-client-tests diff-config prepackaged-plugins prepackaged-binaries test-server test-server-ee test-server-elasticsearch test-server-opensearch test-server-quick test-server-race test-mmctl-unit test-mmctl-e2e test-mmctl test-mmctl-coverage mmctl-build mmctl-docs new-migration migrations-extract test-public mocks-public run-server-faketime default-roles-permissions generated
+.PHONY: build package run stop run-client run-server run-node run-haserver stop-haserver stop-client stop-server restart restart-server restart-client restart-haserver start-docker update-docker clean-dist clean nuke check-style check-client-style check-server-style check-unit-tests test dist run-client-tests setup-run-client-tests cleanup-run-client-tests test-client build-linux build-osx build-freebsd build-windows package-prep package-linux package-osx package-windows internal-test-web-client vet run-server-for-web-client-tests diff-config prepackaged-plugins prepackaged-binaries test-server test-server-ee test-server-elasticsearch test-server-opensearch test-server-quick test-server-race test-mmctl-unit test-mmctl-e2e test-mmctl test-mmctl-coverage mmctl-build mmctl-docs new-migration migrations-extract test-public mocks-public run-server-faketime default-roles-permissions generated seed-data seed-data-only auto-seed-data
 
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -569,6 +569,21 @@ inject-test-data: # add test data to the local instance.
 	@echo Login with a regular account username=user-1 password=SampleUs@r-1
 	@echo ========================================================================
 
+seed-data: export MM_SERVICESETTINGS_ENABLELOCALMODE := true
+seed-data: run-server ## Start a local server and seed it with realistic dev data (users, channels, messages), leaving it running.
+	./scripts/seed-dev-data.sh
+
+seed-data-only: ## Seed an already-running local server (started with local mode enabled) with realistic dev data.
+	./scripts/seed-dev-data.sh
+
+auto-seed-data: ## Internal: seed the running local server once if SEED_ON_RUN is enabled (used by `make run`).
+ifeq ($(SEED_ON_RUN),true)
+	@echo Seeding local dev server with test data if needed '(set SEED_ON_RUN=false to disable)'
+	@MAX_WAIT_SECONDS=180 ./scripts/seed-dev-data.sh --if-empty || echo "[seed-dev-data] WARNING: seeding skipped due to an error; continuing startup."
+else
+	@echo Skipping automatic dev data seeding '(SEED_ON_RUN=$(SEED_ON_RUN))'
+endif
+
 test-mmctl-unit: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-unit: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-unit: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -700,7 +715,8 @@ run-client-fullmap: client ## Legacy alias to run-client
 
 	cd $(BUILD_WEBAPP_DIR) && $(MAKE) run
 
-run: run-server run-client ## Runs the server and webapp.
+run: export MM_SERVICESETTINGS_ENABLELOCALMODE := true
+run: run-server auto-seed-data run-client ## Runs the server and webapp (auto-seeds dev data unless SEED_ON_RUN=false).
 
 run-pgvector: ## Runs the server and webapp with pgvector PostgreSQL image.
 	@MM_USE_PGVECTOR=true $(MAKE) run

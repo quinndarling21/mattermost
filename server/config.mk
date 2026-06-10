@@ -19,6 +19,11 @@ MM_NO_DOCKER ?= false
 # Run the server in the background
 RUN_SERVER_IN_BACKGROUND ?= true
 
+# Automatically seed the local dev server with realistic test data (users,
+# channels, messages) on `make run`. Seeding is idempotent: it only imports
+# once and is skipped if the data is already present. Set to false to disable.
+SEED_ON_RUN ?= true
+
 # Data loaded by default in openldap when container starts.
 #
 # Possible options: test or qa
