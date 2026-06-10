@@ -367,6 +367,10 @@ def make_message(rng, channel_base, members):
     return msg
 
 
+# Reactions and replies add small positive offsets to their parent's timestamp,
+# so a handful created on the most recent posts can land slightly after "now".
+# That's an accepted trade-off for development seed data — it keeps the code
+# simple and has no impact on demos or local analytics testing.
 def make_reactions(rng, members, parent_ts):
     reactions = []
     if rng.random() < 0.25:
