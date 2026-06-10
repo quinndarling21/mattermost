@@ -4,8 +4,8 @@
 .QuietHoursSettings {
     display: flex;
     flex-direction: column;
-    gap: 16px;
     padding: 16px 0;
+    gap: 16px;
 
     &__header {
         display: flex;
@@ -21,17 +21,17 @@
     &__toggle {
         display: flex;
         align-items: center;
-        gap: 8px;
         margin: 0;
         cursor: pointer;
+        gap: 8px;
     }
 
     &__body {
         display: flex;
         flex-direction: column;
-        gap: 16px;
         padding: 0;
         border: 0;
+        gap: 16px;
 
         &:disabled {
             opacity: 0.5;
@@ -87,17 +87,17 @@
     &__preview {
         display: flex;
         flex-direction: column;
-        gap: 4px;
         padding: 8px 12px;
         border-radius: 4px;
         background: rgba(var(--center-channel-color-rgb), 0.04);
+        gap: 4px;
     }
 
     &__preview_label {
         font-size: 12px;
         font-weight: 600;
-        text-transform: uppercase;
         opacity: 0.64;
+        text-transform: uppercase;
     }
 
     &__summary {
@@ -115,13 +115,13 @@
 .QuietHoursBadge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     padding: 2px 8px;
     border-radius: 12px;
     background: rgba(var(--center-channel-color-rgb), 0.08);
     color: rgba(var(--center-channel-color-rgb), 0.75);
     font-size: 12px;
     font-weight: 600;
+    gap: 6px;
 
     &__icon {
         flex-shrink: 0;
