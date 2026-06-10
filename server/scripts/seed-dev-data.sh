@@ -63,7 +63,7 @@ fi
 # Posts are not idempotent, so when asked, skip if the data is already present
 # (detected by the marker team) to avoid duplicating messages on every startup.
 if [ "$IF_EMPTY" = "true" ]; then
-    if "$MMCTL" team list --local 2>/dev/null | grep -qx "$SEED_MARKER_TEAM"; then
+    if "$MMCTL" team list --local --format plain --json=false 2>/dev/null | grep -qx "$SEED_MARKER_TEAM"; then
         log "Seed data already present (team '$SEED_MARKER_TEAM' exists), skipping."
         exit 0
     fi
