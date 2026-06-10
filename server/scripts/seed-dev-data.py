@@ -398,6 +398,10 @@ def make_replies(rng, members, parent_ts):
 
 def generate(args):
     rng = random.Random(args.seed)
+    # Timestamps are anchored to "now" and consume a variable number of random
+    # draws (e.g. weekend re-rolls), so keep them on a separate stream to keep
+    # the content/structure (counts, authors, replies, reactions) deterministic.
+    time_rng = random.Random(args.seed)
     users = build_users()
     channel_members = assign_memberships(users, rng)
 
@@ -453,7 +457,7 @@ def generate(args):
         }.get(base, 1.0)
         count = int(args.posts_per_channel * scale)
         # Pre-generate sorted timestamps so the channel reads chronologically.
-        timestamps = sorted(random_timestamp_ms(rng, args.days) for _ in range(count))
+        timestamps = sorted(random_timestamp_ms(time_rng, args.days) for _ in range(count))
         for ts in timestamps:
             author = rng.choice(members)
             post = {

@@ -13,13 +13,28 @@
 #      which is what `make seed-data` arranges for you).
 #   * `bin/mmctl` built (this script builds it if missing).
 #
+# Usage:
+#   seed-dev-data.sh [--if-empty]
+#     --if-empty   Skip seeding (exit 0) if the server already contains the
+#                  seed data. Use this for automatic seeding on startup so the
+#                  data is only imported once (posts are not idempotent).
+#
 # Environment overrides:
 #   SEED_POSTS_PER_CHANNEL   base posts per channel (default 60)
 #   SEED_DAYS                spread history over the last N days (default 30)
 #   SEED_RANDOM_SEED         deterministic random seed (default 1)
 #   MAX_WAIT_SECONDS         how long to wait for the server (default 90)
+#   SEED_MARKER_TEAM         team name used to detect prior seeding (default core)
 
 set -Eeuo pipefail
+
+IF_EMPTY=false
+for arg in "$@"; do
+    case "$arg" in
+        --if-empty) IF_EMPTY=true ;;
+        *) echo "Unknown argument: $arg" >&2; exit 2 ;;
+    esac
+done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -29,6 +44,7 @@ MMCTL="$SERVER_DIR/bin/mmctl"
 POSTS_PER_CHANNEL="${SEED_POSTS_PER_CHANNEL:-60}"
 DAYS="${SEED_DAYS:-30}"
 RANDOM_SEED="${SEED_RANDOM_SEED:-1}"
+SEED_MARKER_TEAM="${SEED_MARKER_TEAM:-core}"
 export MAX_WAIT_SECONDS="${MAX_WAIT_SECONDS:-90}"
 
 log() { printf '[seed-dev-data] %s\n' "$*" >&2; }
@@ -42,6 +58,15 @@ log "Waiting for the local server to be reachable in local mode..."
 if ! "$SCRIPT_DIR/wait-for-system-start.sh"; then
     log "ERROR: server did not become ready. Start it first with 'make run-server' (local mode enabled)."
     exit 1
+fi
+
+# Posts are not idempotent, so when asked, skip if the data is already present
+# (detected by the marker team) to avoid duplicating messages on every startup.
+if [ "$IF_EMPTY" = "true" ]; then
+    if "$MMCTL" team list --local 2>/dev/null | grep -qx "$SEED_MARKER_TEAM"; then
+        log "Seed data already present (team '$SEED_MARKER_TEAM' exists), skipping."
+        exit 0
+    fi
 fi
 
 # Allow large teams so all seeded members fit.
