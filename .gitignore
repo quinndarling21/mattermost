@@ -168,6 +168,7 @@ docker-compose.override.yaml
 .claude
 .cursorrules
 .cursor/*
+!.cursor/BUGBOT.md
 !.cursor/rules/
 !.cursor/rules/**
 !.cursor/skills/
