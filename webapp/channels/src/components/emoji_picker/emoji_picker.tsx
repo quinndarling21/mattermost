@@ -38,7 +38,7 @@ import type {PropsFromRedux} from './index';
 
 export interface Props extends PropsFromRedux {
     filter: string;
-    onEmojiClick: (emoji: Emoji) => void;
+    onEmojiClick: (emoji: Emoji, shouldClosePicker?: boolean) => void;
     handleFilterChange: (filter: string) => void;
     handleEmojiPickerClose: () => void;
     onAddCustomEmojiClick?: () => void;
@@ -352,7 +352,7 @@ const EmojiPicker = ({
         const clickedEmoji = cursor.emoji;
 
         if (clickedEmoji) {
-            onEmojiClick(clickedEmoji);
+            onEmojiClick(clickedEmoji, true);
         }
     }, [cursor.emojiId]);
 

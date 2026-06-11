@@ -42,11 +42,15 @@ export default function PostReaction({
 }: Props) {
     const intl = useIntl();
 
-    const handleEmojiClick = useCallback((emoji: Emoji) => {
+    const handleEmojiClick = useCallback((emoji: Emoji, shouldClosePicker = true) => {
         const emojiName = getEmojiName(emoji);
         toggleReaction(postId, emojiName);
 
-        setShowEmojiPicker(false);
+        if (shouldClosePicker) {
+            setShowEmojiPicker(false);
+        } else {
+            window.setTimeout(() => setShowEmojiPicker(true));
+        }
     }, [postId, setShowEmojiPicker, toggleReaction]);
 
     const {

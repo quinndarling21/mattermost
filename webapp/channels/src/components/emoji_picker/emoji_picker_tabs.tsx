@@ -17,7 +17,7 @@ const GifPicker = makeAsyncComponent('GifPicker', React.lazy(() => import('compo
 
 export interface Props {
     onEmojiClose: () => void;
-    onEmojiClick: (emoji: Emoji) => void;
+    onEmojiClick: (emoji: Emoji, shouldClosePicker?: boolean) => void;
     onGifClick?: (gif: string) => void;
     onAddCustomEmojiClick?: () => void;
     enableGifPicker?: boolean;
