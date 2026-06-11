@@ -32,8 +32,11 @@ export default function AddReactionButton({
 
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-    const handleEmojiClick = useCallback((emoji: Emoji) => {
+    const handleEmojiClick = useCallback((emoji: Emoji, shouldClosePicker = true) => {
         onEmojiClick(emoji);
+        if (shouldClosePicker) {
+            setShowEmojiPicker(false);
+        }
     }, [onEmojiClick]);
 
     const {

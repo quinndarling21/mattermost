@@ -28,7 +28,7 @@ interface Props {
     customEmojisEnabled: boolean;
     customEmojiPage: number;
     setActiveCategory: (category: EmojiCategory) => void;
-    onEmojiClick: (emoji: Emoji) => void;
+    onEmojiClick: (emoji: Emoji, shouldClosePicker?: boolean) => void;
     onEmojiMouseOver: (cursor: EmojiCursor) => void;
     incrementEmojiPickerPage: () => void;
     getCustomEmojis: (page?: number, perPage?: number, sort?: string, loadUsers?: boolean) => Promise<ActionResult<CustomEmoji[]>>;

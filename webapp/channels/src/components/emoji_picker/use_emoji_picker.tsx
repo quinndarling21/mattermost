@@ -34,7 +34,7 @@ type UseEmojiPickerOptions = {
 
     enableGifPicker?: boolean;
     onAddCustomEmojiClick?: () => void;
-    onEmojiClick: (emoji: Emoji) => void;
+    onEmojiClick: (emoji: Emoji, shouldClosePicker?: boolean) => void;
     onGifClick?: (gif: string) => void;
 
     /**

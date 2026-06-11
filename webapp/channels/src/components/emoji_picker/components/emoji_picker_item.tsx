@@ -19,7 +19,7 @@ interface Props {
     emoji: Emoji;
     rowIndex: number;
     isSelected?: boolean;
-    onClick: (emoji: Emoji) => void;
+    onClick: (emoji: Emoji, shouldClosePicker?: boolean) => void;
     onMouseOver: (cursor: EmojiCursor) => void;
 }
 
@@ -45,7 +45,7 @@ function EmojiPickerItem({emoji, rowIndex, isSelected, onClick, onMouseOver}: Pr
         }), [handleMouseOver]);
 
     const handleClick = useCallback(() => {
-        onClick(emoji);
+        onClick(emoji, false);
     }, [emoji, onClick]);
 
     const itemClassName = classNames('emoji-picker__item', {

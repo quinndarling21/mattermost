@@ -10,7 +10,7 @@ import type {EmojiCursor} from '../types';
 export interface EmojiPickerContextValue {
     cursorRowIndex: number;
     cursorEmojiId: string;
-    onEmojiClick: (emoji: Emoji) => void;
+    onEmojiClick: (emoji: Emoji, shouldClosePicker?: boolean) => void;
     onEmojiMouseOver: (cursor: EmojiCursor) => void;
 }
 
