@@ -398,6 +398,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             >
                 <div
                     ref={this.modalBodyRef}
+                    className='UserSettingsModal__bodyWrapper'
                 >
                     {/* Admin Mode: wait for user + preferences */}
                     {this.props.adminMode &&

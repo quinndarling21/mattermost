@@ -3,16 +3,6 @@
 
 .UserSettingsModal {
 
-    // The modal body is the scroll container, so keep the left nav (settings search
-    // and tab list) pinned to the top while the settings content scrolls. Without this,
-    // navigating to a setting deep in a tab scrolls the nav out of view.
-    .settings-table .settings-links {
-        position: sticky;
-        top: 0;
-        max-height: 100%;
-        align-self: flex-start;
-    }
-
     .GenericModal__wrapper {
         display: flex;
         overflow: hidden;
@@ -43,6 +33,39 @@
                 overflow-x: hidden;
                 overflow-y: auto;
             }
+        }
+    }
+
+    // Let the settings content scroll on its own so the left nav (settings search +
+    // tab list) stays fixed and visible. Without this, the whole modal body scrolls
+    // and the nav is dragged out of view when navigating to a setting deep in a tab
+    // (e.g. via search). The flex/min-height:0 chain is required for the inner
+    // scroll container to receive a bounded height.
+    .GenericModal__body {
+        display: flex;
+        min-height: 0;
+        flex: 1 1 auto;
+        flex-direction: column;
+    }
+
+    &__bodyWrapper {
+        display: flex;
+        min-height: 0;
+        flex: 1 1 auto;
+        flex-direction: column;
+    }
+
+    .settings-table {
+        min-height: 0;
+        flex: 1 1 auto;
+
+        .settings-links {
+            overflow-y: auto;
+        }
+
+        .settings-content {
+            min-height: 0;
+            overflow-y: auto;
         }
     }
 
