@@ -67,6 +67,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     private customConfirmAction: ((handleConfirm: () => void) => void) | null;
     private afterConfirm: (() => void) | null;
     private modalBodyRef: React.RefObject<HTMLDivElement>;
+    private settingsContentRef: React.RefObject<HTMLDivElement>;
 
     constructor(props: Props) {
         super(props);
@@ -91,6 +92,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.afterConfirm = null;
 
         this.modalBodyRef = React.createRef();
+        this.settingsContentRef = React.createRef();
     }
 
     handleResend = (email: string) => {
@@ -131,10 +133,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     componentDidUpdate(prevProps: Props, prevState: State) {
         if (this.state.active_tab !== prevState.active_tab) {
             // Scroll to top if user changes tabs
-            if (this.modalBodyRef.current) {
-                const el = this.modalBodyRef.current as HTMLDivElement;
-                el.scrollTop = 0;
-            }
+            this.scrollSettingsContentToTop();
         }
     }
 
@@ -224,6 +223,25 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         });
     };
 
+    scrollSettingsContentToTop = () => {
+        if (this.settingsContentRef.current) {
+            this.settingsContentRef.current.scrollTop = 0;
+        }
+    };
+
+    scrollActiveSectionIntoView = () => {
+        const settingsContent = this.settingsContentRef.current;
+        const activeSection = settingsContent?.querySelector<HTMLElement>('.section-max');
+        if (!settingsContent || !activeSection) {
+            return;
+        }
+
+        const settingsContentRect = settingsContent.getBoundingClientRect();
+        const activeSectionRect = activeSection.getBoundingClientRect();
+
+        settingsContent.scrollTop += activeSectionRect.top - settingsContentRect.top;
+    };
+
     // Called by settings tabs when their close button is pressed
     closeModal = () => {
         if (this.requireConfirm) {
@@ -263,14 +281,14 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
 
     // Navigates to a specific tab and section in one step. Used by settings search
     // so a result can jump straight to the matching setting.
-    updateTabAndSection = (tab: string, section: string, skipConfirm?: boolean) => {
+    updateTabAndSection = (tab: string, section: string, skipConfirm?: boolean, afterUpdate?: () => void) => {
         if (!skipConfirm && this.requireConfirm) {
-            this.showConfirmModal(() => this.updateTabAndSection(tab, section, true));
+            this.showConfirmModal(() => this.updateTabAndSection(tab, section, true, afterUpdate));
         } else {
             this.setState({
                 active_tab: tab,
                 active_section: section,
-            });
+            }, afterUpdate);
         }
     };
 
@@ -279,8 +297,9 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     };
 
     handleSearchNavigate = (tab: string, section: string) => {
-        this.updateTabAndSection(tab, section);
-        this.setState({search_query: ''});
+        this.updateTabAndSection(tab, section, false, () => {
+            this.setState({search_query: ''}, this.scrollActiveSectionIntoView);
+        });
     };
 
     getUserSettingsTabs = () => {
@@ -433,7 +452,10 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                         />
                                     )}
                                 </div>
-                                <div className='settings-content minimize-settings'>
+                                <div
+                                    ref={this.settingsContentRef}
+                                    className='settings-content minimize-settings'
+                                >
                                     <UserSettings
                                         activeTab={this.state.active_tab}
                                         activeSection={this.state.active_section}
