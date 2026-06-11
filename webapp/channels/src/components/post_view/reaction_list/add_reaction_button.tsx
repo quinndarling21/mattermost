@@ -36,6 +36,8 @@ export default function AddReactionButton({
         onEmojiClick(emoji);
         if (shouldClosePicker) {
             setShowEmojiPicker(false);
+        } else {
+            window.setTimeout(() => setShowEmojiPicker(true));
         }
     }, [onEmojiClick]);
 
