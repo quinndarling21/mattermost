@@ -16,6 +16,7 @@ import {
     builtInSearchableSettings,
     createUserSettingsSearchIndex,
     getPluginSearchableSettings,
+    resolveSearchableText,
     searchUserSettings,
 } from './searchable_user_settings';
 
@@ -112,7 +113,6 @@ export default function SettingsSearch({query, onChange, onSelect, pluginSetting
                 <div
                     ref={resultsRef}
                     className='settingsSearch__results'
-                    role='list'
                     data-testid='settingsSearchResults'
                 >
                     {results.length === 0 ? (
@@ -125,13 +125,12 @@ export default function SettingsSearch({query, onChange, onSelect, pluginSetting
                         </div>
                     ) : (
                         results.map((result) => {
-                            const title = intl.formatMessage(result.title);
-                            const tabLabel = typeof result.tabLabel === 'string' ? result.tabLabel : intl.formatMessage(result.tabLabel);
+                            const title = resolveSearchableText(result.title, intl);
+                            const tabLabel = resolveSearchableText(result.tabLabel, intl);
                             return (
                                 <button
                                     key={`${result.tab}_${result.section}`}
                                     type='button'
-                                    role='listitem'
                                     className='settingsSearch__result'
                                     data-testid={`settingsSearchResult_${result.tab}_${result.section}`}
                                     onClick={() => onSelect(result.tab, result.section)}

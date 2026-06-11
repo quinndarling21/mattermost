@@ -20,8 +20,10 @@ describe('searchable_user_settings', () => {
     describe('builtInSearchableSettings', () => {
         test('every entry uses a title message id that exists in en.json', () => {
             for (const setting of builtInSearchableSettings) {
-                expect(setting.title.id).toBeDefined();
-                expect(enMessages).toHaveProperty(setting.title.id as string);
+                expect(typeof setting.title).not.toBe('string');
+                const id = (setting.title as {id: string}).id;
+                expect(id).toBeDefined();
+                expect(enMessages[id]).toBeDefined();
             }
         });
 

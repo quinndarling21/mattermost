@@ -15,8 +15,11 @@ export type SearchableUserSetting = {
     /** The section id passed to updateSection when navigating to this setting. */
     section: string;
 
-    /** Localized title of the setting, shown as the primary text in search results. */
-    title: MessageDescriptor;
+    /**
+     * Title of the setting, shown as the primary text in search results.
+     * Built-in settings use a MessageDescriptor; plugin sections provide a plain string.
+     */
+    title: MessageDescriptor | string;
 
     /** Localized label of the parent tab, shown as the secondary text in search results. */
     tabLabel: MessageDescriptor | string;
@@ -39,6 +42,7 @@ const tabLabels = {
 // (isContentProductSettings === true). Plugin-provided settings are indexed separately
 // and dynamically via getPluginSearchableSettings.
 export const builtInSearchableSettings: SearchableUserSetting[] = [
+
     // Notifications
     {
         tab: 'notifications',
@@ -290,10 +294,7 @@ export function getPluginSearchableSettings(pluginSettings?: {[pluginId: string]
                 tab: plugin.id,
                 tabLabel: plugin.uiName,
                 section: section.title,
-
-                // Plugin section titles are plain strings, so wrap them in a
-                // MessageDescriptor-like object using only defaultMessage.
-                title: {defaultMessage: section.title},
+                title: section.title,
                 keywords,
             });
         }
@@ -306,8 +307,13 @@ export type UserSettingsSearchIndex = {
     search(query: string): string[];
 };
 
+// Resolves a title/label that may be a plain string (plugin) or a MessageDescriptor (built-in).
+export function resolveSearchableText(value: MessageDescriptor | string, intl: IntlShape): string {
+    return typeof value === 'string' ? value : intl.formatMessage(value);
+}
+
 function buildSearchText(setting: SearchableUserSetting, intl: IntlShape): string {
-    const parts: string[] = [intl.formatMessage(setting.title)];
+    const parts: string[] = [resolveSearchableText(setting.title, intl)];
     if (setting.keywords) {
         parts.push(...setting.keywords);
     }
