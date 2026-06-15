@@ -120,6 +120,7 @@ import type {
     PropertyValue,
 } from '@mattermost/types/properties';
 import type {Reaction} from '@mattermost/types/reactions';
+import type {SubmitFeedbackRequest, SubmitFeedbackResponse} from '@mattermost/types/feedback';
 import type {Recap, CreateRecapRequest} from '@mattermost/types/recaps';
 import type {RemoteCluster, RemoteClusterAcceptInvite, RemoteClusterPatch, RemoteClusterWithPassword} from '@mattermost/types/remote_clusters';
 import type {UserReport, UserReportFilter, UserReportOptions} from '@mattermost/types/reports';
@@ -380,6 +381,10 @@ export default class Client4 {
 
     getReactionsRoute() {
         return `${this.getBaseRoute()}/reactions`;
+    }
+
+    getFeedbackRoute() {
+        return `${this.getBaseRoute()}/feedback`;
     }
 
     getCommandsRoute() {
@@ -2683,6 +2688,13 @@ export default class Client4 {
         return this.doFetch<Reaction>(
             `${this.getReactionsRoute()}`,
             {method: 'post', body: JSON.stringify({user_id: userId, post_id: postId, emoji_name: emojiName})},
+        );
+    };
+
+    submitFeedback = (request: SubmitFeedbackRequest) => {
+        return this.doFetch<SubmitFeedbackResponse>(
+            `${this.getFeedbackRoute()}`,
+            {method: 'post', body: JSON.stringify(request)},
         );
     };
 
