@@ -1206,11 +1206,6 @@ $sidebarOpacityAnimationDuration: 0.15s;
         gap: 8px;
     }
 
-    .SidebarChannelLinkLabel_emoji {
-        flex: 0 0 auto;
-        line-height: 18px;
-    }
-
     .DirectChannel__profile-picture {
         height: 20px;
         margin-right: 9px;
@@ -1228,6 +1223,17 @@ $sidebarOpacityAnimationDuration: 0.15s;
             background: var(--sidebar-bg);
             font-size: 12px;
         }
+    }
+
+    .SidebarChannelEmojiIcon {
+        display: flex;
+        width: 18px;
+        height: 18px;
+        align-items: center;
+        justify-content: center;
+        margin: 0 6px 0 -2px;
+        font-size: 15px;
+        line-height: 18px;
     }
 
     .icon {

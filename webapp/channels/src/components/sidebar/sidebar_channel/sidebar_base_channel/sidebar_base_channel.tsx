@@ -28,6 +28,7 @@ const SidebarBaseChannel = ({
 }: Props) => {
     const intl = useIntl();
     const {emoji} = useChannelEmoji(channel.id);
+    const channelEmoji = formatChannelEmojiForDisplay(emoji);
 
     const handleLeavePublicChannel = useCallback((callback: () => void) => {
         actions.leaveChannel(channel.id);
@@ -46,7 +47,14 @@ const SidebarBaseChannel = ({
         channelLeaveHandler = handleLeaveWithConfirmation;
     }
 
-    const channelIcon = (
+    const channelIcon = channelEmoji ? (
+        <span
+            className='SidebarChannelEmojiIcon'
+            aria-hidden='true'
+        >
+            {channelEmoji}
+        </span>
+    ) : (
         <SidebarBaseChannelIcon
             channelType={channel.type}
         />
@@ -64,7 +72,6 @@ const SidebarBaseChannel = ({
             channel={channel}
             link={`/${currentTeamName}/channels/${channel.name}`}
             label={channel.display_name}
-            channelEmoji={formatChannelEmojiForDisplay(emoji)}
             ariaLabelPrefix={ariaLabelPrefix}
             channelLeaveHandler={channelLeaveHandler!}
             icon={channelIcon}

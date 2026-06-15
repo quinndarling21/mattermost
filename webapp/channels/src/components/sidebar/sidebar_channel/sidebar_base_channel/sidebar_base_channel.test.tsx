@@ -23,7 +23,7 @@ jest.mock('components/common/hooks/useChannelEmoji', () => ({
 jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
     const React = require('react');
 
-    return ({label, channelEmoji, channelLeaveHandler}: {label: string; channelEmoji?: string; channelLeaveHandler?: (callback: () => void) => void}) => {
+    return ({label, icon, channelLeaveHandler}: {label: string; icon?: React.ReactNode; channelLeaveHandler?: (callback: () => void) => void}) => {
         const [isOpen, setIsOpen] = React.useState(false);
 
         return (
@@ -47,7 +47,7 @@ jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
                         </button>
                     </div>
                 )}
-                {channelEmoji && <div>{channelEmoji}</div>}
+                {icon}
                 <div>{label}</div>
             </div>
         );
