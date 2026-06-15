@@ -65,6 +65,7 @@ import type {
 import type {Draft} from '@mattermost/types/drafts';
 import type {CustomEmoji} from '@mattermost/types/emojis';
 import type {ServerError} from '@mattermost/types/errors';
+import type {SubmitFeedbackRequest, SubmitFeedbackResponse} from '@mattermost/types/feedback';
 import type {FileInfo, FileUploadResponse, FileSearchResults} from '@mattermost/types/files';
 import type {SystemSetting} from '@mattermost/types/general';
 import type {
@@ -120,7 +121,6 @@ import type {
     PropertyValue,
 } from '@mattermost/types/properties';
 import type {Reaction} from '@mattermost/types/reactions';
-import type {SubmitFeedbackRequest, SubmitFeedbackResponse} from '@mattermost/types/feedback';
 import type {Recap, CreateRecapRequest} from '@mattermost/types/recaps';
 import type {RemoteCluster, RemoteClusterAcceptInvite, RemoteClusterPatch, RemoteClusterWithPassword} from '@mattermost/types/remote_clusters';
 import type {UserReport, UserReportFilter, UserReportOptions} from '@mattermost/types/reports';
