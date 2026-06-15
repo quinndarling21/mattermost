@@ -1,7 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import type React from 'react';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- JSX in this test still requires React at runtime.
+import React from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
