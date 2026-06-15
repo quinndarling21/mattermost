@@ -1,0 +1,61 @@
+  /api/v4/feedback:
+    post:
+      tags:
+        - feedback
+      summary: Submit feedback
+      description: >
+        Submit a feature request or bug report. The server forwards the
+        submission to Linear as a new issue in the configured intake project.
+
+        ##### Permissions
+
+        Must be authenticated.
+      operationId: SubmitFeedback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - title
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - feature
+                    - bug
+                  description: The kind of feedback being submitted.
+                title:
+                  type: string
+                  description: A short, descriptive title for the issue.
+                description:
+                  type: string
+                  description: Optional additional details for the issue.
+        description: The feedback to submit
+        required: true
+      responses:
+        "200":
+          description: Feedback submitted and issue created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  identifier:
+                    type: string
+                    description: The identifier of the created Linear issue (e.g. MAT-42).
+                  title:
+                    type: string
+                    description: The title of the created issue.
+                  url:
+                    type: string
+                    description: A link to view the created issue in Linear.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "502":
+          description: The upstream issue tracker could not be reached or returned an error.
+        "503":
+          description: Feedback submission is not configured on this server.
