@@ -65,6 +65,7 @@ import type {
 import type {Draft} from '@mattermost/types/drafts';
 import type {CustomEmoji} from '@mattermost/types/emojis';
 import type {ServerError} from '@mattermost/types/errors';
+import type {SubmitFeedbackRequest, SubmitFeedbackResponse} from '@mattermost/types/feedback';
 import type {FileInfo, FileUploadResponse, FileSearchResults} from '@mattermost/types/files';
 import type {SystemSetting} from '@mattermost/types/general';
 import type {
@@ -380,6 +381,10 @@ export default class Client4 {
 
     getReactionsRoute() {
         return `${this.getBaseRoute()}/reactions`;
+    }
+
+    getFeedbackRoute() {
+        return `${this.getBaseRoute()}/feedback`;
     }
 
     getCommandsRoute() {
@@ -2683,6 +2688,13 @@ export default class Client4 {
         return this.doFetch<Reaction>(
             `${this.getReactionsRoute()}`,
             {method: 'post', body: JSON.stringify({user_id: userId, post_id: postId, emoji_name: emojiName})},
+        );
+    };
+
+    submitFeedback = (request: SubmitFeedbackRequest) => {
+        return this.doFetch<SubmitFeedbackResponse>(
+            `${this.getFeedbackRoute()}`,
+            {method: 'post', body: JSON.stringify(request)},
         );
     };
 

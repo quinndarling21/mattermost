@@ -418,6 +418,8 @@ tags:
     description: Endpoints for creating, getting and interacting with emojis.
   - name: reactions
     description: Endpoints for creating, getting and removing emoji reactions.
+  - name: feedback
+    description: Endpoints for submitting feature requests and bug reports.
   - name: webhooks
     description: Endpoints for creating, getting and updating webhooks.
   - name: commands

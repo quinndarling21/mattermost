@@ -9,6 +9,7 @@ import {WithTooltip} from '@mattermost/shared/components/tooltip';
 
 import IconButton from 'components/global_header/header_icon_button';
 import KeyboardShortcutsModal from 'components/keyboard_shortcuts/keyboard_shortcuts_modal/keyboard_shortcuts_modal';
+import SubmitFeedbackModal from 'components/submit_feedback_modal/submit_feedback_modal';
 import Menu from 'components/widgets/menu/menu';
 import MenuWrapper from 'components/widgets/menu/menu_wrapper';
 
@@ -42,6 +43,14 @@ class UserGuideDropdown extends React.PureComponent<Props, State> {
         });
     };
 
+    openSubmitFeedbackModal = (e: MouseEvent) => {
+        e.preventDefault();
+        this.props.actions.openModal({
+            modalId: ModalIdentifiers.SUBMIT_FEEDBACK,
+            dialogType: SubmitFeedbackModal,
+        });
+    };
+
     buttonToggleState = (menuActive: boolean) => {
         this.setState({
             buttonActive: menuActive,
@@ -68,6 +77,12 @@ class UserGuideDropdown extends React.PureComponent<Props, State> {
 
         return (
             <Menu.Group>
+                <Menu.ItemAction
+                    id='submitFeedback'
+                    iconClassName='icon-lightbulb-outline'
+                    onClick={this.openSubmitFeedbackModal}
+                    text={intl.formatMessage({id: 'userGuideHelp.submitFeedback', defaultMessage: 'Submit feature request or bug'})}
+                />
                 <Menu.ItemExternalLink
                     id='mattermostUserGuideLink'
                     iconClassName='icon-file-text-outline'

@@ -178,6 +178,8 @@ type Routes struct {
 	PropertyField        *mux.Router // 'api/v4/properties/groups/{group_name:[a-z][a-z0-9_]*}/{object_type:[a-z]+}/fields/{field_id:[A-Za-z0-9]+}'
 	PropertyValues       *mux.Router // 'api/v4/properties/groups/{group_name:[a-z][a-z0-9_]*}/{object_type:[a-z]+}/values/{target_id:[A-Za-z0-9]+}'
 	PropertySystemValues *mux.Router // 'api/v4/properties/groups/{group_name:[a-z][a-z0-9_]*}/system/values'
+
+	Feedback *mux.Router // 'api/v4/feedback'
 }
 
 type API struct {
@@ -342,6 +344,8 @@ func Init(srv *app.Server) (*API, error) {
 	api.BaseRoutes.PropertyValues = api.BaseRoutes.Properties.PathPrefix("/groups/{group_name:[a-z][a-z0-9_]*}/{object_type:[a-z]+}/values/{target_id:[A-Za-z0-9]+}").Subrouter()
 	api.BaseRoutes.PropertySystemValues = api.BaseRoutes.Properties.PathPrefix("/groups/{group_name:[a-z][a-z0-9_]*}/system/values").Subrouter()
 
+	api.BaseRoutes.Feedback = api.BaseRoutes.APIRoot.PathPrefix("/feedback").Subrouter()
+
 	api.InitUser()
 	api.InitBot()
 	api.InitTeam()
@@ -401,6 +405,7 @@ func Init(srv *app.Server) (*API, error) {
 	api.InitContentFlagging()
 	api.InitAgents()
 	api.InitProperties()
+	api.InitFeedback()
 
 	// If we allow testing then listen for manual testing URL hits
 	if *srv.Config().ServiceSettings.EnableTesting {

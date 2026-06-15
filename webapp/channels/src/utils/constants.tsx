@@ -441,6 +441,7 @@ export const ModalIdentifiers = {
     PURCHASE_IN_PROGRESS: 'purchase_in_progress',
     DELETE_WORKSPACE: 'delete_workspace',
     FEEDBACK: 'feedback',
+    SUBMIT_FEEDBACK: 'submit_feedback',
     DELETE_WORKSPACE_PROGRESS: 'delete_workspace_progress',
     DELETE_WORKSPACE_RESULT: 'delete_workspace_result',
     SCREENING_IN_PROGRESS: 'screening_in_progress',
