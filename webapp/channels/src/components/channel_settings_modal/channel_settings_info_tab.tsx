@@ -11,11 +11,11 @@ import type {ServerError} from '@mattermost/types/errors';
 import {PropertyTypes} from 'mattermost-redux/action_types';
 import {patchChannel, updateChannelPrivacy} from 'mattermost-redux/actions/channels';
 import {Client4} from 'mattermost-redux/client';
+import {General} from 'mattermost-redux/constants';
 import {
     ChannelEmojiPropertyGroupName,
     ChannelEmojiPropertyObjectType,
 } from 'mattermost-redux/constants/channel_emojis';
-import {General} from 'mattermost-redux/constants';
 import Permissions from 'mattermost-redux/constants/permissions';
 import {areManagedCategoriesEnabled, getChannelManagedCategoryName, isChannelCategorySortingEnabled, makeGetSidebarCategoryNamesForTeam} from 'mattermost-redux/selectors/entities/channel_categories';
 import {haveIChannelPermission} from 'mattermost-redux/selectors/entities/roles';
@@ -32,11 +32,11 @@ import {
 import ConvertConfirmModal from 'components/admin_console/team_channel_settings/convert_confirm_modal';
 import CategorySelector from 'components/category_selector/category_selector';
 import ChannelNameFormField from 'components/channel_name_form_field/channel_name_form_field';
+import useChannelEmoji, {normalizeChannelEmoji} from 'components/common/hooks/useChannelEmoji';
 import type {TextboxElement} from 'components/textbox';
 import AdvancedTextbox from 'components/widgets/advanced_textbox/advanced_textbox';
 import SaveChangesPanel, {type SaveChangesPanelState} from 'components/widgets/modals/components/save_changes_panel';
 import PublicPrivateSelector from 'components/widgets/public-private-selector/public-private-selector';
-import useChannelEmoji, {normalizeChannelEmoji} from 'components/common/hooks/useChannelEmoji';
 
 import {isMembershipPolicyEnforced} from 'utils/channel_utils';
 import Constants from 'utils/constants';

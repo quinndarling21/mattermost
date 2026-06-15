@@ -29,7 +29,7 @@ export function normalizeChannelEmoji(value: string): string {
         return '';
     }
 
-    if (/^[\w+-]+$/.test(trimmed)) {
+    if ((/^[\w+-]+$/).test(trimmed)) {
         return `:${trimmed}:`;
     }
 

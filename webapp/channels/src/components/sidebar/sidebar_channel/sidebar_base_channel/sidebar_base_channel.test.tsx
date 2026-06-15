@@ -5,11 +5,10 @@ import React from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
+import useChannelEmoji from 'components/common/hooks/useChannelEmoji';
 import SidebarBaseChannel from 'components/sidebar/sidebar_channel/sidebar_base_channel/sidebar_base_channel';
 
 import {renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
-
-import useChannelEmoji from 'components/common/hooks/useChannelEmoji';
 
 jest.mock('components/tours/onboarding_tour', () => ({
     ChannelsAndDirectMessagesTour: () => null,
