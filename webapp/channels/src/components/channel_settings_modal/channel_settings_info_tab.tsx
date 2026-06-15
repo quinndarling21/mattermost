@@ -95,6 +95,7 @@ function ChannelSettingsInfoTab({
         return haveIChannelPermission(state, channel.team_id, channel.id, channelPropertiesPermission);
     });
     const canManageChannelRoles = useSelector((state: GlobalState) => haveIChannelPermission(state, channel.team_id, channel.id, Permissions.MANAGE_CHANNEL_ROLES));
+    const canManageChannelEmoji = canManageChannelRoles && canManageChannelProperties;
 
     const showDefaultCategorySelector = useSelector(isChannelCategorySortingEnabled);
     const showDefaultCategoryField = showDefaultCategorySelector && !isDMorGroupChannel;
@@ -125,6 +126,7 @@ function ChannelSettingsInfoTab({
     const [serverManagedCategoryName, setServerManagedCategoryName] = useState(currentManagedCategoryName);
     const [channelEmoji, setChannelEmoji] = useState(channelEmojiState.emoji);
     const [serverChannelEmoji, setServerChannelEmoji] = useState(channelEmojiState.emoji);
+    const channelEmojiChannelId = useRef(channel.id);
 
     useEffect(() => {
         setDefaultCategoryName(channel.default_category_name);
@@ -137,9 +139,15 @@ function ChannelSettingsInfoTab({
     }, [currentManagedCategoryName]);
 
     useEffect(() => {
-        setChannelEmoji(channelEmojiState.emoji);
+        const channelChanged = channelEmojiChannelId.current !== channel.id;
+        channelEmojiChannelId.current = channel.id;
+        const hasLocalEmojiChanges = !channelChanged && normalizeChannelEmoji(channelEmoji) !== normalizeChannelEmoji(serverChannelEmoji);
+
         setServerChannelEmoji(channelEmojiState.emoji);
-    }, [channel.id, channelEmojiState.emoji]);
+        if (!hasLocalEmojiChanges) {
+            setChannelEmoji(channelEmojiState.emoji);
+        }
+    }, [channel.id, channelEmojiState.emoji, channelEmoji, serverChannelEmoji]);
 
     // Constants
     const HEADER_MAX_LENGTH = 1024;
@@ -342,16 +350,6 @@ function ChannelSettingsInfoTab({
         const normalizedChannelEmoji = normalizeChannelEmoji(channelEmoji);
         const hasChannelEmojiChanges = !isDMorGroupChannel && normalizedChannelEmoji !== normalizeChannelEmoji(serverChannelEmoji);
 
-        let data: Channel | undefined;
-        if (Object.keys(updated).length > 0) {
-            const result = await dispatch(patchChannel(channel.id, updated));
-            if (result.error) {
-                handleServerError(result.error as ServerError);
-                return false;
-            }
-            data = result.data;
-        }
-
         if (hasChannelEmojiChanges) {
             if (!channelEmojiState.field) {
                 setFormError(formatMessage({
@@ -379,6 +377,16 @@ function ChannelSettingsInfoTab({
                 handleServerError(err as ServerError);
                 return false;
             }
+        }
+
+        let data: Channel | undefined;
+        if (Object.keys(updated).length > 0) {
+            const result = await dispatch(patchChannel(channel.id, updated));
+            if (result.error) {
+                handleServerError(result.error as ServerError);
+                return false;
+            }
+            data = result.data;
         }
 
         // After every successful save, update local state to match the saved values
@@ -581,7 +589,7 @@ function ChannelSettingsInfoTab({
                         value={channelEmoji}
                         placeholder={formatMessage({id: 'channel_settings.channel_emoji.placeholder', defaultMessage: ':rocket:'})}
                         maxLength={64}
-                        disabled={!canManageChannelRoles || channelEmojiState.loading}
+                        disabled={!canManageChannelEmoji || channelEmojiState.loading}
                         onChange={(e) => {
                             setChannelEmoji(e.target.value);
                             if (formError) {

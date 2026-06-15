@@ -22,6 +22,7 @@ import {EmojiIndicesByAlias, Emojis} from 'utils/emoji';
 import {trimmedEmojiName, unifiedToUnicode} from 'utils/emoji_utils';
 
 let channelEmojiFieldFetchRequested = false;
+const channelEmojiValueRequests = new Set<string>();
 
 export function normalizeChannelEmoji(value: string): string {
     const trimmed = value.trim();
@@ -88,17 +89,31 @@ export default function useChannelEmoji(channelId: string): ChannelEmojiState {
         }
 
         channelEmojiFieldFetchRequested = true;
-        dispatch(fetchPropertyFields(
+        const fieldFetch = Promise.resolve(dispatch(fetchPropertyFields(
             ChannelEmojiPropertyGroupName,
             ChannelEmojiPropertyObjectType,
             ChannelEmojiPropertyTargetType,
-        ));
+        )));
+
+        fieldFetch.then((result) => {
+            if (result && typeof result === 'object' && 'error' in result) {
+                channelEmojiFieldFetchRequested = false;
+            }
+        }).catch(() => {
+            channelEmojiFieldFetchRequested = false;
+        });
     }, [dispatch, field]);
 
     useEffect(() => {
         if (!field || !channelId || propertyValue) {
             return;
         }
+
+        const requestKey = `${channelId}:${field.id}`;
+        if (channelEmojiValueRequests.has(requestKey)) {
+            return;
+        }
+        channelEmojiValueRequests.add(requestKey);
 
         Client4.getPropertyValues<string>(
             ChannelEmojiPropertyGroupName,
@@ -112,6 +127,8 @@ export default function useChannelEmoji(channelId: string): ChannelEmojiState {
                 });
             }
         }).catch(() => {
+            channelEmojiValueRequests.delete(requestKey);
+
             // Silently ignore; most channels will not have an emoji configured.
         });
     }, [channelId, dispatch, field, propertyValue]);
