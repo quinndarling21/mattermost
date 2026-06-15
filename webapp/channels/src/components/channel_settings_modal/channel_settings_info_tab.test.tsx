@@ -5,6 +5,10 @@ import React from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
+import {Client4} from 'mattermost-redux/client';
+
+import useChannelEmoji from 'components/common/hooks/useChannelEmoji';
+
 import {act, renderWithContext, screen, userEvent} from 'tests/react_testing_utils';
 import {TestHelper} from 'utils/test_helper';
 
@@ -15,6 +19,22 @@ jest.mock('mattermost-redux/actions/channels', () => ({
     patchChannel: jest.fn(),
     updateChannelPrivacy: jest.fn(),
 }));
+
+jest.mock('mattermost-redux/client', () => ({
+    Client4: {
+        patchPropertyValues: jest.fn(),
+    },
+}));
+
+jest.mock('components/common/hooks/useChannelEmoji', () => {
+    const actual = jest.requireActual('components/common/hooks/useChannelEmoji');
+
+    return {
+        ...actual,
+        __esModule: true,
+        default: jest.fn(() => ({emoji: '', field: {id: 'emoji_field_id'}, loading: false})),
+    };
+});
 
 // Mock the ConvertConfirmModal component
 jest.mock('components/admin_console/team_channel_settings/convert_confirm_modal', () => {
@@ -136,9 +156,16 @@ const baseProps = {
 
 describe('ChannelSettingsInfoTab', () => {
     beforeEach(() => {
+        jest.clearAllMocks();
         mockChannelPropertiesPermission = true;
         mockConvertToPublicPermission = true;
         mockConvertToPrivatePermission = true;
+        (useChannelEmoji as jest.Mock).mockReturnValue({emoji: '', field: {id: 'emoji_field_id'}, loading: false});
+        (Client4.patchPropertyValues as jest.Mock).mockResolvedValue([{
+            target_id: 'channel1',
+            field_id: 'emoji_field_id',
+            value: ':rocket:',
+        }]);
     });
 
     it('should render with the correct initial values', () => {
@@ -215,6 +242,27 @@ describe('ChannelSettingsInfoTab', () => {
             purpose: 'Updated purpose',
             header: 'Updated header',
         });
+    });
+
+    it('should save a channel emoji as a normalized property value', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        const emojiInput = screen.getByRole('textbox', {name: 'Channel emoji (optional)'});
+        await userEvent.clear(emojiInput);
+        await userEvent.type(emojiInput, 'rocket');
+
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(Client4.patchPropertyValues).toHaveBeenCalledWith(
+            'channel_emojis',
+            'channel',
+            'channel1',
+            [{field_id: 'emoji_field_id', value: ':rocket:'}],
+        );
+        expect(patchChannel).not.toHaveBeenCalled();
     });
 
     it('should save DM header from channel settings without requiring channel name', async () => {

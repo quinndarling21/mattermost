@@ -77,6 +77,46 @@ func TestDoSetupManagedCategoryProperties(t *testing.T) {
 	})
 }
 
+func TestDoSetupChannelEmojiProperties(t *testing.T) {
+	t.Run("should register the property group and field on fresh install", func(t *testing.T) {
+		th := Setup(t)
+
+		group, appErr := th.App.GetPropertyGroup(th.Context, model.ChannelEmojiPropertyGroupName)
+		require.Nil(t, appErr)
+		require.NotNil(t, group)
+		require.Equal(t, model.ChannelEmojiPropertyGroupName, group.Name)
+
+		propertyFields, appErr := th.App.SearchPropertyFields(th.Context, group.ID, model.PropertyFieldSearchOpts{PerPage: 100})
+		require.Nil(t, appErr)
+		require.Len(t, propertyFields, 1)
+		require.Equal(t, model.ChannelEmojiPropertyFieldName, propertyFields[0].Name)
+		require.Equal(t, model.PropertyValueTargetTypeChannel, propertyFields[0].ObjectType)
+		require.Equal(t, model.NewPointer(model.PermissionLevelAdmin), propertyFields[0].PermissionValues)
+
+		data, sysErr := th.Store.System().GetByName(channelEmojiSetupDoneKey)
+		require.NoError(t, sysErr)
+		require.Equal(t, channelEmojiMigrationVersion, data.Value)
+	})
+
+	t.Run("should be idempotent when the system key is already current", func(t *testing.T) {
+		th := Setup(t)
+
+		sysErr := th.Store.System().SaveOrUpdate(&model.System{Name: channelEmojiSetupDoneKey, Value: channelEmojiMigrationVersion})
+		require.NoError(t, sysErr)
+
+		group, appErr := th.App.GetPropertyGroup(th.Context, model.ChannelEmojiPropertyGroupName)
+		require.Nil(t, appErr)
+		versionBefore := group.Version
+
+		err := th.Server.doSetupChannelEmojiProperties()
+		require.NoError(t, err)
+
+		group, appErr = th.App.GetPropertyGroup(th.Context, model.ChannelEmojiPropertyGroupName)
+		require.Nil(t, appErr)
+		require.Equal(t, versionBefore, group.Version)
+	})
+}
+
 func TestDoSetupContentFlaggingProperties(t *testing.T) {
 	t.Run("should register property group and fields", func(t *testing.T) {
 		//we need to call the Setup method and run the full setup instead of

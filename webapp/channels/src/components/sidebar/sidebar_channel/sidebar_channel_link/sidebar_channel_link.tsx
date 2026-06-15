@@ -39,6 +39,7 @@ type Props = WrappedComponentProps & {
     channel: Channel;
     link: string;
     label: string;
+    channelEmoji?: string;
     ariaLabelPrefix?: string;
     channelLeaveHandler?: (callback: () => void) => void;
     icon: JSX.Element | null;
@@ -195,6 +196,7 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
             isMuted,
             isUnread,
             label,
+            channelEmoji,
             link,
             unreadMentions,
             firstChannelName,
@@ -261,6 +263,14 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
                 <div
                     className='SidebarChannelLinkLabel_wrapper'
                 >
+                    {channelEmoji && (
+                        <span
+                            className='SidebarChannelLinkLabel_emoji'
+                            aria-hidden='true'
+                        >
+                            {wrapEmojis(channelEmoji)}
+                        </span>
+                    )}
                     {labelElement}
                     {customStatus}
                     <Pluggable
