@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {useDispatch} from 'react-redux';
 
@@ -32,6 +32,10 @@ export default function SubmitFeedbackModal() {
     const [error, setError] = useState('');
     const [created, setCreated] = useState<SubmitFeedbackResponse | null>(null);
 
+    // Synchronous guard so a rapid double-click cannot fire two requests
+    // before the `submitting` state update re-renders the disabled button.
+    const submittingRef = useRef(false);
+
     const handleClose = () => {
         dispatch(closeModal(ModalIdentifiers.SUBMIT_FEEDBACK));
     };
@@ -39,10 +43,11 @@ export default function SubmitFeedbackModal() {
     const submitDisabled = submitting || title.trim() === '';
 
     const handleConfirm = async () => {
-        if (submitDisabled) {
+        if (submittingRef.current || title.trim() === '') {
             return;
         }
 
+        submittingRef.current = true;
         setSubmitting(true);
         setError('');
 
@@ -60,6 +65,7 @@ export default function SubmitFeedbackModal() {
                 defaultMessage: 'Something went wrong while submitting your feedback. Please try again.',
             }));
         } finally {
+            submittingRef.current = false;
             setSubmitting(false);
         }
     };
