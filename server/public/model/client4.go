@@ -497,6 +497,10 @@ func (c *Client4) reactionsRoute() clientRoute {
 	return newClientRoute("reactions")
 }
 
+func (c *Client4) feedbackRoute() clientRoute {
+	return newClientRoute("feedback")
+}
+
 func (c *Client4) oAuthRoute() clientRoute {
 	return newClientRoute("oauth")
 }
@@ -6245,6 +6249,17 @@ func (c *Client4) AutocompleteEmoji(ctx context.Context, name string, etag strin
 }
 
 // Reaction Section
+
+// SubmitFeedback forwards a user-submitted feature request or bug report so that
+// the server can create a corresponding issue in Linear.
+func (c *Client4) SubmitFeedback(ctx context.Context, req *SubmitFeedbackRequest) (*SubmitFeedbackResponse, *Response, error) {
+	r, err := c.doAPIPostJSON(ctx, c.feedbackRoute(), req)
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	defer closeBody(r)
+	return DecodeJSONFromResponse[*SubmitFeedbackResponse](r)
+}
 
 // SaveReaction saves an emoji reaction for a post. Returns the saved reaction if successful, otherwise an error will be returned.
 func (c *Client4) SaveReaction(ctx context.Context, reaction *Reaction) (*Reaction, *Response, error) {

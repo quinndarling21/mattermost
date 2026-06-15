@@ -6537,6 +6537,30 @@
     "translation": "Failed to add file to zip archive during export."
   },
   {
+    "id": "app.feedback.linear_failed.app_error",
+    "translation": "Unable to create the issue in Linear. Please try again later."
+  },
+  {
+    "id": "app.feedback.linear_request.app_error",
+    "translation": "Unable to reach Linear to create the issue. Please try again later."
+  },
+  {
+    "id": "app.feedback.linear_response.app_error",
+    "translation": "Received an unexpected response from Linear."
+  },
+  {
+    "id": "app.feedback.marshal.app_error",
+    "translation": "Unable to prepare the feedback request."
+  },
+  {
+    "id": "app.feedback.not_configured.app_error",
+    "translation": "Feedback submission is not configured on this server."
+  },
+  {
+    "id": "app.feedback.request.app_error",
+    "translation": "Unable to build the feedback request."
+  },
+  {
     "id": "app.file.cloud.get.app_error",
     "translation": "Can not fetch the file as it is past the cloud plan's limit."
   },
@@ -12105,6 +12129,22 @@
   {
     "id": "model.emoji.user_id.app_error",
     "translation": "Invalid creator id."
+  },
+  {
+    "id": "model.feedback.is_valid.description.app_error",
+    "translation": "The description is too long."
+  },
+  {
+    "id": "model.feedback.is_valid.request.app_error",
+    "translation": "Invalid feedback request."
+  },
+  {
+    "id": "model.feedback.is_valid.title.app_error",
+    "translation": "Please provide a title for your feedback."
+  },
+  {
+    "id": "model.feedback.is_valid.type.app_error",
+    "translation": "Please choose a valid feedback type."
   },
   {
     "id": "model.file_info.is_valid.create_at.app_error",
