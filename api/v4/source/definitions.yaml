@@ -210,6 +210,8 @@ components:
           type: string
         name:
           type: string
+        channel_emoji:
+          type: string
         header:
           type: string
         purpose:

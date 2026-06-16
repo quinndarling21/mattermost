@@ -16,6 +16,10 @@ jest.mock('@mattermost/shared/utils/user_agent', () => ({
     isDesktopApp: jest.fn(),
 }));
 
+jest.mock('components/emoji/render_emoji', () => {
+    return ({emojiName}: {emojiName: string}) => <span data-testid='rendered-channel-emoji'>{emojiName}</span>;
+});
+
 describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
     const baseChannel = {
         id: 'channel_id',
@@ -210,6 +214,17 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
         });
 
         expect(screen.getByRole('link')).not.toHaveAccessibleName(/including an urgent mention/i);
+    });
+
+    test('should render channel emoji when present', () => {
+        renderLink({
+            channel: {
+                ...baseChannel,
+                channel_emoji: 'rocket',
+            },
+        });
+
+        expect(screen.getByTestId('rendered-channel-emoji')).toHaveTextContent('rocket');
     });
 
     test('should refetch when channel changes', () => {
