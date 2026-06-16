@@ -4,7 +4,7 @@
 import React from 'react';
 
 import {isDesktopApp} from '@mattermost/shared/utils/user_agent';
-import type {ChannelType} from '@mattermost/types/channels';
+import type {Channel, ChannelType} from '@mattermost/types/channels';
 
 import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_channel_link/sidebar_channel_link';
 
@@ -21,7 +21,7 @@ jest.mock('components/emoji/render_emoji', () => {
 });
 
 describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
-    const baseChannel = {
+    const baseChannel: Channel = {
         id: 'channel_id',
         display_name: 'channel_display_name',
         create_at: 0,
