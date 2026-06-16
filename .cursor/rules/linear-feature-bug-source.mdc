@@ -1,0 +1,10 @@
+---
+description: Use the Mattermost MAT Linear project as the source of truth for feature requests and bugs
+alwaysApply: true
+---
+
+# Linear
+
+- For anything related to feature requests or bugs in this repository, treat Linear as the source of truth.
+- Use the Mattermost Factory `MAT` project: https://linear.app/mattermost-factory/team/MAT/overview.
+- When the user references a feature request, bug, issue, ticket, or work item without naming another tracker, check or refer to this Linear project first.
