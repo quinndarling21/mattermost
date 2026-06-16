@@ -5,6 +5,7 @@ import React, {useCallback, useState, useEffect, useMemo, useRef} from 'react';
 import {useIntl} from 'react-intl';
 import {useDispatch, useSelector} from 'react-redux';
 
+import {Button} from '@mattermost/shared/components/button';
 import type {Channel, ChannelType} from '@mattermost/types/channels';
 import type {Emoji} from '@mattermost/types/emojis';
 import type {ServerError} from '@mattermost/types/errors';
@@ -528,10 +529,11 @@ function ChannelSettingsInfoTab({
                         {formatMessage({id: 'channel_settings.emoji.help_text', defaultMessage: 'Choose an emoji to show next to this channel in the sidebar.'})}
                     </div>
                     <div className='ChannelSettingsModal__emojiFieldControls'>
-                        <button
+                        <Button
                             id='channel_settings_emoji_button'
                             ref={setReference}
                             type='button'
+                            emphasis='tertiary'
                             className='ChannelSettingsModal__emojiButton emoji-picker__container'
                             disabled={!canManageChannelProperties || !enableEmojiPicker}
                             aria-label={formatMessage({id: 'channel_settings.emoji.select', defaultMessage: 'Select channel emoji'})}
@@ -549,16 +551,17 @@ function ChannelSettingsInfoTab({
                             <span>
                                 {channelEmojiName ? `:${channelEmojiName}:` : formatMessage({id: 'channel_settings.emoji.none', defaultMessage: 'No emoji'})}
                             </span>
-                        </button>
+                        </Button>
                         {channelEmojiName && (
-                            <button
+                            <Button
                                 type='button'
-                                className='btn btn-tertiary ChannelSettingsModal__emojiClear'
+                                emphasis='tertiary'
+                                className='ChannelSettingsModal__emojiClear'
                                 disabled={!canManageChannelProperties}
                                 onClick={() => setChannelEmojiName('')}
                             >
                                 {formatMessage({id: 'channel_settings.emoji.clear', defaultMessage: 'Clear'})}
-                            </button>
+                            </Button>
                         )}
                     </div>
                     {emojiPicker}
