@@ -59,6 +59,30 @@ func TestChannelPatchDiscoverable(t *testing.T) {
 	})
 }
 
+func TestChannelPatchEmojiName(t *testing.T) {
+	t.Run("applies emoji name when set", func(t *testing.T) {
+		emojiName := "party_parrot"
+		p := &ChannelPatch{EmojiName: &emojiName}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(p)
+		require.Equal(t, "party_parrot", o.EmojiName)
+	})
+
+	t.Run("trims colons and whitespace", func(t *testing.T) {
+		emojiName := " :dog: "
+		p := &ChannelPatch{EmojiName: &emojiName}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(p)
+		require.Equal(t, "dog", o.EmojiName)
+	})
+
+	t.Run("nil emoji name leaves channel untouched", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, EmojiName: "dog"}
+		o.Patch(&ChannelPatch{})
+		require.Equal(t, "dog", o.EmojiName)
+	})
+}
+
 func TestChannelIsValidDiscoverable(t *testing.T) {
 	base := Channel{
 		Id:          NewId(),
@@ -89,6 +113,49 @@ func TestChannelIsValidDiscoverable(t *testing.T) {
 		require.NotNil(t, c.IsValid())
 
 		c.Type = ChannelTypePrivate
+		require.Nil(t, c.IsValid())
+	})
+}
+
+func TestChannelIsValidEmojiName(t *testing.T) {
+	base := Channel{
+		Id:          NewId(),
+		CreateAt:    GetMillis(),
+		UpdateAt:    GetMillis(),
+		DisplayName: "x",
+		Name:        "valid-name",
+		Header:      "h",
+		Purpose:     "p",
+		Type:        ChannelTypeOpen,
+	}
+
+	t.Run("empty emoji name is valid", func(t *testing.T) {
+		c := base
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("emoji name requires open or private channel", func(t *testing.T) {
+		c := base
+		c.Type = ChannelTypeDirect
+		c.EmojiName = "dog"
+		require.NotNil(t, c.IsValid())
+
+		c.Type = ChannelTypeGroup
+		require.NotNil(t, c.IsValid())
+
+		c.Type = ChannelTypePrivate
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("emoji name validates length and characters", func(t *testing.T) {
+		c := base
+		c.EmojiName = strings.Repeat("a", ChannelEmojiNameMaxRunes+1)
+		require.NotNil(t, c.IsValid())
+
+		c.EmojiName = "bad emoji"
+		require.NotNil(t, c.IsValid())
+
+		c.EmojiName = "party-parrot+1"
 		require.Nil(t, c.IsValid())
 	})
 }
