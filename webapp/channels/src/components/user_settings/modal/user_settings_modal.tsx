@@ -24,6 +24,13 @@ import {cmdOrCtrlPressed, isKeyPressed} from 'utils/keyboard';
 import {stopTryNotificationRing} from 'utils/notification_sounds';
 import {isValidUrl} from 'utils/url';
 import {getDisplayName} from 'utils/utils';
+import type {Index} from 'utils/user_settings_index';
+import {generateUserSettingsIndex} from 'utils/user_settings_index';
+import {
+    getMatchingTabs,
+    searchUserSettings,
+} from 'utils/user_settings_search';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import type {PluginConfiguration} from 'types/plugins/user_settings';
 
@@ -58,6 +65,7 @@ type State = {
     show: boolean;
     resendStatus: string;
     loading: boolean;
+    searchFilter: UserSettingsSearchFilter;
 };
 
 class UserSettingsModal extends React.PureComponent<Props, State> {
@@ -65,6 +73,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     private customConfirmAction: ((handleConfirm: () => void) => void) | null;
     private afterConfirm: (() => void) | null;
     private modalBodyRef: React.RefObject<HTMLDivElement>;
+    private searchIndex: Index | null;
 
     constructor(props: Props) {
         super(props);
@@ -77,6 +86,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             show: true,
             resendStatus: '',
             loading: false,
+            searchFilter: {query: '', matchingSections: null},
         };
 
         this.requireConfirm = false;
@@ -88,7 +98,63 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.afterConfirm = null;
 
         this.modalBodyRef = React.createRef();
+        this.searchIndex = null;
     }
+
+    getSearchIndex = () => {
+        if (this.searchIndex === null) {
+            this.searchIndex = generateUserSettingsIndex(this.props.intl, {
+                isContentProductSettings: this.props.isContentProductSettings,
+                pluginSettings: this.props.pluginSettings,
+            });
+        }
+        return this.searchIndex;
+    };
+
+    getAllTabNames = () => {
+        const tabs = this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab();
+        const pluginTabs = this.props.isContentProductSettings ? this.getPluginsSettingsTab() : [];
+        return [...tabs, ...pluginTabs].map((tab) => tab.name);
+    };
+
+    handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const query = event.target.value;
+        const searchFilter = searchUserSettings(query, this.props.intl, {
+            isContentProductSettings: this.props.isContentProductSettings,
+            pluginSettings: this.props.pluginSettings,
+        }, this.getSearchIndex());
+
+        this.setState({searchFilter});
+
+        if (!query || !searchFilter.matchingSections || searchFilter.matchingSections.size === 0) {
+            return;
+        }
+
+        const matchingTabs = getMatchingTabs(searchFilter, this.getAllTabNames());
+        if (!matchingTabs || matchingTabs.size === 0) {
+            return;
+        }
+
+        let targetTab = this.state.active_tab;
+        if (!targetTab || !matchingTabs.has(targetTab)) {
+            targetTab = matchingTabs.values().next().value;
+            this.updateTab(targetTab);
+        }
+
+        for (const sectionId of searchFilter.matchingSections) {
+            const [tab, section] = sectionId.split('.', 2);
+            if (tab === targetTab) {
+                this.updateSection(section);
+                break;
+            }
+        }
+    };
+
+    handleSearchClear = () => {
+        this.setState({
+            searchFilter: {query: '', matchingSections: null},
+        });
+    };
 
     handleResend = (email: string) => {
         this.setState({resendStatus: 'sending'});
@@ -164,7 +230,9 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: this.props.isContentProductSettings ? 'notifications' : 'profile',
             active_section: '',
+            searchFilter: {query: '', matchingSections: null},
         });
+        this.searchIndex = null;
         if (this.props.focusOriginElement) {
             focusElement(this.props.focusOriginElement, true);
         }
@@ -320,6 +388,9 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
 
     render() {
         const {formatMessage} = this.props.intl;
+        const {searchFilter} = this.state;
+        const matchingTabs = getMatchingTabs(searchFilter, this.getAllTabNames());
+        const showNoSearchResults = Boolean(searchFilter.query && matchingTabs && matchingTabs.size === 0);
 
         let modalTitle: string;
         if (this.props.adminMode && this.props.user) {
@@ -394,6 +465,14 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                         pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
                                         activeTab={this.state.active_tab}
                                         updateTab={this.updateTab}
+                                        enableSearch={true}
+                                        searchQuery={searchFilter.query}
+                                        searchPlaceholder={formatMessage({id: 'user.settings.search.placeholder', defaultMessage: 'Find settings'})}
+                                        searchAriaLabel={formatMessage({id: 'user.settings.search.ariaLabel', defaultMessage: 'Search settings'})}
+                                        onSearchChange={this.handleSearchChange}
+                                        onSearchClear={this.handleSearchClear}
+                                        matchingTabs={matchingTabs}
+                                        showNoSearchResults={showNoSearchResults}
                                     />
                                 </div>
                                 <div className='settings-content minimize-settings'>
@@ -412,6 +491,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                         user={this.props.user}
                                         adminMode={this.props.adminMode}
                                         userPreferences={this.props.userPreferences}
+                                        searchFilter={searchFilter}
                                     />
                                 </div>
                             </div>

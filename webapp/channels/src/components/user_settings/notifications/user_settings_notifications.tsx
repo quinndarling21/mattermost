@@ -31,6 +31,7 @@ import SendTestNotificationNotice from './send_test_notification_notice';
 
 import SettingDesktopHeader from '../headers/setting_desktop_header';
 import SettingMobileHeader from '../headers/setting_mobile_header';
+import UserSettingsSearchSection from '../search/user_settings_search_section';
 
 import type {OwnProps, PropsFromRedux} from './index';
 
@@ -982,6 +983,7 @@ class NotificationsTab extends React.PureComponent<Props, State> {
         const autoResponderSection = this.createAutoResponderSection();
 
         const areAllSectionsInactive = this.props.activeSection === '';
+        const searchFilter = this.props.searchFilter ?? {query: '', matchingSections: null};
 
         return (
             <div
@@ -1030,75 +1032,111 @@ class NotificationsTab extends React.PureComponent<Props, State> {
                         }
                     />
                     <div className='divider-dark first'/>
-                    <DesktopAndMobileNotificationSettings
-                        active={this.props.activeSection === UserSettingsNotificationSections.DESKTOP_AND_MOBILE}
-                        updateSection={this.handleUpdateSection}
-                        onSubmit={this.handleSubmit}
-                        onCancel={this.handleCancel}
-                        saving={this.state.isSaving}
-                        error={this.state.serverError}
-                        setParentState={this.setStateValue}
-                        areAllSectionsInactive={areAllSectionsInactive}
-                        isCollapsedThreadsEnabled={this.props.isCollapsedThreadsEnabled}
-                        desktopActivity={this.state.desktopActivity}
-                        pushActivity={this.state.pushActivity}
-                        sendPushNotifications={this.props.sendPushNotifications}
-                        pushStatus={this.state.pushStatus}
-                        desktopThreads={this.state.desktopThreads}
-                        pushThreads={this.state.pushThreads}
-                        desktopAndMobileSettingsDifferent={this.state.desktopAndMobileSettingsDifferent}
-                    />
+                    <UserSettingsSearchSection
+                        tab='notifications'
+                        section={UserSettingsNotificationSections.DESKTOP_AND_MOBILE}
+                        searchFilter={searchFilter}
+                    >
+                        <DesktopAndMobileNotificationSettings
+                            active={this.props.activeSection === UserSettingsNotificationSections.DESKTOP_AND_MOBILE}
+                            updateSection={this.handleUpdateSection}
+                            onSubmit={this.handleSubmit}
+                            onCancel={this.handleCancel}
+                            saving={this.state.isSaving}
+                            error={this.state.serverError}
+                            setParentState={this.setStateValue}
+                            areAllSectionsInactive={areAllSectionsInactive}
+                            isCollapsedThreadsEnabled={this.props.isCollapsedThreadsEnabled}
+                            desktopActivity={this.state.desktopActivity}
+                            pushActivity={this.state.pushActivity}
+                            sendPushNotifications={this.props.sendPushNotifications}
+                            pushStatus={this.state.pushStatus}
+                            desktopThreads={this.state.desktopThreads}
+                            pushThreads={this.state.pushThreads}
+                            desktopAndMobileSettingsDifferent={this.state.desktopAndMobileSettingsDifferent}
+                        />
+                    </UserSettingsSearchSection>
                     <div className='divider-light'/>
-                    <DesktopNotificationSoundsSettings
-                        active={this.props.activeSection === UserSettingsNotificationSections.DESKTOP_NOTIFICATION_SOUND}
-                        updateSection={this.handleUpdateSection}
-                        onSubmit={this.handleSubmit}
-                        onCancel={this.handleCancel}
-                        saving={this.state.isSaving}
-                        error={this.state.serverError}
-                        setParentState={this.setStateValue}
-                        areAllSectionsInactive={areAllSectionsInactive}
-                        desktopSound={this.state.desktopSound}
-                        desktopNotificationSound={this.state.desktopNotificationSound}
-                        isCallsRingingEnabled={this.props.isCallsRingingEnabled}
-                        callsDesktopSound={this.state.callsDesktopSound}
-                        callsNotificationSound={this.state.callsNotificationSound}
-                    />
+                    <UserSettingsSearchSection
+                        tab='notifications'
+                        section={UserSettingsNotificationSections.DESKTOP_NOTIFICATION_SOUND}
+                        searchFilter={searchFilter}
+                    >
+                        <DesktopNotificationSoundsSettings
+                            active={this.props.activeSection === UserSettingsNotificationSections.DESKTOP_NOTIFICATION_SOUND}
+                            updateSection={this.handleUpdateSection}
+                            onSubmit={this.handleSubmit}
+                            onCancel={this.handleCancel}
+                            saving={this.state.isSaving}
+                            error={this.state.serverError}
+                            setParentState={this.setStateValue}
+                            areAllSectionsInactive={areAllSectionsInactive}
+                            desktopSound={this.state.desktopSound}
+                            desktopNotificationSound={this.state.desktopNotificationSound}
+                            isCallsRingingEnabled={this.props.isCallsRingingEnabled}
+                            callsDesktopSound={this.state.callsDesktopSound}
+                            callsNotificationSound={this.state.callsNotificationSound}
+                        />
+                    </UserSettingsSearchSection>
                     <div className='divider-light'/>
-                    <EmailNotificationSetting
-                        active={this.props.activeSection === UserSettingsNotificationSections.EMAIL}
-                        updateSection={this.handleUpdateSection}
-                        onSubmit={this.handleSubmit}
-                        onCancel={this.handleCancel}
-                        saving={this.state.isSaving}
-                        error={this.state.serverError}
-                        setParentState={this.setStateValue}
-                        areAllSectionsInactive={areAllSectionsInactive}
-                        isCollapsedThreadsEnabled={this.props.isCollapsedThreadsEnabled}
-                        enableEmail={this.state.enableEmail === 'true'}
-                        onChange={this.handleEmailRadio}
-                        threads={this.state.emailThreads || ''}
-                    />
+                    <UserSettingsSearchSection
+                        tab='notifications'
+                        section={UserSettingsNotificationSections.EMAIL}
+                        searchFilter={searchFilter}
+                    >
+                        <EmailNotificationSetting
+                            active={this.props.activeSection === UserSettingsNotificationSections.EMAIL}
+                            updateSection={this.handleUpdateSection}
+                            onSubmit={this.handleSubmit}
+                            onCancel={this.handleCancel}
+                            saving={this.state.isSaving}
+                            error={this.state.serverError}
+                            setParentState={this.setStateValue}
+                            areAllSectionsInactive={areAllSectionsInactive}
+                            isCollapsedThreadsEnabled={this.props.isCollapsedThreadsEnabled}
+                            enableEmail={this.state.enableEmail === 'true'}
+                            onChange={this.handleEmailRadio}
+                            threads={this.state.emailThreads || ''}
+                        />
+                    </UserSettingsSearchSection>
                     <div className='divider-light'/>
-                    {keywordsWithNotificationSection}
+                    <UserSettingsSearchSection
+                        tab='notifications'
+                        section={UserSettingsNotificationSections.KEYWORDS_MENTIONS}
+                        searchFilter={searchFilter}
+                    >
+                        {keywordsWithNotificationSection}
+                    </UserSettingsSearchSection>
                     {(!this.props.isEnterpriseOrCloudOrSKUStarterFree && this.props.isEnterpriseReady) && (
-                        <>
+                        <UserSettingsSearchSection
+                            tab='notifications'
+                            section={UserSettingsNotificationSections.KEYWORDS_HIGHLIGHT}
+                            searchFilter={searchFilter}
+                        >
                             <div className='divider-light'/>
                             {keywordsWithHighlightSection}
-                        </>
+                        </UserSettingsSearchSection>
                     )}
                     <div className='divider-light'/>
                     {!this.props.isCollapsedThreadsEnabled && (
-                        <>
+                        <UserSettingsSearchSection
+                            tab='notifications'
+                            section={UserSettingsNotificationSections.REPLY_NOTIFCATIONS}
+                            searchFilter={searchFilter}
+                        >
                             <div className='divider-light'/>
                             {commentsSection}
-                        </>
+                        </UserSettingsSearchSection>
                     )}
                     {this.props.enableAutoResponder && (
-                        <>
+                        <UserSettingsSearchSection
+                            tab='notifications'
+                            section={UserSettingsNotificationSections.AUTO_RESPONDER}
+                            searchFilter={searchFilter}
+                        >
                             <div className='divider-light'/>
                             {autoResponderSection}
-                        </>
+                        </UserSettingsSearchSection>
                     )}
 
                     {/*  We placed the disabled items in the last */}

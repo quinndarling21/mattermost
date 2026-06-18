@@ -26,12 +26,15 @@ import Input from 'components/widgets/inputs/input/input';
 import icon50 from 'images/icon50x50.png';
 import Constants from 'utils/constants';
 import {isValidPassword} from 'utils/password';
+import {isUserSettingsSectionVisible} from 'utils/user_settings_search';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import MfaSection from './mfa_section';
 import UserAccessTokenSection from './user_access_token_section';
 
 import SettingDesktopHeader from '../headers/setting_desktop_header';
 import SettingMobileHeader from '../headers/setting_mobile_header';
+import UserSettingsSearchSection from '../search/user_settings_search_section';
 
 const SECTION_MFA = 'mfa';
 const SECTION_PASSWORD = 'password';
@@ -72,6 +75,7 @@ type Props = {
     actions: Actions;
     intl: IntlShape;
     deleteAccountLink?: string;
+    searchFilter?: UserSettingsSearchFilter;
 };
 
 type State = {
@@ -229,7 +233,16 @@ export class SecurityTab extends React.PureComponent<Props, State> {
         }
     };
 
+    isSectionVisible(section: string) {
+        const searchFilter = this.props.searchFilter ?? {query: '', matchingSections: null};
+        return isUserSettingsSectionVisible('security', section, searchFilter);
+    }
+
     createPasswordSection = () => {
+        if (!this.isSectionVisible(SECTION_PASSWORD)) {
+            return null;
+        }
+
         const inputs = [];
         let submit;
 
@@ -527,6 +540,10 @@ export class SecurityTab extends React.PureComponent<Props, State> {
     };
 
     createSignInSection = () => {
+        if (!this.isSectionVisible(SECTION_SIGNIN)) {
+            return null;
+        }
+
         const user = this.props.user;
 
         const active = this.props.activeSection === SECTION_SIGNIN;
@@ -843,6 +860,10 @@ export class SecurityTab extends React.PureComponent<Props, State> {
     };
 
     createOAuthAppsSection = () => {
+        if (!this.isSectionVisible(SECTION_APPS)) {
+            return null;
+        }
+
         const active = this.props.activeSection === SECTION_APPS;
         let max = null;
         if (active) {
@@ -987,6 +1008,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
 
     render() {
         const user = this.props.user;
+        const searchFilter = this.props.searchFilter ?? {query: '', matchingSections: null};
 
         const passwordSection = this.createPasswordSection();
 
@@ -1014,7 +1036,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
         }
 
         let tokensSection;
-        if (this.props.canUseAccessTokens) {
+        if (this.props.canUseAccessTokens && this.isSectionVisible(SECTION_TOKENS)) {
             tokensSection = (
                 <UserAccessTokenSection
                     user={this.props.user}
@@ -1054,11 +1076,17 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                     <div className='divider-dark first'/>
                     {passwordSection}
                     <div className='divider-light'/>
-                    <MfaSection
-                        active={this.props.activeSection === SECTION_MFA}
-                        areAllSectionsInactive={this.props.activeSection === ''}
-                        updateSection={this.handleUpdateSection}
-                    />
+                    <UserSettingsSearchSection
+                        tab='security'
+                        section={SECTION_MFA}
+                        searchFilter={searchFilter}
+                    >
+                        <MfaSection
+                            active={this.props.activeSection === SECTION_MFA}
+                            areAllSectionsInactive={this.props.activeSection === ''}
+                            updateSection={this.handleUpdateSection}
+                        />
+                    </UserSettingsSearchSection>
                     <div className='divider-light'/>
                     {oauthSection}
                     <div className='divider-light'/>

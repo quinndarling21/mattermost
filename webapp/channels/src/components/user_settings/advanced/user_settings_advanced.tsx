@@ -19,6 +19,8 @@ import SettingItemMax from 'components/setting_item_max';
 
 import Constants, {AdvancedSections, Preferences} from 'utils/constants';
 import {a11yFocus} from 'utils/utils';
+import {isUserSettingsSectionVisible} from 'utils/user_settings_search';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import EnableConcurrentReactExperimentalSection from './enable_concurrent_react_experimental_section';
 import JoinLeaveSection from './join_leave_section';
@@ -26,6 +28,7 @@ import PerformanceDebuggingSection from './performance_debugging_section';
 
 import SettingDesktopHeader from '../headers/setting_desktop_header';
 import SettingMobileHeader from '../headers/setting_mobile_header';
+import UserSettingsSearchSection from '../search/user_settings_search_section';
 
 import type {PropsFromRedux} from './index';
 
@@ -46,6 +49,7 @@ export type OwnProps = {
     activeSection: string;
     closeModal: () => void;
     collapseModal: () => void;
+    searchFilter?: UserSettingsSearchFilter;
 }
 
 export type Props = OwnProps & PropsFromRedux;
@@ -255,7 +259,16 @@ export default class AdvancedSettingsDisplay extends React.PureComponent<Props, 
         );
     }
 
+    isSectionVisible(section: string) {
+        const searchFilter = this.props.searchFilter ?? {query: '', matchingSections: null};
+        return isUserSettingsSectionVisible('advanced', section, searchFilter);
+    }
+
     renderFormattingSection = () => {
+        if (!this.isSectionVisible(AdvancedSections.FORMATTING)) {
+            return null;
+        }
+
         const active = this.props.activeSection === 'formatting';
         let max = null;
         if (active) {
@@ -342,6 +355,10 @@ export default class AdvancedSettingsDisplay extends React.PureComponent<Props, 
     };
 
     renderUnreadScrollPositionSection = () => {
+        if (!this.isSectionVisible(Preferences.UNREAD_SCROLL_POSITION)) {
+            return null;
+        }
+
         const active = this.props.activeSection === Preferences.UNREAD_SCROLL_POSITION;
         let max = null;
         if (active) {
@@ -428,6 +445,10 @@ export default class AdvancedSettingsDisplay extends React.PureComponent<Props, 
     };
 
     renderSyncDraftsSection = () => {
+        if (!this.isSectionVisible(AdvancedSections.SYNC_DRAFTS)) {
+            return null;
+        }
+
         const active = this.props.activeSection === AdvancedSections.SYNC_DRAFTS;
         let max = null;
         if (active) {
@@ -515,6 +536,10 @@ export default class AdvancedSettingsDisplay extends React.PureComponent<Props, 
     };
 
     renderCtrlSendSection = () => {
+        if (!this.isSectionVisible(AdvancedSections.CONTROL_SEND)) {
+            return null;
+        }
+
         const active = this.props.activeSection === 'advancedCtrlSend';
         const serverError = this.state.serverError || null;
         const {ctrlSendTitle, ctrlSendDesc} = this.getCtrlSendText();
@@ -626,6 +651,7 @@ export default class AdvancedSettingsDisplay extends React.PureComponent<Props, 
     };
 
     render() {
+        const searchFilter = this.props.searchFilter ?? {query: '', matchingSections: null};
         const ctrlSendSection = this.renderCtrlSendSection();
 
         const formattingSection = this.renderFormattingSection();
@@ -637,7 +663,7 @@ export default class AdvancedSettingsDisplay extends React.PureComponent<Props, 
         let deactivateAccountSection: ReactNode = '';
         let makeConfirmationModal: ReactNode = '';
 
-        if (this.props.user.auth_service === '' && this.props.enableUserDeactivation && !this.props.adminMode) {
+        if (this.props.user.auth_service === '' && this.props.enableUserDeactivation && !this.props.adminMode && this.isSectionVisible('deactivateAccount')) {
             const active = this.props.activeSection === 'deactivateAccount';
             let max = null;
             if (active) {
@@ -767,22 +793,34 @@ export default class AdvancedSettingsDisplay extends React.PureComponent<Props, 
                     {formattingSectionDivider}
                     {formattingSection}
                     <div className='divider-light'/>
-                    <JoinLeaveSection
-                        active={this.props.activeSection === AdvancedSections.JOIN_LEAVE}
-                        areAllSectionsInactive={this.props.activeSection === ''}
-                        onUpdateSection={this.handleUpdateSection}
-                        renderOnOffLabel={this.renderOnOffLabel}
-                        adminMode={this.props.adminMode}
-                        userPreferences={this.props.userPreferences}
-                        userId={this.props.user.id}
-                    />
-                    <PerformanceDebuggingSection
-                        active={this.props.activeSection === AdvancedSections.PERFORMANCE_DEBUGGING}
-                        onUpdateSection={this.handleUpdateSection}
-                        areAllSectionsInactive={this.props.activeSection === ''}
-                        adminMode={this.props.adminMode}
-                        userId={this.props.user.id}
-                    />
+                    <UserSettingsSearchSection
+                        tab='advanced'
+                        section={AdvancedSections.JOIN_LEAVE}
+                        searchFilter={searchFilter}
+                    >
+                        <JoinLeaveSection
+                            active={this.props.activeSection === AdvancedSections.JOIN_LEAVE}
+                            areAllSectionsInactive={this.props.activeSection === ''}
+                            onUpdateSection={this.handleUpdateSection}
+                            renderOnOffLabel={this.renderOnOffLabel}
+                            adminMode={this.props.adminMode}
+                            userPreferences={this.props.userPreferences}
+                            userId={this.props.user.id}
+                        />
+                    </UserSettingsSearchSection>
+                    <UserSettingsSearchSection
+                        tab='advanced'
+                        section={AdvancedSections.PERFORMANCE_DEBUGGING}
+                        searchFilter={searchFilter}
+                    >
+                        <PerformanceDebuggingSection
+                            active={this.props.activeSection === AdvancedSections.PERFORMANCE_DEBUGGING}
+                            onUpdateSection={this.handleUpdateSection}
+                            areAllSectionsInactive={this.props.activeSection === ''}
+                            adminMode={this.props.adminMode}
+                            userId={this.props.user.id}
+                        />
+                    </UserSettingsSearchSection>
                     {unreadScrollPositionSectionDivider}
                     {unreadScrollPositionSection}
                     {syncDraftsSectionDivider}
