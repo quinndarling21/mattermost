@@ -76,6 +76,7 @@ jobs:
             --pr-url "${{ github.event.pull_request.html_url }}"
 
       - name: Build docs
+        id: build-docs
         if: steps.key.outputs.present == 'true' && steps.docs.outcome == 'success'
         continue-on-error: true
         working-directory: docs
@@ -92,6 +93,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Create or update documentation PR
+        id: docs-pr
         if: steps.key.outputs.present == 'true' && steps.docs.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -103,9 +105,11 @@ jobs:
         run: |
           if git diff --quiet -- docs; then
             echo "No docs changes produced."
+            echo "docs_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          echo "docs_changed=true" >> "$GITHUB_OUTPUT"
           branch="cursor/docs-for-pr-${SOURCE_PR_NUMBER}"
           title="Update docs for PR #${SOURCE_PR_NUMBER}"
           patch_file="${RUNNER_TEMP}/docs-impact.patch"
@@ -144,21 +148,54 @@ jobs:
             gh pr create --repo "$REPO" --base "$BASE_REF" --head "$branch" --title "$title" --body-file "$body_file"
           fi
 
-      - name: Post failure notice
-        if: steps.key.outputs.present == 'true' && steps.docs.outcome != 'success'
+          docs_pr_url="$(gh pr list --repo "$REPO" --head "$branch" --json url --jq '.[0].url')"
+          echo "docs_pr_url=${docs_pr_url}" >> "$GITHUB_OUTPUT"
+
+      - name: Post or update documentation impact comment
+        if: always() && steps.key.outputs.present == 'true'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          DOCS_OUTCOME: ${{ steps.docs.outcome }}
+          BUILD_OUTCOME: ${{ steps.build-docs.outcome }}
+          DOCS_PR_OUTCOME: ${{ steps.docs-pr.outcome }}
+          DOCS_CHANGED: ${{ steps.docs-pr.outputs.docs_changed }}
+          DOCS_PR_URL: ${{ steps.docs-pr.outputs.docs_pr_url }}
         run: |
           marker="<!-- cursor-docs-impact -->"
-          body_file="${RUNNER_TEMP}/docs-impact-failure.md"
+          body_file="${RUNNER_TEMP}/docs-impact-comment.md"
           {
             echo "$marker"
-            echo "Documentation impact automation could not complete for this PR."
+            echo "## Documentation impact review"
             echo
-            echo "The check is advisory and does not block merge."
+            if [ "$DOCS_OUTCOME" != "success" ]; then
+              echo "Documentation impact automation could not complete for this PR."
+            elif [ "$DOCS_CHANGED" = "true" ] && [ "$DOCS_PR_OUTCOME" = "success" ] && [ -n "$DOCS_PR_URL" ]; then
+              echo "Documentation updates were proposed in ${DOCS_PR_URL}."
+            elif [ "$DOCS_CHANGED" = "true" ]; then
+              echo "Documentation updates were generated, but automation could not create or update the documentation PR."
+              echo
+              echo "Review the workflow logs before applying docs changes."
+            else
+              echo "No documentation changes were produced for this PR."
+            fi
+            echo
+            if [ -f ".cursor-docs-impact/report.md" ]; then
+              echo "<details>"
+              echo "<summary>Agent report</summary>"
+              echo
+              cat ".cursor-docs-impact/report.md"
+              echo
+              echo "</details>"
+              echo
+            fi
+            if [ "$BUILD_OUTCOME" = "failure" ]; then
+              echo "The docs build failed after automation. Review the workflow logs before merging docs changes."
+              echo
+            fi
+            echo "_Advisory only — this check does not block merge._"
           } > "$body_file"
 
           existing="$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" \
