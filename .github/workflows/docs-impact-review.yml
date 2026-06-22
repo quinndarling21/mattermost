@@ -113,6 +113,8 @@ jobs:
           branch="cursor/docs-for-pr-${SOURCE_PR_NUMBER}"
           title="Update docs for PR #${SOURCE_PR_NUMBER}"
           patch_file="${RUNNER_TEMP}/docs-impact.patch"
+          echo "docs_branch=${branch}" >> "$GITHUB_OUTPUT"
+          echo "docs_branch_url=https://github.com/${REPO}/tree/${branch}" >> "$GITHUB_OUTPUT"
 
           git diff -- docs > "$patch_file"
           git reset --hard
@@ -141,14 +143,22 @@ jobs:
           } > "$body_file"
 
           existing="$(gh pr list --repo "$REPO" --head "$branch" --json number --jq '.[0].number')"
+          set +e
           if [ -n "$existing" ]; then
-            gh pr edit "$existing" --repo "$REPO" --title "$title" --body-file "$body_file"
-            echo "Updated documentation PR #${existing}."
+            pr_output="$(gh pr edit "$existing" --repo "$REPO" --title "$title" --body-file "$body_file" 2>&1)"
+            pr_status=$?
+            [ "$pr_status" -eq 0 ] && echo "Updated documentation PR #${existing}."
           else
-            gh pr create --repo "$REPO" --base "$BASE_REF" --head "$branch" --title "$title" --body-file "$body_file"
+            pr_output="$(gh pr create --repo "$REPO" --base "$BASE_REF" --head "$branch" --title "$title" --body-file "$body_file" 2>&1)"
+            pr_status=$?
+          fi
+          set -e
+
+          if [ "$pr_status" -ne 0 ]; then
+            echo "docs_pr_error=${pr_output//$'\n'/ }" >> "$GITHUB_OUTPUT"
           fi
 
-          docs_pr_url="$(gh pr list --repo "$REPO" --head "$branch" --json url --jq '.[0].url')"
+          docs_pr_url="$(gh pr list --repo "$REPO" --head "$branch" --json url --jq '.[0].url' 2>/dev/null || true)"
           echo "docs_pr_url=${docs_pr_url}" >> "$GITHUB_OUTPUT"
 
       - name: Post or update documentation impact comment
@@ -163,6 +173,8 @@ jobs:
           DOCS_PR_OUTCOME: ${{ steps.docs-pr.outcome }}
           DOCS_CHANGED: ${{ steps.docs-pr.outputs.docs_changed }}
           DOCS_PR_URL: ${{ steps.docs-pr.outputs.docs_pr_url }}
+          DOCS_BRANCH_URL: ${{ steps.docs-pr.outputs.docs_branch_url }}
+          DOCS_PR_ERROR: ${{ steps.docs-pr.outputs.docs_pr_error }}
         run: |
           marker="<!-- cursor-docs-impact -->"
           body_file="${RUNNER_TEMP}/docs-impact-comment.md"
@@ -172,12 +184,18 @@ jobs:
             echo
             if [ "$DOCS_OUTCOME" != "success" ]; then
               echo "Documentation impact automation could not complete for this PR."
-            elif [ "$DOCS_CHANGED" = "true" ] && [ "$DOCS_PR_OUTCOME" = "success" ] && [ -n "$DOCS_PR_URL" ]; then
+            elif [ "$DOCS_CHANGED" = "true" ] && [ -n "$DOCS_PR_URL" ]; then
               echo "Documentation updates were proposed in ${DOCS_PR_URL}."
-            elif [ "$DOCS_CHANGED" = "true" ]; then
-              echo "Documentation updates were generated, but automation could not create or update the documentation PR."
+            elif [ "$DOCS_CHANGED" = "true" ] && [ -n "$DOCS_BRANCH_URL" ]; then
+              echo "Documentation updates were generated and pushed to ${DOCS_BRANCH_URL}, but automation could not create or update the documentation PR."
               echo
-              echo "Review the workflow logs before applying docs changes."
+              if [ -n "$DOCS_PR_ERROR" ]; then
+                echo "PR creation error: ${DOCS_PR_ERROR}"
+                echo
+              fi
+              echo "Open a PR from that branch or enable GitHub Actions pull request creation in repository settings."
+            elif [ "$DOCS_CHANGED" = "true" ]; then
+              echo "Documentation updates were generated, but automation could not publish them."
             else
               echo "No documentation changes were produced for this PR."
             fi
