@@ -118,3 +118,36 @@ export type TeamInviteWithError = {
         message: string;
     };
 };
+
+export type TeamDigestSettings = {
+    enabled: boolean;
+    webhook_url: string;
+    header_html: string;
+    include_posts: boolean;
+    include_replies: boolean;
+    cadence: string;
+};
+
+export type DigestMemberActivity = {
+    user_id: string;
+    username: string;
+    email: string;
+    last_activity_at: number;
+    post_count: number;
+    reply_count: number;
+    last_active_channel?: string;
+};
+
+export type TeamDigestPreview = {
+    header_html: string;
+    members: DigestMemberActivity[];
+    team_id: string;
+};
+
+export type TeamDigestMemberSummary = {
+    user_id: string;
+    team_id: string;
+    post_count: number;
+    reply_count: number;
+    last_activity_at: number;
+};

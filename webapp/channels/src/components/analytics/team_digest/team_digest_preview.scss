@@ -1,0 +1,43 @@
+.team-digest-preview {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+    border-radius: 4px;
+    background: var(--center-channel-bg);
+
+    &__header {
+        margin-bottom: 16px;
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+    &__members-title {
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+}
+
+.team-digest-settings {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+    border-radius: 4px;
+    background: var(--center-channel-bg);
+
+    &__title {
+        margin-bottom: 16px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    &__row {
+        margin-bottom: 12px;
+    }
+
+    &__actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+    }
+}
