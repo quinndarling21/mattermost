@@ -1,0 +1,9 @@
+candidate_id,title,theme,target_persona,effort_weeks,confidence,strategic_theme
+rc_search,Cross-channel search and answer quality,core_collaboration,incident_responder,10,high,retention
+rc_mobile_notif,Granular mobile notification controls,mobile,frontline_worker,6,high,activation
+rc_integration_setup,Guided integration setup wizard,integrations,it_admin,8,medium,expansion
+rc_admin_perms,Bulk admin permissions management,admin,it_admin,5,medium,enterprise
+rc_boards_templates,Boards template library,boards,team_lead,4,low,adoption
+rc_calls_recording,Call recording and transcript search,calls,executive,12,low,expansion
+rc_thread_summaries,AI thread summaries in busy channels,core_collaboration,engineer,7,medium,productivity
+rc_compliance_export,Compliance export for channel history,compliance,compliance_analyst,9,medium,enterprise

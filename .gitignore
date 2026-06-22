@@ -171,6 +171,8 @@ docker-compose.override.yaml
 !.cursor/BUGBOT.md
 !.cursor/rules/
 !.cursor/rules/**
+!.cursor/insights/
+!.cursor/insights/**
 !.cursor/skills/
 !.cursor/skills/**
 !.cursor/skills/mattermost-pull-request/
