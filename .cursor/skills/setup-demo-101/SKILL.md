@@ -39,7 +39,18 @@ Use this skill from the repository root.
 
    This intentionally starts only the required local Docker services, `mattermost-postgres` and `mattermost-redis`, then starts the Mattermost server and webapp.
 
-4. Wait for the server to be healthy:
+4. Start the local documentation site in a separate tmux session:
+
+   ```bash
+   SESSION_NAME="mattermost-docs-site"
+   REPO_ROOT="$(git rev-parse --show-toplevel)"
+   tmux -f /exec-daemon/tmux.portal.conf has-session -t "=$SESSION_NAME" 2>/dev/null || tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION_NAME" -c "$REPO_ROOT" -- "${SHELL:-bash}" -l
+   tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" "cd \"$REPO_ROOT/docs\" && npm ci && npm run dev" C-m
+   ```
+
+   If the tmux config path is unavailable, run the same commands without `-f /exec-daemon/tmux.portal.conf`.
+
+5. Wait for the server to be healthy:
 
    ```bash
    for i in {1..90}; do
@@ -51,7 +62,19 @@ Use this skill from the repository root.
    curl -fsS http://127.0.0.1:8065/api/v4/system/ping
    ```
 
-5. Open the app in the browser at:
+6. Wait for the docs site to be healthy:
+
+   ```bash
+   for i in {1..60}; do
+     if curl -fsS http://127.0.0.1:3001 >/dev/null; then
+       break
+     fi
+     sleep 2
+   done
+   curl -fsS http://127.0.0.1:3001 >/dev/null
+   ```
+
+7. Open the app in the browser at:
 
    ```text
    http://localhost:8065
@@ -63,10 +86,11 @@ Use this skill from the repository root.
    open http://localhost:8065
    ```
 
-6. Finish by reporting the branch name, app URL, and whether a pre-demo stash was created.
+8. Finish by reporting the branch name, app URL, docs URL, and whether a pre-demo stash was created.
 
 ## Notes
 
 - Before starting a new long-running app command, inspect existing terminals and reuse a healthy running stack when possible.
 - If `docker info` fails, report Docker as unavailable instead of trying to work around it.
 - A healthy server responds at `http://127.0.0.1:8065/api/v4/system/ping`.
+- The local documentation site responds at `http://127.0.0.1:3001`.

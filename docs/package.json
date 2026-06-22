@@ -1,0 +1,17 @@
+{
+  "name": "mattermost-instance-docs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev . --host 0.0.0.0 --port 3001",
+    "build": "vitepress build .",
+    "preview": "vitepress preview . --host 0.0.0.0 --port 3001"
+  },
+  "devDependencies": {
+    "vitepress": "^2.0.0-alpha.17"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  }
+}

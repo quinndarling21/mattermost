@@ -9,6 +9,7 @@ import type {ProductIdentifier} from '@mattermost/types/products';
 import Pluggable from 'plugins/pluggable';
 import {isChannels} from 'utils/products';
 
+import DocsLink from './docs_link';
 import GlobalSearchNav from './global_search_nav/global_search_nav';
 import UserGuideDropdown from './user_guide_dropdown';
 
@@ -35,6 +36,7 @@ const CenterControls = ({productId = null}: Props): JSX.Element => {
             {isChannels(productId) ? (
                 <>
                     <GlobalSearchNav/>
+                    <DocsLink/>
                     <UserGuideDropdown/>
                 </>
             ) : (
