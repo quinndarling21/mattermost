@@ -28,6 +28,7 @@ export default defineConfig({
                     {text: 'System Console', link: '/admin/'},
                     {text: 'Authentication and security', link: '/admin/authentication-and-security'},
                     {text: 'Users and permissions', link: '/admin/users-and-permissions'},
+                    {text: 'Team activity digest', link: '/admin/team-activity-digest'},
                     {text: 'Compliance and data governance', link: '/admin/compliance-and-governance'},
                     {text: 'Command-line administration', link: '/admin/command-line-administration'},
                 ],
