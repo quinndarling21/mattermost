@@ -1,0 +1,258 @@
+feedback_id,user_id,account_id,submitted_at,feature_area,source,tag,sentiment,severity,verbatim
+fb_00000,usr_f3a2a6c2,acct_northwind,2026-05-20,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00001,usr_f3a2a6c2,acct_northwind,2026-05-23,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00002,usr_4616e3c8,acct_northwind,2026-05-26,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00003,usr_9d7baf24,acct_northwind,2026-06-22,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00004,usr_9d7baf24,acct_northwind,2026-05-30,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00005,usr_b3599c2a,acct_northwind,2026-06-20,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00006,usr_b3599c2a,acct_northwind,2026-05-15,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00007,usr_bc48e4c7,acct_northwind,2026-05-02,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00008,usr_233e184b,acct_northwind,2026-05-06,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00009,usr_233e184b,acct_northwind,2026-06-12,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00010,usr_9001b711,acct_northwind,2026-06-22,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00011,usr_9001b711,acct_northwind,2026-05-01,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00012,usr_1c54e2bf,acct_helix,2026-05-17,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00013,usr_1c54e2bf,acct_helix,2026-06-11,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00014,usr_63e0bcc5,acct_helix,2026-05-08,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00015,usr_63e0bcc5,acct_helix,2026-06-18,mobile_notifications,support,churn_signal,negative,high,Three users disabled notifications and stopped opening the app weekly.
+fb_00016,usr_3a02385f,acct_helix,2026-05-10,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00017,usr_3a02385f,acct_helix,2026-05-19,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00018,usr_75ee9647,acct_helix,2026-06-14,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00019,usr_75ee9647,acct_helix,2026-05-22,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00020,usr_d0f46b26,acct_helix,2026-05-16,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00021,usr_d0f46b26,acct_helix,2026-05-02,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00022,usr_7772d972,acct_helix,2026-06-10,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00023,usr_ec422d9b,acct_cascade,2026-05-27,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00024,usr_c10f0cd2,acct_cascade,2026-06-08,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00025,usr_c10f0cd2,acct_cascade,2026-04-30,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00026,usr_72e9b546,acct_cascade,2026-06-11,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00027,usr_72e9b546,acct_cascade,2026-05-18,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00028,usr_29787d6d,acct_vertex,2026-05-16,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00029,usr_9e923242,acct_vertex,2026-05-19,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00030,usr_9e923242,acct_vertex,2026-05-16,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00031,usr_aca5e3d4,acct_vertex,2026-06-21,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00032,usr_aca5e3d4,acct_vertex,2026-06-02,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00033,usr_fb7c3e7f,acct_vertex,2026-05-03,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00034,usr_fb7c3e7f,acct_vertex,2026-05-26,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00035,usr_b3745624,acct_vertex,2026-06-17,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00036,usr_b84e0071,acct_vertex,2026-05-10,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00037,usr_29937abc,acct_vertex,2026-06-21,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00038,usr_29937abc,acct_vertex,2026-05-13,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00039,usr_ff28379d,acct_pioneer,2026-04-30,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00040,usr_614fe0ed,acct_pioneer,2026-05-26,mobile_notifications,support,churn_signal,negative,high,Three users disabled notifications and stopped opening the app weekly.
+fb_00041,usr_614fe0ed,acct_pioneer,2026-05-02,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00042,usr_8edebd85,acct_pioneer,2026-05-28,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00043,usr_8edebd85,acct_pioneer,2026-05-04,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00044,usr_bd4764b5,acct_pioneer,2026-06-18,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00045,usr_cbd58648,acct_pioneer,2026-06-17,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00046,usr_cbd58648,acct_pioneer,2026-06-06,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00047,usr_43e6f54e,acct_pioneer,2026-06-07,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00048,usr_43e6f54e,acct_pioneer,2026-06-13,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00049,usr_95b0f5ed,acct_pioneer,2026-05-10,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00050,usr_38b93348,acct_summit,2026-05-07,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00051,usr_df35ac80,acct_summit,2026-05-14,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00052,usr_f0255b6b,acct_summit,2026-05-01,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00053,usr_f0255b6b,acct_summit,2026-05-28,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00054,usr_73a9887c,acct_summit,2026-04-29,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00055,usr_91fef244,acct_summit,2026-06-04,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00056,usr_b3f238c7,acct_brightline,2026-06-06,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00057,usr_a9c76047,acct_brightline,2026-05-03,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00058,usr_a9c76047,acct_brightline,2026-06-13,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00059,usr_5d55bd75,acct_brightline,2026-06-13,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00060,usr_0d2b3b4a,acct_brightline,2026-05-31,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00061,usr_0d2b3b4a,acct_brightline,2026-06-18,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00062,usr_f777d0c9,acct_brightline,2026-05-24,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00063,usr_f777d0c9,acct_brightline,2026-05-29,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00064,usr_b2d1be52,acct_brightline,2026-05-04,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00065,usr_b30f1de9,acct_brightline,2026-06-06,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00066,usr_b30f1de9,acct_brightline,2026-06-03,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00067,usr_ebcf8cdb,acct_brightline,2026-06-05,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00068,usr_ebcf8cdb,acct_brightline,2026-06-05,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00069,usr_3e5ffb59,acct_brightline,2026-06-08,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00070,usr_3e5ffb59,acct_brightline,2026-06-11,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00071,usr_5ba021a1,acct_riverstone,2026-06-17,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00072,usr_5ba021a1,acct_riverstone,2026-06-03,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00073,usr_7bd4d04e,acct_riverstone,2026-06-14,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00074,usr_7c309684,acct_riverstone,2026-06-08,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00075,usr_7c309684,acct_riverstone,2026-05-29,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00076,usr_5480a843,acct_riverstone,2026-05-24,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00077,usr_c06de761,acct_riverstone,2026-05-19,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00078,usr_def66d35,acct_riverstone,2026-05-09,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00079,usr_f4788c00,acct_riverstone,2026-05-17,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00080,usr_f4788c00,acct_riverstone,2026-06-22,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00081,usr_f8afc34e,acct_atlas,2026-05-18,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00082,usr_f8afc34e,acct_atlas,2026-06-10,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00083,usr_1c5ff1ef,acct_atlas,2026-06-15,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00084,usr_1c5ff1ef,acct_atlas,2026-06-15,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00085,usr_4155cdc9,acct_atlas,2026-05-21,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00086,usr_0479ee10,acct_atlas,2026-05-13,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00087,usr_db575417,acct_atlas,2026-05-26,mobile_notifications,support,churn_signal,negative,high,Three users disabled notifications and stopped opening the app weekly.
+fb_00088,usr_db575417,acct_atlas,2026-06-22,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00089,usr_da55d73e,acct_atlas,2026-05-31,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00090,usr_da55d73e,acct_atlas,2026-05-14,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00091,usr_a7929c9f,acct_atlas,2026-04-28,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00092,usr_a7929c9f,acct_atlas,2026-06-10,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00093,usr_b4643ad1,acct_atlas,2026-06-05,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00094,usr_b4643ad1,acct_atlas,2026-05-10,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00095,usr_75f06a6b,acct_atlas,2026-05-07,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00096,usr_75f06a6b,acct_atlas,2026-06-02,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00097,usr_26c2f230,acct_horizon,2026-05-27,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00098,usr_26c2f230,acct_horizon,2026-05-27,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00099,usr_4c72ad0b,acct_horizon,2026-06-13,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00100,usr_89fee6e7,acct_horizon,2026-05-01,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00101,usr_89fee6e7,acct_horizon,2026-05-04,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00102,usr_43112a36,acct_horizon,2026-04-30,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00103,usr_43112a36,acct_horizon,2026-05-15,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00104,usr_606d08a4,acct_horizon,2026-06-09,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00105,usr_55f51956,acct_horizon,2026-05-16,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00106,usr_383d2569,acct_horizon,2026-06-03,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00107,usr_383d2569,acct_horizon,2026-05-18,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00108,usr_918ec5ad,acct_horizon,2026-06-01,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00109,usr_b200946b,acct_horizon,2026-05-06,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00110,usr_2c535d11,acct_clearpath,2026-05-04,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00111,usr_fd0a84ad,acct_clearpath,2026-05-08,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00112,usr_fd0a84ad,acct_clearpath,2026-04-30,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00113,usr_b66322f2,acct_clearpath,2026-05-06,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00114,usr_b66322f2,acct_clearpath,2026-06-19,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00115,usr_60231302,acct_clearpath,2026-06-12,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00116,usr_9948d200,acct_clearpath,2026-05-27,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00117,usr_be6b5403,acct_sterling,2026-05-22,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00118,usr_e9cf60f1,acct_sterling,2026-05-23,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00119,usr_a878c490,acct_sterling,2026-06-09,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00120,usr_ab346899,acct_sterling,2026-05-19,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00121,usr_72911137,acct_sterling,2026-05-12,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00122,usr_5247098e,acct_blueharbor,2026-05-03,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00123,usr_5247098e,acct_blueharbor,2026-05-29,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00124,usr_f1f1717c,acct_blueharbor,2026-06-20,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00125,usr_f1f1717c,acct_blueharbor,2026-05-03,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00126,usr_01e21b30,acct_blueharbor,2026-06-02,mobile_notifications,in_app,notification_noise,negative,high,Getting pinged for every reply in large channels overnight.
+fb_00127,usr_01e21b30,acct_blueharbor,2026-06-12,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00128,usr_04a7a24b,acct_blueharbor,2026-05-04,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00129,usr_04a7a24b,acct_blueharbor,2026-05-06,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00130,usr_90db4366,acct_blueharbor,2026-06-09,mobile_notifications,in_app,notification_noise,negative,high,Getting pinged for every reply in large channels overnight.
+fb_00131,usr_90db4366,acct_blueharbor,2026-05-07,mobile_notifications,in_app,notification_noise,negative,high,Getting pinged for every reply in large channels overnight.
+fb_00132,usr_cc196fa6,acct_blueharbor,2026-06-13,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00133,usr_cc196fa6,acct_blueharbor,2026-04-30,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00134,usr_0fa297b8,acct_blueharbor,2026-05-13,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00135,usr_0fa297b8,acct_blueharbor,2026-05-21,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00136,usr_37579dad,acct_redwood,2026-05-11,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00137,usr_37579dad,acct_redwood,2026-05-15,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00138,usr_7e475e1e,acct_redwood,2026-05-11,mobile_notifications,in_app,notification_noise,negative,high,Getting pinged for every reply in large channels overnight.
+fb_00139,usr_8b77b3d0,acct_redwood,2026-05-09,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00140,usr_8b77b3d0,acct_redwood,2026-05-13,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00141,usr_84df97e7,acct_redwood,2026-06-14,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00142,usr_f53b71d8,acct_redwood,2026-06-06,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00143,usr_f53b71d8,acct_redwood,2026-06-11,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00144,usr_cb23a64d,acct_ironclad,2026-06-08,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00145,usr_cb23a64d,acct_ironclad,2026-05-02,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00146,usr_658e5c66,acct_ironclad,2026-06-17,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00147,usr_10bc85e7,acct_ironclad,2026-06-11,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00148,usr_10bc85e7,acct_ironclad,2026-05-10,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00149,usr_2b55ad54,acct_ironclad,2026-04-30,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00150,usr_2b55ad54,acct_ironclad,2026-05-04,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00151,usr_46d1fa16,acct_ironclad,2026-06-07,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00152,usr_46d1fa16,acct_ironclad,2026-04-30,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00153,usr_4b716aff,acct_ironclad,2026-06-13,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00154,usr_07ece614,acct_ironclad,2026-05-13,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00155,usr_d4c932cd,acct_ironclad,2026-05-11,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00156,usr_3c1a2ab5,acct_ironclad,2026-06-14,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00157,usr_89a5475d,acct_ironclad,2026-05-05,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00158,usr_89a5475d,acct_ironclad,2026-06-01,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00159,usr_65626227,acct_fieldforce,2026-05-05,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00160,usr_c85f75da,acct_fieldforce,2026-04-28,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00161,usr_c85f75da,acct_fieldforce,2026-05-17,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00162,usr_a5a2fa1f,acct_fieldforce,2026-06-13,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00163,usr_a5a2fa1f,acct_fieldforce,2026-05-19,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00164,usr_398b554c,acct_fieldforce,2026-05-20,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00165,usr_f995a22f,acct_fieldforce,2026-06-07,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00166,usr_f995a22f,acct_fieldforce,2026-05-01,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00167,usr_af92c361,acct_fieldforce,2026-06-16,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00168,usr_af92c361,acct_fieldforce,2026-05-08,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00169,usr_d7908556,acct_greenleaf,2026-05-23,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00170,usr_fbdb1454,acct_greenleaf,2026-05-05,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00171,usr_fbdb1454,acct_greenleaf,2026-05-24,mobile_notifications,in_app,notification_noise,negative,high,Getting pinged for every reply in large channels overnight.
+fb_00172,usr_d3529cc2,acct_greenleaf,2026-06-12,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00173,usr_cbe90089,acct_greenleaf,2026-06-04,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00174,usr_cbe90089,acct_greenleaf,2026-05-31,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00175,usr_45820de4,acct_greenleaf,2026-06-07,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00176,usr_76a3e9ce,acct_greenleaf,2026-06-21,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00177,usr_76a3e9ce,acct_greenleaf,2026-06-19,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00178,usr_48ac2b1f,acct_greenleaf,2026-05-19,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00179,usr_48ac2b1f,acct_greenleaf,2026-06-05,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00180,usr_7b997f91,acct_quantum,2026-05-19,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00181,usr_7b997f91,acct_quantum,2026-04-29,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00182,usr_5cce18dd,acct_quantum,2026-05-04,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00183,usr_ac90e643,acct_quantum,2026-05-04,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00184,usr_768fc7e4,acct_quantum,2026-06-17,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00185,usr_768fc7e4,acct_quantum,2026-05-18,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00186,usr_0bc3eaa0,acct_quantum,2026-05-25,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00187,usr_0bc3eaa0,acct_quantum,2026-06-08,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00188,usr_ed14e80d,acct_union,2026-06-14,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00189,usr_ed14e80d,acct_union,2026-04-29,search,in_app,slow_results,negative,medium,Search takes too long when filtering by date in large workspaces.
+fb_00190,usr_fe3fe2f3,acct_union,2026-04-28,mobile_notifications,in_app,notification_noise,negative,high,Getting pinged for every reply in large channels overnight.
+fb_00191,usr_f8f48754,acct_union,2026-05-30,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00192,usr_f35c9e22,acct_union,2026-05-26,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00193,usr_f35c9e22,acct_union,2026-04-30,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00194,usr_69532027,acct_union,2026-06-14,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00195,usr_dcc0601c,acct_union,2026-05-20,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00196,usr_927f655a,acct_union,2026-06-01,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00197,usr_927f655a,acct_union,2026-06-09,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00198,usr_a9c1d33d,acct_union,2026-05-02,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00199,usr_a9c1d33d,acct_union,2026-06-18,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00200,usr_4c075071,acct_coastal,2026-06-03,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00201,usr_fc2d635e,acct_coastal,2026-05-13,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00202,usr_998eec44,acct_coastal,2026-05-18,mobile_notifications,support,churn_signal,negative,high,Three users disabled notifications and stopped opening the app weekly.
+fb_00203,usr_998eec44,acct_coastal,2026-05-28,mobile_notifications,support,churn_signal,negative,high,Three users disabled notifications and stopped opening the app weekly.
+fb_00204,usr_d12f5dcb,acct_coastal,2026-05-31,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00205,usr_d12f5dcb,acct_coastal,2026-05-12,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00206,usr_31babd02,acct_coastal,2026-05-09,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00207,usr_31babd02,acct_coastal,2026-05-29,integrations,support,setup_dropoff,negative,high,Stalled on Jira webhook setup; no clear error message.
+fb_00208,usr_f8678968,acct_coastal,2026-05-08,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00209,usr_32398a7f,acct_nimble,2026-05-30,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00210,usr_32398a7f,acct_nimble,2026-06-13,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00211,usr_d49bd75c,acct_nimble,2026-05-29,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00212,usr_d49bd75c,acct_nimble,2026-06-09,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00213,usr_b37194cb,acct_nimble,2026-05-02,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00214,usr_fadd63e4,acct_nimble,2026-05-11,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00215,usr_fadd63e4,acct_nimble,2026-05-21,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00216,usr_9ad98368,acct_nimble,2026-05-19,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00217,usr_6d9134e5,acct_nimble,2026-06-08,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00218,usr_6d9134e5,acct_nimble,2026-05-14,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00219,usr_583eb065,acct_craftworks,2026-05-24,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00220,usr_583eb065,acct_craftworks,2026-06-21,mobile_notifications,in_app,return_driver,positive,low,Mobile alerts are how I know when to jump back in on shift.
+fb_00221,usr_135ba102,acct_craftworks,2026-05-23,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00222,usr_5cc4f0cd,acct_craftworks,2026-06-03,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00223,usr_8761ef87,acct_craftworks,2026-06-14,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00224,usr_8761ef87,acct_craftworks,2026-05-17,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00225,usr_42848727,acct_prairie,2026-05-16,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00226,usr_42848727,acct_prairie,2026-06-15,mobile_notifications,in_app,notification_noise,negative,high,Getting pinged for every reply in large channels overnight.
+fb_00227,usr_87f53827,acct_prairie,2026-06-06,mobile_notifications,support,mute_complexity,negative,medium,Hard to mute one channel without missing urgent alerts.
+fb_00228,usr_87f53827,acct_prairie,2026-04-30,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00229,usr_a2893ad0,acct_prairie,2026-06-16,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00230,usr_c91bc0cb,acct_prairie,2026-05-23,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00231,usr_c91bc0cb,acct_prairie,2026-06-16,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00232,usr_8b885c0f,acct_prairie,2026-06-01,search,support,wrong_ranking,negative,high,Top results rarely include the thread I need during outages.
+fb_00233,usr_8b885c0f,acct_prairie,2026-06-22,channel_browse,in_app,navigation,positive,low,Sidebar organization helps new hires find teams.
+fb_00234,usr_a29e5070,acct_prairie,2026-06-15,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00235,usr_80e95419,acct_prairie,2026-06-05,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00236,usr_9884b23e,acct_prairie,2026-05-30,search,in_app,missing_context,negative,medium,Need snippets from attachments in search results.
+fb_00237,usr_5cc0a08e,acct_urban,2026-06-12,integrations,support,admin_burden,negative,medium,Need a checklist for rolling integrations to 40 teams.
+fb_00238,usr_d569ad3b,acct_urban,2026-05-02,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00239,usr_d569ad3b,acct_urban,2026-05-06,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00240,usr_80f4ad4a,acct_urban,2026-06-01,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00241,usr_e53be2fa,acct_urban,2026-05-22,admin_permissions,in_app,deal_dependency,negative,high,Procurement asked for bulk role assignment before signature.
+fb_00242,usr_e53be2fa,acct_urban,2026-05-23,mobile_notifications,support,churn_signal,negative,high,Three users disabled notifications and stopped opening the app weekly.
+fb_00243,usr_5e484ee3,acct_urban,2026-05-25,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00244,usr_5e484ee3,acct_urban,2026-05-29,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00245,usr_5b52542e,acct_urban,2026-05-10,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00246,usr_5b52542e,acct_urban,2026-05-30,integrations,in_app,retention_driver,positive,medium,GitLab integration keeps engineering in the workspace all day.
+fb_00247,usr_40e91384,acct_urban,2026-06-21,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.
+fb_00248,usr_fa3a36f0,acct_pulse,2026-05-13,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00249,usr_fa3a36f0,acct_pulse,2026-05-01,search,support,search_miss,negative,high,Cannot find incident postmortems across channels from last quarter.
+fb_00250,usr_c4eee95b,acct_pulse,2026-04-28,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00251,usr_20590eca,acct_pulse,2026-05-07,search,support,enterprise_blocker,negative,critical,Renewal review flagged search as a blocker for ops teams.
+fb_00252,usr_20590eca,acct_pulse,2026-05-13,boards,in_app,nice_to_have,neutral,low,Boards are fine for sprint planning but not daily.
+fb_00253,usr_fc485acf,acct_pulse,2026-05-11,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00254,usr_fcd469cb,acct_pulse,2026-06-04,admin_permissions,support,bulk_edit,negative,medium,Updating channel moderators team-by-team is painful.
+fb_00255,usr_43c4aa34,acct_pulse,2026-06-13,threaded_replies,in_app,workflow_core,positive,low,Threads keep incident channels readable.
+fb_00256,usr_1713d8be,acct_pulse,2026-06-14,calls,in_app,occasional_use,neutral,low,We use calls for all-hands but Slack huddles for quick syncs.

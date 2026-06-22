@@ -1,0 +1,26 @@
+account_id,account_name,segment,seat_count,plan,industry,lifecycle_stage,arr_band
+acct_northwind,Northwind Logistics,enterprise,420,enterprise,logistics,expansion,250k-500k
+acct_helix,Helix Health Systems,enterprise,890,enterprise,healthcare,retained,500k-1m
+acct_cascade,Cascade Financial,enterprise,310,enterprise,finance,expansion,250k-500k
+acct_vertex,Vertex Defense,enterprise,560,enterprise,defense,retained,500k-1m
+acct_pioneer,Pioneer Retail Group,mid_market,145,professional,retail,expansion,75k-150k
+acct_summit,Summit Manufacturing,mid_market,198,professional,manufacturing,retained,75k-150k
+acct_brightline,Brightline Media,mid_market,88,professional,media,onboarding,50k-75k
+acct_riverstone,Riverstone Energy,mid_market,122,professional,energy,retained,75k-150k
+acct_atlas,Atlas Compliance,enterprise,240,enterprise,compliance,expansion,150k-250k
+acct_horizon,Horizon Airlines Ops,enterprise,675,enterprise,transportation,retained,500k-1m
+acct_clearpath,Clearpath Insurance,mid_market,156,professional,insurance,onboarding,75k-150k
+acct_sterling,Sterling SaaS,mid_market,64,professional,software,expansion,50k-75k
+acct_blueharbor,Blue Harbor Shipping,enterprise,380,enterprise,logistics,retained,250k-500k
+acct_redwood,Redwood Biotech,mid_market,92,professional,biotech,onboarding,50k-75k
+acct_ironclad,Ironclad Security,enterprise,205,enterprise,security,expansion,150k-250k
+acct_fieldforce,FieldForce Services,mid_market,310,professional,field_services,retained,75k-150k
+acct_greenleaf,Greenleaf Foods,mid_market,118,professional,food,retained,50k-75k
+acct_quantum,Quantum Labs,mid_market,48,professional,software,onboarding,25k-50k
+acct_union,Union Municipal IT,enterprise,520,enterprise,government,retained,250k-500k
+acct_coastal,Coastal Hospitality,smb,32,team,hospitality,onboarding,10k-25k
+acct_nimble,Nimble Startups Co,smb,28,team,software,expansion,10k-25k
+acct_craftworks,Craftworks Studio,smb,18,team,creative,retained,5k-10k
+acct_prairie,Prairie Ag Co-op,smb,45,team,agriculture,retained,10k-25k
+acct_urban,Urban Property Mgmt,smb,36,team,real_estate,onboarding,10k-25k
+acct_pulse,Pulse Incident Response,enterprise,142,enterprise,security,expansion,150k-250k
