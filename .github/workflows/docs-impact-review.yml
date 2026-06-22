@@ -160,6 +160,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           DOCS_OUTCOME: ${{ steps.docs.outcome }}
           BUILD_OUTCOME: ${{ steps.build-docs.outcome }}
+          DOCS_PR_OUTCOME: ${{ steps.docs-pr.outcome }}
           DOCS_CHANGED: ${{ steps.docs-pr.outputs.docs_changed }}
           DOCS_PR_URL: ${{ steps.docs-pr.outputs.docs_pr_url }}
         run: |
@@ -171,8 +172,12 @@ jobs:
             echo
             if [ "$DOCS_OUTCOME" != "success" ]; then
               echo "Documentation impact automation could not complete for this PR."
-            elif [ "$DOCS_CHANGED" = "true" ]; then
+            elif [ "$DOCS_CHANGED" = "true" ] && [ "$DOCS_PR_OUTCOME" = "success" ] && [ -n "$DOCS_PR_URL" ]; then
               echo "Documentation updates were proposed in ${DOCS_PR_URL}."
+            elif [ "$DOCS_CHANGED" = "true" ]; then
+              echo "Documentation updates were generated, but automation could not create or update the documentation PR."
+              echo
+              echo "Review the workflow logs before applying docs changes."
             else
               echo "No documentation changes were produced for this PR."
             fi
