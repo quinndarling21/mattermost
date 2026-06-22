@@ -36,8 +36,8 @@ const CenterControls = ({productId = null}: Props): JSX.Element => {
             {isChannels(productId) ? (
                 <>
                     <GlobalSearchNav/>
-                    <UserGuideDropdown/>
                     <DocsLink/>
+                    <UserGuideDropdown/>
                 </>
             ) : (
                 <Pluggable

@@ -13,19 +13,25 @@ const DocsLinkAnchor = styled(ExternalLink)`
     display: flex;
     height: 28px;
     align-items: center;
+    gap: 4px;
     padding: 0 8px;
     border-radius: 4px;
-    color: rgba(var(--sidebar-header-text-color-rgb), 0.72);
-    font-size: 12px;
+    background: rgba(var(--sidebar-header-text-color-rgb), 0.92);
+    color: var(--sidebar-header-bg);
+    font-size: 13px;
     font-weight: 600;
     line-height: 16px;
     text-decoration: none;
 
     &:hover,
     &:focus {
-        background: rgba(var(--sidebar-header-text-color-rgb), 0.08);
-        color: rgba(var(--sidebar-header-text-color-rgb), 1);
+        background: rgba(var(--sidebar-header-text-color-rgb), 1);
+        color: var(--sidebar-header-bg);
         text-decoration: none;
+    }
+
+    i::before {
+        margin: 0;
     }
 
     &:focus-visible {
@@ -46,7 +52,11 @@ const DocsLink = (): JSX.Element => {
             location='global_header_docs'
             aria-label={label}
         >
-            {label}
+            <i
+                className='icon-file-text-outline'
+                aria-hidden='true'
+            />
+            <span>{label}</span>
         </DocsLinkAnchor>
     );
 };
