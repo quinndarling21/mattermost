@@ -5126,6 +5126,7 @@
   "gif_picker.attribution.alt": "Powered by GIPHY",
   "gif_picker.input.label": "Search for GIFs",
   "gif_picker.input.placeholder": "Search GIPHY",
+  "global_header.docs": "Docs",
   "global_header.productSettings": "Settings",
   "global_header.productSwitchMenu": "Product switch menu",
   "globalThreads.heading": "Followed threads",

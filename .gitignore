@@ -194,3 +194,8 @@ server/shard-*.txt
 
 # Cursor rules compliance check output
 .cursor-rules-report/
+.cursor-docs-impact/
+
+# Repository-local docs output
+docs/.vitepress/cache/
+docs/.vitepress/dist/

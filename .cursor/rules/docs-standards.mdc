@@ -1,0 +1,42 @@
+---
+description: Standards for maintaining the repository-local documentation site.
+globs:
+  - "docs/**/*.md"
+  - "docs/.vitepress/**/*.mts"
+  - ".cursor/skills/update-docs-from-change/**"
+alwaysApply: false
+---
+
+# Repository-local docs standards
+
+These rules apply to the docs site in `docs/`.
+
+## Scope
+
+- Document this repository's Mattermost product behavior and administration workflows.
+- Use the current source tree as the authority. Do not copy from public Mattermost docs.
+- Keep developer architecture notes out of this site unless they directly explain admin-visible behavior.
+- If behavior depends on license, plugin installation, or configuration, say so.
+
+## Structure
+
+- Product pages live under `docs/product/`.
+- Administration pages live under `docs/admin/`.
+- Integration pages live under `docs/integrations/`.
+- Navigation lives in `docs/.vitepress/config.mts`; add new pages to the sidebar when they should be discoverable.
+
+## Writing style
+
+- Use sentence case headings.
+- Prefer short paragraphs and task-oriented bullets.
+- Name the setting, feature, role, or workflow directly.
+- Avoid marketing language and broad claims that are not visible in the source.
+- Use inline code for config keys, commands, endpoints, file paths, plugin IDs, and role IDs.
+
+## Source discipline
+
+- Before editing docs, inspect the relevant source files and existing docs page.
+- For System Console behavior, start with `webapp/channels/src/components/admin_console/admin_definition.tsx`.
+- For defaults and config behavior, inspect `server/public/model/config.go`.
+- For roles and permissions, inspect `server/public/model/role.go` and `server/public/model/permission.go`.
+- For integrations, inspect `webapp/channels/src/components/integrations/` and server handlers such as `server/channels/web/webhook.go`.

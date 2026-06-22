@@ -42,11 +42,15 @@ Use this skill from the repository root.
 4. Stop the local dev stack so nothing keeps running on the laptop:
 
    ```bash
+   SESSION_NAME="mattermost-docs-site"
+   tmux -f /exec-daemon/tmux.portal.conf has-session -t "=$SESSION_NAME" 2>/dev/null && tmux -f /exec-daemon/tmux.portal.conf kill-session -t "=$SESSION_NAME" || true
    cd server
    make stop
    ```
 
-   This stops the Mattermost server, webapp watcher, and Docker Compose services (`mattermost-postgres`, `mattermost-redis`, and related containers).
+   If the tmux config path is unavailable, run the tmux commands without `-f /exec-daemon/tmux.portal.conf`.
+
+   This stops the documentation site, Mattermost server, webapp watcher, and Docker Compose services (`mattermost-postgres`, `mattermost-redis`, and related containers).
 
    If `docker info` fails, still run `make stop` and report Docker as unavailable.
 
@@ -56,7 +60,7 @@ Use this skill from the repository root.
    curl -fsS http://127.0.0.1:8065/api/v4/system/ping >/dev/null 2>&1 && echo "SERVER_STILL_RUNNING=yes" || echo "SERVER_STILL_RUNNING=no"
    ```
 
-6. Finish by reporting the previous demo branch name, whether a stash was created, the current branch, and whether the dev stack was stopped successfully.
+6. Finish by reporting the previous demo branch name, whether a stash was created, the current branch, and whether the dev stack and documentation site were stopped successfully.
 
 ## Notes
 
