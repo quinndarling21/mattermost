@@ -1,4 +1,4 @@
-# Mattermost instance docs
+# Mattermost Docs
 
 This site documents the product behavior and administration workflows in this repository. Treat the application source as the authority. When behavior changes in the app, update these docs in the same branch or let the documentation impact automation open a follow-up pull request.
 

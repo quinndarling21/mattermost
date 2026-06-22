@@ -1,7 +1,7 @@
 import {defineConfig} from 'vitepress';
 
 export default defineConfig({
-    title: 'Mattermost instance docs',
+    title: 'Mattermost Docs',
     description: 'Product and administration documentation for this Mattermost repository.',
     cleanUrls: true,
     lastUpdated: true,
