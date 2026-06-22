@@ -353,6 +353,7 @@ func init() {
 	UserCreateCmd.Flags().String("firstname", "", "Optional. The first name for the new user account")
 	UserCreateCmd.Flags().String("lastname", "", "Optional. The last name for the new user account")
 	UserCreateCmd.Flags().String("locale", "", "Optional. The locale (ex: en, fr) for the new user account")
+	UserCreateCmd.Flags().String("timezone", "", "Optional. The timezone (ex: America/New_York) for the new user account")
 	UserCreateCmd.Flags().Bool("system-admin", false, "Optional. If supplied, the new user will be a system administrator. Defaults to false")
 	UserCreateCmd.Flags().Bool("guest", false, "Optional. If supplied, the new user will be a guest. Defaults to false")
 	UserCreateCmd.Flags().Bool("email-verified", false, "Optional. If supplied, the new user will have the email verified. Defaults to false")
@@ -524,6 +525,7 @@ func userCreateCmdF(c client.Client, cmd *cobra.Command, args []string) error {
 	firstname, _ := cmd.Flags().GetString("firstname")
 	lastname, _ := cmd.Flags().GetString("lastname")
 	locale, _ := cmd.Flags().GetString("locale")
+	timezone, _ := cmd.Flags().GetString("timezone")
 	systemAdmin, _ := cmd.Flags().GetBool("system-admin")
 	guest, _ := cmd.Flags().GetBool("guest")
 	emailVerified, _ := cmd.Flags().GetBool("email-verified")
@@ -539,6 +541,9 @@ func userCreateCmdF(c client.Client, cmd *cobra.Command, args []string) error {
 		Locale:              locale,
 		EmailVerified:       emailVerified,
 		DisableWelcomeEmail: disableWelcomeEmail,
+	}
+	if timezone != "" {
+		user.Timezone = model.StringMap{"useAutomaticTimezone": "false", "manualTimezone": timezone}
 	}
 
 	ruser, _, err := c.CreateUser(context.TODO(), user)
