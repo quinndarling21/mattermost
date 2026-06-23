@@ -102,7 +102,7 @@ export function buildUserSettingsSearchIndex(
             {section: AdvancedSections.JOIN_LEAVE, label: {id: 'user.settings.advance.joinLeave', defaultMessage: 'Enable Join/Leave Messages'}},
             {section: AdvancedSections.PERFORMANCE_DEBUGGING, label: {id: 'user.settings.advance.performanceDebugging', defaultMessage: 'Performance Debugging'}},
             {section: 'deactivateAccount', label: {id: 'user.settings.advance.deactivateAccount', defaultMessage: 'Deactivate Account'}},
-            {section: 'enableConcurrentReactExperimental', label: {id: 'user.settings.advance.enableConcurrentReactExperimental', defaultMessage: 'Enable Concurrent React (Experimental)'}},
+            {section: 'concurrentReactExperimental', label: {id: 'user.settings.advance.enableConcurrentReactExperimental', defaultMessage: 'Enable Concurrent React (Experimental)'}},
         ], formatMessage));
 
         for (const plugin of Object.values(pluginSettings)) {
