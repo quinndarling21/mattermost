@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {screen, fireEvent} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -252,5 +252,60 @@ describe('plugin tabs use the correct icon', () => {
         expect(element).toBeInTheDocument();
         expect(element!.nodeName).toBe('I');
         expect(element?.className).toBe('icon icon-phone-in-talk');
+    });
+});
+
+describe('settings search', () => {
+    it('renders search input in the settings modal', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        expect(screen.getByTestId('settings-search-input')).toBeInTheDocument();
+    });
+
+    it('shows matching results when searching', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: 'theme'}});
+
+        expect(screen.getByTestId('settings-search-result-display:theme')).toBeInTheDocument();
+        expect(screen.queryByTestId('notifications-tab-button')).not.toBeInTheDocument();
+    });
+
+    it('shows empty state for unmatched search text', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: 'zzzznotfound'}});
+
+        expect(screen.getByTestId('settings-search-empty')).toBeInTheDocument();
+    });
+
+    it('restores sidebar when search is cleared', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: 'theme'}});
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: ''}});
+
+        expect(screen.getByTestId('notifications-tab-button')).toBeInTheDocument();
+    });
+
+    it('searches plugin tab names when plugin settings are present', () => {
+        const uiName = 'Plugin Search Target';
+        const state: DeepPartial<GlobalState> = {
+            plugins: {
+                userSettings: {
+                    plugin_a: {
+                        id: 'plugin_a',
+                        sections: [],
+                        uiName,
+                    },
+                },
+            },
+        };
+
+        renderWithContext(<UserSettingsModal {...baseProps}/>, mergeObjects(baseState, state));
+
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: 'search target'}});
+
+        expect(screen.getByTestId('settings-search-result-plugin_a')).toBeInTheDocument();
     });
 });
