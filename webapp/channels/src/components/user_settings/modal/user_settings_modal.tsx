@@ -66,6 +66,7 @@ type State = {
     resendStatus: string;
     loading: boolean;
     searchTerm: string;
+    searchNavigationKey: number;
 };
 
 class UserSettingsModal extends React.PureComponent<Props, State> {
@@ -86,6 +87,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             resendStatus: '',
             loading: false,
             searchTerm: '',
+            searchNavigationKey: 0,
         };
 
         this.requireConfirm = false;
@@ -273,14 +275,12 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
 
     handleSearchResultSelect = (result: SettingsSearchResult) => {
         const navigate = () => {
-            if (result.section) {
-                this.updateTab(result.tab, true);
-                this.updateSection(result.section, true);
-            } else {
-                this.updateTab(result.tab, true);
-            }
-
-            this.setState({searchTerm: ''});
+            this.setState((state) => ({
+                active_tab: result.tab,
+                active_section: result.section ?? '',
+                searchTerm: '',
+                searchNavigationKey: state.searchNavigationKey + 1,
+            }));
             document.querySelector('#accountSettingsModal')?.closest('.modal-dialog')?.classList.add('display--content');
         };
 
@@ -454,6 +454,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                 </div>
                                 <div className='settings-content minimize-settings'>
                                     <UserSettings
+                                        key={this.state.searchNavigationKey}
                                         activeTab={this.state.active_tab}
                                         activeSection={this.state.active_section}
                                         updateSection={this.updateSection}

@@ -308,4 +308,26 @@ describe('settings search', () => {
 
         expect(screen.getByTestId('settings-search-result-plugin_a')).toBeInTheDocument();
     });
+
+    it('resets section state when navigating between search results on the same tab', () => {
+        renderWithContext(
+            <UserSettingsModal
+                {...baseProps}
+                isContentProductSettings={false}
+            />,
+            baseState,
+        );
+
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: 'email'}});
+        fireEvent.click(screen.getByTestId('settings-search-result-profile:email'));
+        fireEvent.change(screen.getByLabelText('New Email'), {target: {value: 'edited@example.com'}});
+
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: 'full name'}});
+        fireEvent.click(screen.getByTestId('settings-search-result-profile:name'));
+
+        fireEvent.change(screen.getByTestId('settings-search-input'), {target: {value: 'email'}});
+        fireEvent.click(screen.getByTestId('settings-search-result-profile:email'));
+
+        expect(screen.getByLabelText('New Email')).toHaveValue('');
+    });
 });
