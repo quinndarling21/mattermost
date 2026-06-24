@@ -8,8 +8,14 @@ import {useDispatch, useSelector} from 'react-redux';
 import type {Channel, ChannelType} from '@mattermost/types/channels';
 import type {ServerError} from '@mattermost/types/errors';
 
+import {PropertyTypes} from 'mattermost-redux/action_types';
 import {patchChannel, updateChannelPrivacy} from 'mattermost-redux/actions/channels';
+import {Client4} from 'mattermost-redux/client';
 import {General} from 'mattermost-redux/constants';
+import {
+    ChannelEmojiPropertyGroupName,
+    ChannelEmojiPropertyObjectType,
+} from 'mattermost-redux/constants/channel_emojis';
 import Permissions from 'mattermost-redux/constants/permissions';
 import {areManagedCategoriesEnabled, getChannelManagedCategoryName, isChannelCategorySortingEnabled, makeGetSidebarCategoryNamesForTeam} from 'mattermost-redux/selectors/entities/channel_categories';
 import {haveIChannelPermission} from 'mattermost-redux/selectors/entities/roles';
@@ -26,6 +32,7 @@ import {
 import ConvertConfirmModal from 'components/admin_console/team_channel_settings/convert_confirm_modal';
 import CategorySelector from 'components/category_selector/category_selector';
 import ChannelNameFormField from 'components/channel_name_form_field/channel_name_form_field';
+import useChannelEmoji, {normalizeChannelEmoji} from 'components/common/hooks/useChannelEmoji';
 import type {TextboxElement} from 'components/textbox';
 import AdvancedTextbox from 'components/widgets/advanced_textbox/advanced_textbox';
 import SaveChangesPanel, {type SaveChangesPanelState} from 'components/widgets/modals/components/save_changes_panel';
@@ -88,6 +95,7 @@ function ChannelSettingsInfoTab({
         return haveIChannelPermission(state, channel.team_id, channel.id, channelPropertiesPermission);
     });
     const canManageChannelRoles = useSelector((state: GlobalState) => haveIChannelPermission(state, channel.team_id, channel.id, Permissions.MANAGE_CHANNEL_ROLES));
+    const canManageChannelEmoji = canManageChannelRoles && canManageChannelProperties;
 
     const showDefaultCategorySelector = useSelector(isChannelCategorySortingEnabled);
     const showDefaultCategoryField = showDefaultCategorySelector && !isDMorGroupChannel;
@@ -96,6 +104,7 @@ function ChannelSettingsInfoTab({
     const showManagedCategoryField = enableManagedCategories && !isDMorGroupChannel;
 
     const currentManagedCategoryName = useSelector((state: GlobalState) => getChannelManagedCategoryName(state, channel.id));
+    const channelEmojiState = useChannelEmoji(channel.id);
 
     // Must stay aligned with the server gates (`setChannelMembers`, guest
     // invite, `ChannelAccessControlled`). Read the membership action key
@@ -115,6 +124,9 @@ function ChannelSettingsInfoTab({
 
     const [managedCategoryName, setManagedCategoryName] = useState(currentManagedCategoryName);
     const [serverManagedCategoryName, setServerManagedCategoryName] = useState(currentManagedCategoryName);
+    const [channelEmoji, setChannelEmoji] = useState(channelEmojiState.emoji);
+    const [serverChannelEmoji, setServerChannelEmoji] = useState(channelEmojiState.emoji);
+    const channelEmojiChannelId = useRef(channel.id);
 
     useEffect(() => {
         setDefaultCategoryName(channel.default_category_name);
@@ -125,6 +137,17 @@ function ChannelSettingsInfoTab({
         setManagedCategoryName(currentManagedCategoryName);
         setServerManagedCategoryName(currentManagedCategoryName);
     }, [currentManagedCategoryName]);
+
+    useEffect(() => {
+        const channelChanged = channelEmojiChannelId.current !== channel.id;
+        channelEmojiChannelId.current = channel.id;
+        const hasLocalEmojiChanges = !channelChanged && normalizeChannelEmoji(channelEmoji) !== normalizeChannelEmoji(serverChannelEmoji);
+
+        setServerChannelEmoji(channelEmojiState.emoji);
+        if (!hasLocalEmojiChanges) {
+            setChannelEmoji(channelEmojiState.emoji);
+        }
+    }, [channel.id, channelEmojiState.emoji, channelEmoji, serverChannelEmoji]);
 
     // Constants
     const HEADER_MAX_LENGTH = 1024;
@@ -173,11 +196,12 @@ function ChannelSettingsInfoTab({
             channelHeader.trim() !== channel.header ||
             channelType !== channel.type ||
             (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '') ||
-            managedCategoryName !== serverManagedCategoryName
+            managedCategoryName !== serverManagedCategoryName ||
+            normalizeChannelEmoji(channelEmoji) !== normalizeChannelEmoji(serverChannelEmoji)
         ) : false;
 
         setAreThereUnsavedChanges?.(unsavedChanges);
-    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, setAreThereUnsavedChanges]);
+    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, channelEmoji, serverChannelEmoji, setAreThereUnsavedChanges]);
 
     const handleURLChange = useCallback((newURL: string) => {
         if (internalUrlError) {
@@ -286,6 +310,14 @@ function ChannelSettingsInfoTab({
             return false;
         }
 
+        if (!isDMorGroupChannel && channelEmoji.trim().length > 64) {
+            setFormError(formatMessage({
+                id: 'channel_settings.error_channel_emoji_length',
+                defaultMessage: 'Channel emoji must be 64 characters or fewer.',
+            }));
+            return false;
+        }
+
         // write the code to validate if the channel is changing from public to private
         if (channel.type === Constants.OPEN_CHANNEL && channelType === Constants.PRIVATE_CHANNEL) {
             const {error} = await dispatch(updateChannelPrivacy(channel.id, General.PRIVATE_CHANNEL));
@@ -315,15 +347,46 @@ function ChannelSettingsInfoTab({
             updated.managed_category_name = managedCategoryName ?? '';
         }
 
-        if (Object.keys(updated).length === 0) {
-            // Return true if no changes were made
-            return true;
+        const normalizedChannelEmoji = normalizeChannelEmoji(channelEmoji);
+        const hasChannelEmojiChanges = !isDMorGroupChannel && normalizedChannelEmoji !== normalizeChannelEmoji(serverChannelEmoji);
+
+        if (hasChannelEmojiChanges) {
+            if (!channelEmojiState.field) {
+                setFormError(formatMessage({
+                    id: 'channel_settings.error_channel_emoji_unavailable',
+                    defaultMessage: 'Channel emoji settings are not available yet. Please try again.',
+                }));
+                return false;
+            }
+
+            try {
+                const values = await Client4.patchPropertyValues<string | null>(
+                    ChannelEmojiPropertyGroupName,
+                    ChannelEmojiPropertyObjectType,
+                    channel.id,
+                    [{field_id: channelEmojiState.field.id, value: normalizedChannelEmoji || null}],
+                );
+                if (normalizedChannelEmoji) {
+                    dispatch({type: PropertyTypes.RECEIVED_PROPERTY_VALUES, data: {values}});
+                } else {
+                    dispatch({type: PropertyTypes.PROPERTY_VALUE_DELETED, data: {targetId: channel.id, fieldId: channelEmojiState.field.id}});
+                }
+                setServerChannelEmoji(normalizedChannelEmoji);
+                setChannelEmoji(normalizedChannelEmoji);
+            } catch (err) {
+                handleServerError(err as ServerError);
+                return false;
+            }
         }
 
-        const {data, error} = await dispatch(patchChannel(channel.id, updated));
-        if (error) {
-            handleServerError(error as ServerError);
-            return false;
+        let data: Channel | undefined;
+        if (Object.keys(updated).length > 0) {
+            const result = await dispatch(patchChannel(channel.id, updated));
+            if (result.error) {
+                handleServerError(result.error as ServerError);
+                return false;
+            }
+            data = result.data;
         }
 
         // After every successful save, update local state to match the saved values
@@ -338,7 +401,7 @@ function ChannelSettingsInfoTab({
         setServerManagedCategoryName(managedCategoryName);
 
         return true;
-    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, channelEmoji, serverChannelEmoji, channelEmojiState.field]);
 
     // Handle save changes panel actions
     const handleSaveChanges = useCallback(async () => {
@@ -381,6 +444,7 @@ function ChannelSettingsInfoTab({
         setChannelType(channel?.type as ChannelType ?? Constants.OPEN_CHANNEL as ChannelType);
         setDefaultCategoryName(serverDefaultCategoryName);
         setManagedCategoryName(serverManagedCategoryName);
+        setChannelEmoji(serverChannelEmoji);
 
         // Clear errors
         setUrlError('');
@@ -392,7 +456,7 @@ function ChannelSettingsInfoTab({
         if (onCancel) {
             onCancel();
         }
-    }, [channel, onCancel, serverDefaultCategoryName, serverManagedCategoryName, setFormError]);
+    }, [channel, onCancel, serverDefaultCategoryName, serverManagedCategoryName, serverChannelEmoji, setFormError]);
 
     // Calculate if there are errors
     const hasErrors = Boolean(formError) ||
@@ -413,11 +477,12 @@ function ChannelSettingsInfoTab({
                 unsavedChanges = unsavedChanges || channelType !== channel.type;
                 unsavedChanges = unsavedChanges || (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '');
                 unsavedChanges = unsavedChanges || managedCategoryName !== serverManagedCategoryName;
+                unsavedChanges = unsavedChanges || normalizeChannelEmoji(channelEmoji) !== normalizeChannelEmoji(serverChannelEmoji);
             }
         }
 
         return unsavedChanges || saveChangesPanelState === 'saved';
-    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, channelEmoji, serverChannelEmoji]);
 
     return (
         <div className='ChannelSettingsModal__infoTab'>
@@ -507,6 +572,35 @@ function ChannelSettingsInfoTab({
                     menuPortalTargetId='channelSettingsModal'
                     disabled={!canManageChannelRoles}
                 />
+            )}
+
+            {!isDMorGroupChannel && (
+                <div className='ChannelSettingsModal__emojiField'>
+                    <label
+                        className='control-label'
+                        htmlFor='channel_settings_emoji_input'
+                    >
+                        {formatMessage({id: 'channel_settings.channel_emoji.label', defaultMessage: 'Channel emoji (optional)'})}
+                    </label>
+                    <input
+                        id='channel_settings_emoji_input'
+                        className='form-control'
+                        type='text'
+                        value={channelEmoji}
+                        placeholder={formatMessage({id: 'channel_settings.channel_emoji.placeholder', defaultMessage: ':rocket:'})}
+                        maxLength={64}
+                        disabled={!canManageChannelEmoji || channelEmojiState.loading}
+                        onChange={(e) => {
+                            setChannelEmoji(e.target.value);
+                            if (formError) {
+                                setFormError('');
+                            }
+                        }}
+                    />
+                    <div className='help-text'>
+                        {formatMessage({id: 'channel_settings.channel_emoji.help', defaultMessage: 'Shown before the channel name in the sidebar. Use a native emoji, :shortcode:, or a shortcode name.'})}
+                    </div>
+                </div>
             )}
 
             {/* Purpose Section*/}
