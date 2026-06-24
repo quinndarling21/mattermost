@@ -1,0 +1,52 @@
+{
+  "skill": "dry-review",
+  "windowDays": 7,
+  "records": [
+    {
+      "runId": "2026-06-20T10:00:00Z",
+      "version": 1,
+      "url": "https://github.com/quinndarling21/mattermost/pull/4101#issuecomment-1001",
+      "context": "PR #4101: extracted SharedMenu from three channel menus",
+      "signals": {
+        "thumbsUp": 0,
+        "thumbsDown": 2,
+        "replies": [
+          "Reverted. 'SharedMenu' tells me nothing about what it is, and it only fit after adding four config props. The duplication was cheaper."
+        ],
+        "agentPrState": "closed_unmerged",
+        "mergedWithHeavyEdits": false,
+        "relabeledAway": false
+      }
+    },
+    {
+      "runId": "2026-06-21T14:30:00Z",
+      "version": 1,
+      "url": "https://github.com/quinndarling21/mattermost/pull/4108#issuecomment-1002",
+      "context": "PR #4108: extracted useChannelDraft hook shared by composer and thread",
+      "signals": {
+        "thumbsUp": 3,
+        "thumbsDown": 0,
+        "replies": [],
+        "agentPrState": "merged",
+        "mergedWithHeavyEdits": false,
+        "relabeledAway": false
+      }
+    },
+    {
+      "runId": "2026-06-23T09:15:00Z",
+      "version": 1,
+      "url": "https://github.com/quinndarling21/mattermost/pull/4115#issuecomment-1003",
+      "context": "PR #4115: merged two formatters that looked alike but served posts vs files",
+      "signals": {
+        "thumbsUp": 0,
+        "thumbsDown": 1,
+        "replies": [
+          "These format different domain concepts (post text vs file size). Merging them coupled unrelated code; please keep them separate next time."
+        ],
+        "agentPrState": "merged_with_edits",
+        "mergedWithHeavyEdits": true,
+        "relabeledAway": false
+      }
+    }
+  ]
+}
