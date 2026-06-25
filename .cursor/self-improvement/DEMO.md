@@ -5,6 +5,11 @@ work, the team's normal reactions become a training signal, and a scheduled
 agent retools the skills — with humans as the merge gate. See `PLAN.md` for the
 full architecture.
 
+> **No terminal? Use a skill.** Invoke the `skill-loop-demo` skill and the agent
+> runs the whole flow for you (deterministic dry run + live agent edit + diff).
+> For the fully-live path, invoke `skill-loop-seed`. The commands below are what
+> those skills run under the hood.
+
 ## Prereqs
 
 - `CURSOR_API_KEY` set in your shell (for the live agent step).
