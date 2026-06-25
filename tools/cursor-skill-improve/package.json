@@ -1,0 +1,23 @@
+{
+  "name": "cursor-skill-improve",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The Improver: outer self-improvement loop that turns human feedback on agent runs into reviewed, versioned skill edits via the Cursor SDK.",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "improve": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@cursor/sdk": "^1.0.21"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

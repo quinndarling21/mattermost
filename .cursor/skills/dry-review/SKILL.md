@@ -1,5 +1,6 @@
 ---
 name: dry-review
+version: 1
 description: Review a focused set of Mattermost code for meaningful redundancy and improve modularity by extracting reusable components, hooks, selectors, utilities, styles, or test helpers. Use when the user asks to DRY up code, find duplicated logic, reduce redundancy, modularize components, or refactor repeated React, TypeScript, SCSS, or test code.
 ---
 
@@ -52,9 +53,25 @@ Prefer small, behavior-preserving refactors over broad rewrites. Keep ownership 
 - Moving feature-specific logic into global folders prematurely.
 - Refactoring unrelated code while performing the DRY review.
 
+## Principles (learned)
+
+<!-- improver:managed-section -->
+This section is maintained by the `improve-skill` outer loop (see
+`.cursor/self-improvement/`). Each item is a transferable principle, not a
+one-off exception. Sharpen, merge, or delete before appending.
+
+- **Name extractions by domain concept, never by shape.** `ChannelHeaderMenu`
+  beats `SharedMenu`; shape-named helpers read as accidental and get reverted.
+  _(learned: seed principle, 2026-06)_
+- **If an extraction needs more props or branching than the duplication it
+  replaces, leave it duplicated.** Indirection is a real cost. _(learned: seed
+  principle, 2026-06)_
+
 ## Report Format
 
-When finished, summarize in this format:
+When finished, summarize in this format, then stamp the output so the
+self-improvement loop can attribute feedback to it (see
+`.cursor/self-improvement/CONVENTIONS.md`):
 
 ```markdown
 ## DRY Review Summary
@@ -63,4 +80,7 @@ When finished, summarize in this format:
 - Left duplicated: [intentional non-extractions and why]
 - Validation: [commands or checks run]
 - Follow-ups: [optional next candidates, only if useful]
+
+_Was this helpful? 👍 / 👎, or reply with a correction — it trains `dry-review`._
+<!-- skill:dry-review@1 run:<iso8601> -->
 ```

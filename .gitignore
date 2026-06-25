@@ -177,6 +177,8 @@ docker-compose.override.yaml
 !.cursor/skills/**
 !.cursor/skills/mattermost-pull-request/
 !.cursor/skills/mattermost-pull-request/**
+!.cursor/self-improvement/
+!.cursor/self-improvement/**
 !.cursor/README.md
 !.cursor/cursor.md
 !.cursor/Dockerfile
@@ -196,6 +198,7 @@ server/shard-*.txt
 # Cursor rules compliance check output
 .cursor-rules-report/
 .cursor-docs-impact/
+.cursor-skill-improve/
 
 # Repository-local docs output
 docs/.vitepress/cache/

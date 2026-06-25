@@ -1,0 +1,161 @@
+name: Skill Self-Improvement
+
+# Outer self-improvement loop (see .cursor/self-improvement/PLAN.md).
+#
+# On a schedule, an agent reviews how a Cursor skill's recent runs landed with
+# the team (feedback) and proposes a principle-level edit to that skill as a
+# DRAFT pull request. It never auto-merges and only edits the target skill file.
+#
+# Requires a CURSOR_API_KEY secret; without it the job is a green no-op. Phase 0
+# collects feedback from a committed fixture (manual dispatch); live GitHub
+# feedback collection lands in Phase 1.
+
+on:
+  schedule:
+    # Weekly, Monday 07:00 UTC. Scheduled + rate-limited so a bad day of
+    # feedback cannot thrash the skills.
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Skill under .cursor/skills/ to improve"
+        required: false
+        default: "dry-review"
+      dry_run:
+        description: "Dry run (summarize only; no agent, no PR)"
+        required: false
+        default: "true"
+      fixture:
+        description: "Optional feedback fixture path (relative to tool dir)"
+        required: false
+        default: ""
+
+concurrency:
+  group: skill-self-improve-${{ github.event.inputs.target || 'scheduled' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  improve:
+    name: Improve a skill from feedback
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Check for Cursor API key
+        id: key
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          if [ -n "$CURSOR_API_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Skill self-improvement skipped::Set the CURSOR_API_KEY secret to enable the self-improvement loop."
+          fi
+
+      - name: Set up Node.js
+        if: steps.key.outputs.present == 'true'
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tools/cursor-skill-improve/package-lock.json
+
+      - name: Install dependencies
+        if: steps.key.outputs.present == 'true'
+        working-directory: tools/cursor-skill-improve
+        run: npm ci
+
+      - name: Run the Improver
+        id: improve
+        if: steps.key.outputs.present == 'true'
+        continue-on-error: true
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          CURSOR_MODEL: ${{ vars.CURSOR_SKILL_IMPROVE_MODEL }}
+          INPUT_TARGET: ${{ github.event.inputs.target }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          INPUT_FIXTURE: ${{ github.event.inputs.fixture }}
+          DEFAULT_TARGET: ${{ vars.SKILL_IMPROVE_TARGET }}
+        run: |
+          target="${INPUT_TARGET:-${DEFAULT_TARGET:-dry-review}}"
+          args=(--target "$target")
+          # Scheduled runs go live; manual dispatch defaults to a safe dry run.
+          if [ "${INPUT_DRY_RUN}" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          if [ -n "${INPUT_FIXTURE}" ]; then
+            args+=(--fixture "${INPUT_FIXTURE}")
+          fi
+          echo "Running: improve ${args[*]}"
+          npm --prefix tools/cursor-skill-improve run --silent improve -- "${args[@]}"
+
+      - name: Upload report
+        if: steps.key.outputs.present == 'true'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: skill-self-improve-report
+          path: .cursor-skill-improve/
+          if-no-files-found: ignore
+
+      - name: Open draft improvement PR
+        id: pr
+        if: steps.key.outputs.present == 'true' && steps.improve.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          TARGET: ${{ steps.improve.outputs.target }}
+        run: |
+          relpath=".cursor/skills/${TARGET}/SKILL.md"
+          if git diff --quiet HEAD -- "$relpath"; then
+            echo "No change to ${relpath}; nothing to open."
+            exit 0
+          fi
+
+          branch="cursor/skill-improve-${TARGET}"
+          patch="${RUNNER_TEMP}/skill-improve.patch"
+          git diff HEAD -- "$relpath" > "$patch"
+          git reset --hard
+          git checkout -B "$branch" "origin/${BASE_BRANCH}"
+          git apply "$patch"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$relpath"
+          git commit -m "improve(${TARGET}): principle update from agent feedback loop"
+          git push --force-with-lease origin "$branch"
+
+          body="${RUNNER_TEMP}/skill-improve-pr.md"
+          {
+            echo "#### Summary"
+            echo "Proposed principle-level update to \`${relpath}\` from the self-improvement loop."
+            echo
+            if [ -f ".cursor-skill-improve/report.md" ]; then
+              cat ".cursor-skill-improve/report.md"
+              echo
+            fi
+            echo "Review the principle change and the version bump. This PR is a draft and is never auto-merged."
+            echo
+            echo "#### Release Note"
+            echo '```release-note'
+            echo "NONE"
+            echo '```'
+          } > "$body"
+
+          title="improve(${TARGET}): principle update from feedback loop"
+          existing="$(gh pr list --repo "$REPO" --head "$branch" --json number --jq '.[0].number')"
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --repo "$REPO" --title "$title" --body-file "$body"
+          else
+            gh pr create --repo "$REPO" --draft --base "$BASE_BRANCH" --head "$branch" --title "$title" --body-file "$body"
+          fi
