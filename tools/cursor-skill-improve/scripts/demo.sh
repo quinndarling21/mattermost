@@ -31,6 +31,26 @@ done
 hr() { printf '\n\033[1m== %s ==\033[0m\n' "$1"; }
 cmd() { printf '\033[2m$ %s\033[0m\n' "$1"; }
 
+has_cursor_api_key() {
+  if [ -n "${CURSOR_API_KEY:-}" ]; then
+    return 0
+  fi
+
+  node -e '
+    const fs = require("node:fs");
+    const envPath = process.argv[1];
+    if (!fs.existsSync(envPath) || typeof process.loadEnvFile !== "function") {
+      process.exit(1);
+    }
+    try {
+      process.loadEnvFile(envPath);
+    } catch {
+      process.exit(1);
+    }
+    process.exit(process.env.CURSOR_API_KEY ? 0 : 1);
+  ' "${REPO_ROOT}/.env"
+}
+
 REPORT="${REPO_ROOT}/.cursor-skill-improve/report.md"
 SKILL_PATH="${REPO_ROOT}/.cursor/skills/${SKILL}/SKILL.md"
 
@@ -41,9 +61,9 @@ echo
 echo "----- report.md -----"
 cat "${REPORT}"
 
-if [ -z "${CURSOR_API_KEY:-}" ]; then
-  hr "CURSOR_API_KEY not set — stopping after the dry run"
-  echo "Set CURSOR_API_KEY to watch the agent edit the skill and bump its version."
+if ! has_cursor_api_key; then
+  hr "CURSOR_API_KEY not set in the environment or .env — stopping after the dry run"
+  echo "Set CURSOR_API_KEY in the environment or repo .env to watch the agent edit the skill and bump its version."
   exit 0
 fi
 
