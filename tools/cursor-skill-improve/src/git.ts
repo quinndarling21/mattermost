@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 
 const MAX_GIT_BUFFER = 64 * 1024 * 1024;
 
@@ -14,11 +14,14 @@ export function getRepoRoot(): string {
     }
 }
 
-/** True when the given repo-relative path has uncommitted changes. */
+/** True when the given tracked path differs from HEAD in the index or working tree. */
 export function hasChanges(repoRoot: string, relPath: string): boolean {
-    try {
-        return git(["status", "--porcelain", "--", relPath], repoRoot).trim().length > 0;
-    } catch {
+    const result = spawnSync("git", ["diff", "--quiet", "HEAD", "--", relPath], { cwd: repoRoot });
+    if (result.status === 0) {
         return false;
     }
+    if (result.status === 1) {
+        return true;
+    }
+    return false;
 }

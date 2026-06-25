@@ -117,14 +117,14 @@ jobs:
           TARGET: ${{ steps.improve.outputs.target }}
         run: |
           relpath=".cursor/skills/${TARGET}/SKILL.md"
-          if git diff --quiet -- "$relpath"; then
+          if git diff --quiet HEAD -- "$relpath"; then
             echo "No change to ${relpath}; nothing to open."
             exit 0
           fi
 
           branch="cursor/skill-improve-${TARGET}"
           patch="${RUNNER_TEMP}/skill-improve.patch"
-          git diff -- "$relpath" > "$patch"
+          git diff HEAD -- "$relpath" > "$patch"
           git reset --hard
           git checkout -B "$branch" "origin/${BASE_BRANCH}"
           git apply "$patch"
