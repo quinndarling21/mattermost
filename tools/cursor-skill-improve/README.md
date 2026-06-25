@@ -43,6 +43,25 @@ degrades to a green no-op when `CURSOR_API_KEY` is absent.
   agent to edit the skill and bump its version. The workflow turns the change
   into a draft PR.
 
+## Feedback sources
+
+- `--fixture <path>` — read feedback from JSON (deterministic; best for demos).
+- no `--fixture` — **live collection** from GitHub (`src/github.ts`): scans
+  recently-updated PRs/issues for comments stamped `<!-- skill:NAME@N -->`, reads
+  their 👍/👎 reactions and the human replies that follow, and infers PR
+  merge-state. Needs `gh` authenticated (`GH_TOKEN` in CI; resolves the repo from
+  `$GITHUB_REPOSITORY` or `gh repo view`). Degrades to no records on any error.
+
+## One-command demo
+
+```bash
+cd tools/cursor-skill-improve && npm ci
+npm run demo            # dry run -> live agent edit -> shows the diff -> restores the file
+npm run demo -- --keep  # keep the agent's edit instead of restoring it
+```
+
+See `.cursor/self-improvement/DEMO.md` for the full narrated flow.
+
 ## Local usage
 
 ```bash
@@ -60,6 +79,10 @@ cat ../../.cursor-skill-improve/report.md
 # Real run (edits the skill in your working tree; review the diff before committing):
 export CURSOR_API_KEY=...        # or add CURSOR_API_KEY=... to <repo>/.env
 npm run improve -- --target dry-review --fixture fixtures/sample-feedback.json
+
+# Fully live (real GitHub feedback): seed signal, then collect it (no --fixture):
+scripts/seed-demo-feedback.sh          # needs gh WRITE access
+npm run improve -- --dry-run --target dry-review
 ```
 
 ## Configuration
