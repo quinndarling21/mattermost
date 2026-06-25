@@ -1434,6 +1434,31 @@ func (s *MmctlUnitTestSuite) TestUserCreateCmd() {
 		s.Require().Len(printer.GetErrorLines(), 0)
 	})
 
+	s.Run("Create a regular user with timezone", func() {
+		printer.Clean()
+
+		expectedUser := mockUser
+		expectedUser.Timezone = model.StringMap{"useAutomaticTimezone": "false", "manualTimezone": "America/New_York"}
+
+		s.client.
+			EXPECT().
+			CreateUser(context.TODO(), &expectedUser).
+			Return(&expectedUser, &model.Response{}, nil).
+			Times(1)
+
+		command := cobra.Command{}
+		command.Flags().String("username", mockUser.Username, "")
+		command.Flags().String("email", mockUser.Email, "")
+		command.Flags().String("password", mockUser.Password, "")
+		command.Flags().String("timezone", expectedUser.Timezone["manualTimezone"], "")
+
+		err := userCreateCmdF(s.client, &command, []string{})
+
+		s.Require().Nil(err)
+		s.Require().Equal(&expectedUser, printer.GetLines()[0])
+		s.Require().Len(printer.GetErrorLines(), 0)
+	})
+
 	s.Run("Create a regular user with client returning error", func() {
 		printer.Clean()
 
