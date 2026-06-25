@@ -217,13 +217,3 @@ export function summarizeFeedback(records: FeedbackRecord[]): FeedbackSummary {
     summary.corrections.sort((a, b) => b.weight - a.weight);
     return summary;
 }
-
-/**
- * Live collection from GitHub lands in Phase 1: search recent PR/issue comments
- * for the skill marker via `gh`, then assemble {@link FeedbackRecord}s. Until
- * then the tool runs from a `--fixture`, so this returns an empty set and the
- * caller degrades to a "nothing to learn" no-op.
- */
-export function collectFromGitHub(skill: string): FeedbackFile {
-    return { skill, records: [] };
-}

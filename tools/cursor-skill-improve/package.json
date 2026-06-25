@@ -9,6 +9,7 @@
   },
   "scripts": {
     "improve": "tsx src/index.ts",
+    "demo": "bash scripts/demo.sh",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.ts"
   },

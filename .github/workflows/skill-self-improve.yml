@@ -82,6 +82,8 @@ jobs:
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           CURSOR_MODEL: ${{ vars.CURSOR_SKILL_IMPROVE_MODEL }}
+          # Authenticates the `gh` calls in live feedback collection (no --fixture).
+          GH_TOKEN: ${{ github.token }}
           INPUT_TARGET: ${{ github.event.inputs.target }}
           INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
           INPUT_FIXTURE: ${{ github.event.inputs.fixture }}

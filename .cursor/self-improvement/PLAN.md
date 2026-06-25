@@ -192,9 +192,11 @@ end without depending on secrets:
 - `.github/workflows/skill-self-improve.yml` — scheduled + manual, opens a draft
   PR, no-op without `CURSOR_API_KEY`.
 
-**Phase 1 — close the loop on the two CI agents.** Stamp `cursor-rules-check`
-and `cursor-docs-impact` outputs with markers+versions; teach the Improver to
-read their reactions/replies and the merge-state of docs PRs; run it weekly.
+**Phase 1 — close the loop on the two CI agents.** Live GitHub feedback
+collection is implemented (`tools/cursor-skill-improve/src/github.ts`: scans
+stamped comments, reads reactions/replies/PR-state). Remaining: stamp
+`cursor-rules-check` and `cursor-docs-impact` outputs with `skill@version`
+markers so their runs feed the same collector, and run the Improver weekly.
 
 **Phase 2 — feedback where the team works.** Add Slack + Linear feedback intake
 via MCP so corrections made in chat count. Give the Improver a consistent name
