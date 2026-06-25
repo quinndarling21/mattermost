@@ -16,12 +16,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import {
-    collectFromGitHub,
-    loadFixture,
-    summarizeFeedback,
-    type FeedbackFile,
-} from "./feedback.js";
+import { loadFixture, summarizeFeedback, type FeedbackFile } from "./feedback.js";
+import { collectFromGitHub } from "./github.js";
 import { getRepoRoot, hasChanges } from "./git.js";
 import { buildPrompt } from "./prompt.js";
 import { renderReport, writePromptArtifact, writeReport, ghOutput } from "./report.js";
@@ -146,7 +142,8 @@ async function main(): Promise<number> {
             }));
             return 0;
         }
-        feedback = collectFromGitHub(target);
+        log(`No --fixture supplied; collecting live feedback for "${target}" from GitHub (last ${options.windowDays} days)...`);
+        feedback = collectFromGitHub(target, { windowDays: options.windowDays, log });
     }
 
     const target = options.target ?? feedback.skill;
