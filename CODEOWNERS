@@ -1,4 +1,4 @@
 /webapp/channels/src/packages/mattermost-redux/src/store/configureStore.ts @hmhealey
 /server/channels/app/authentication.go @mattermost/product-security
 /server/channels/app/authorization.go @mattermost/product-security
-/webapp/channels/src/sass/base/_css_variables.scss @quinndarling21
+/webapp/channels/src/sass/base/_css_variables.scss @codeowner-rnd-7f3a91
