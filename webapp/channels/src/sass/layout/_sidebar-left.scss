@@ -1198,6 +1198,13 @@ $sidebarOpacityAnimationDuration: 0.15s;
         font-size: 18px;
     }
 
+    .SidebarChannel .SidebarLink > i.SidebarChannelLink__emoji {
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        font-style: normal;
+    }
+
     .SidebarChannelLinkLabel_wrapper,
     .SidebarChannelLinkLabel_wrapper > div {
         display: flex;

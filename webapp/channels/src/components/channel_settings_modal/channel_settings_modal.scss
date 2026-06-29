@@ -112,6 +112,67 @@
         margin-top: 16px;
     }
 
+    &__emojiSection {
+        display: flex;
+        flex-direction: column;
+        margin-top: 24px;
+    }
+
+    &__emojiLabel {
+        margin-bottom: 4px;
+        color: var(--center-channel-color);
+        font-family: Open Sans, sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    &__emojiSubheading {
+        margin-bottom: 8px;
+        color: rgba(var(--center-channel-color-rgb), 0.64);
+        font-family: Open Sans, sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+    }
+
+    &__emojiControls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__emojiButton {
+        display: flex;
+        width: 40px;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+        border-radius: 4px;
+        background: var(--center-channel-bg);
+        color: rgba(var(--center-channel-color-rgb), 0.64);
+
+        &:hover:not(:disabled) {
+            border-color: rgba(var(--center-channel-color-rgb), 0.48);
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    }
+
+    &__emojiRemove {
+        border: none;
+        background: transparent;
+        color: var(--button-bg);
+        font-size: 12px;
+        font-weight: 600;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
     &__purposeContainer, &__headerContainer {
         margin-top: 28px;
 

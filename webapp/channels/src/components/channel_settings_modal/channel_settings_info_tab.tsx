@@ -5,7 +5,9 @@ import React, {useCallback, useState, useEffect, useMemo, useRef} from 'react';
 import {useIntl} from 'react-intl';
 import {useDispatch, useSelector} from 'react-redux';
 
+import {EmoticonPlusOutlineIcon} from '@mattermost/compass-icons/components';
 import type {Channel, ChannelType} from '@mattermost/types/channels';
+import type {Emoji} from '@mattermost/types/emojis';
 import type {ServerError} from '@mattermost/types/errors';
 
 import {patchChannel, updateChannelPrivacy} from 'mattermost-redux/actions/channels';
@@ -26,6 +28,8 @@ import {
 import ConvertConfirmModal from 'components/admin_console/team_channel_settings/convert_confirm_modal';
 import CategorySelector from 'components/category_selector/category_selector';
 import ChannelNameFormField from 'components/channel_name_form_field/channel_name_form_field';
+import RenderEmoji from 'components/emoji/render_emoji';
+import useEmojiPicker from 'components/emoji_picker/use_emoji_picker';
 import type {TextboxElement} from 'components/textbox';
 import AdvancedTextbox from 'components/widgets/advanced_textbox/advanced_textbox';
 import SaveChangesPanel, {type SaveChangesPanelState} from 'components/widgets/modals/components/save_changes_panel';
@@ -116,6 +120,16 @@ function ChannelSettingsInfoTab({
     const [managedCategoryName, setManagedCategoryName] = useState(currentManagedCategoryName);
     const [serverManagedCategoryName, setServerManagedCategoryName] = useState(currentManagedCategoryName);
 
+    // Channel emoji shown next to the channel in the left sidebar.
+    const [channelEmoji, setChannelEmoji] = useState(channel.emoji ?? '');
+    const [serverChannelEmoji, setServerChannelEmoji] = useState(channel.emoji ?? '');
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+    useEffect(() => {
+        setChannelEmoji(channel.emoji ?? '');
+        setServerChannelEmoji(channel.emoji ?? '');
+    }, [channel.id, channel.emoji]);
+
     useEffect(() => {
         setDefaultCategoryName(channel.default_category_name);
         setServerDefaultCategoryName(channel.default_category_name);
@@ -173,11 +187,12 @@ function ChannelSettingsInfoTab({
             channelHeader.trim() !== channel.header ||
             channelType !== channel.type ||
             (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '') ||
-            managedCategoryName !== serverManagedCategoryName
+            managedCategoryName !== serverManagedCategoryName ||
+            channelEmoji !== serverChannelEmoji
         ) : false;
 
         setAreThereUnsavedChanges?.(unsavedChanges);
-    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, setAreThereUnsavedChanges]);
+    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, channelEmoji, serverChannelEmoji, setAreThereUnsavedChanges]);
 
     const handleURLChange = useCallback((newURL: string) => {
         if (internalUrlError) {
@@ -195,6 +210,28 @@ function ChannelSettingsInfoTab({
     const toggleHeaderPreview = useCallback(() => {
         dispatch(setShowPreviewOnChannelSettingsHeaderModal(!shouldShowPreviewHeader));
     }, [dispatch, shouldShowPreviewHeader]);
+
+    const handleEmojiClick = useCallback((selectedEmoji: Emoji) => {
+        setShowEmojiPicker(false);
+        const emojiName = ('short_name' in selectedEmoji) ? selectedEmoji.short_name : selectedEmoji.name;
+        setChannelEmoji(emojiName);
+        setFormError('');
+    }, []);
+
+    const handleEmojiClear = useCallback(() => {
+        setChannelEmoji('');
+        setFormError('');
+    }, []);
+
+    const {
+        emojiPicker,
+        getReferenceProps,
+        setReference,
+    } = useEmojiPicker({
+        showEmojiPicker,
+        setShowEmojiPicker,
+        onEmojiClick: handleEmojiClick,
+    });
 
     const handleChannelTypeChange = (type: ChannelType) => {
         if (channelTypeLockedByMembershipPolicy) {
@@ -314,6 +351,9 @@ function ChannelSettingsInfoTab({
         if (managedCategoryName !== serverManagedCategoryName) {
             updated.managed_category_name = managedCategoryName ?? '';
         }
+        if (!isDMorGroupChannel && channelEmoji !== serverChannelEmoji) {
+            updated.emoji = channelEmoji;
+        }
 
         if (Object.keys(updated).length === 0) {
             // Return true if no changes were made
@@ -336,9 +376,14 @@ function ChannelSettingsInfoTab({
         setChannelHeader(data?.header ?? updated.header ?? channel.header);
         setServerDefaultCategoryName(defaultCategoryName);
         setServerManagedCategoryName(managedCategoryName);
+        if (!isDMorGroupChannel) {
+            const savedEmoji = data?.emoji ?? updated.emoji ?? channelEmoji;
+            setChannelEmoji(savedEmoji);
+            setServerChannelEmoji(savedEmoji);
+        }
 
         return true;
-    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, channelEmoji, serverChannelEmoji]);
 
     // Handle save changes panel actions
     const handleSaveChanges = useCallback(async () => {
@@ -381,6 +426,8 @@ function ChannelSettingsInfoTab({
         setChannelType(channel?.type as ChannelType ?? Constants.OPEN_CHANNEL as ChannelType);
         setDefaultCategoryName(serverDefaultCategoryName);
         setManagedCategoryName(serverManagedCategoryName);
+        setChannelEmoji(serverChannelEmoji);
+        setShowEmojiPicker(false);
 
         // Clear errors
         setUrlError('');
@@ -392,7 +439,7 @@ function ChannelSettingsInfoTab({
         if (onCancel) {
             onCancel();
         }
-    }, [channel, onCancel, serverDefaultCategoryName, serverManagedCategoryName, setFormError]);
+    }, [channel, onCancel, serverDefaultCategoryName, serverManagedCategoryName, serverChannelEmoji, setFormError]);
 
     // Calculate if there are errors
     const hasErrors = Boolean(formError) ||
@@ -413,11 +460,12 @@ function ChannelSettingsInfoTab({
                 unsavedChanges = unsavedChanges || channelType !== channel.type;
                 unsavedChanges = unsavedChanges || (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '');
                 unsavedChanges = unsavedChanges || managedCategoryName !== serverManagedCategoryName;
+                unsavedChanges = unsavedChanges || channelEmoji !== serverChannelEmoji;
             }
         }
 
         return unsavedChanges || saveChangesPanelState === 'saved';
-    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, channelEmoji, serverChannelEmoji]);
 
     return (
         <div className='ChannelSettingsModal__infoTab'>
@@ -484,6 +532,51 @@ function ChannelSettingsInfoTab({
                     }}
                     onChange={handleChannelTypeChange}
                 />
+            )}
+            {/* Channel Emoji Section */}
+            {!isDMorGroupChannel && (
+                <div className='ChannelSettingsModal__emojiSection'>
+                    <label
+                        className='ChannelSettingsModal__emojiLabel'
+                        htmlFor='channelSettingsEmojiButton'
+                    >
+                        {formatMessage({id: 'channel_settings.emoji.label', defaultMessage: 'Channel Emoji'})}
+                    </label>
+                    <div className='ChannelSettingsModal__emojiSubheading'>
+                        {formatMessage({id: 'channel_settings.emoji.description', defaultMessage: 'Choose an emoji to show next to this channel in the sidebar.'})}
+                    </div>
+                    <div className='ChannelSettingsModal__emojiControls'>
+                        <button
+                            id='channelSettingsEmojiButton'
+                            ref={setReference}
+                            type='button'
+                            className='ChannelSettingsModal__emojiButton'
+                            onClick={() => setShowEmojiPicker((prev) => !prev)}
+                            disabled={!canManageChannelProperties}
+                            aria-label={formatMessage({id: 'emoji_picker.emojiPicker.button.ariaLabel', defaultMessage: 'select an emoji'})}
+                            {...getReferenceProps()}
+                        >
+                            {channelEmoji ? (
+                                <RenderEmoji
+                                    emojiName={channelEmoji}
+                                    size={20}
+                                />
+                            ) : (
+                                <EmoticonPlusOutlineIcon size={20}/>
+                            )}
+                        </button>
+                        {emojiPicker}
+                        {channelEmoji && canManageChannelProperties && (
+                            <button
+                                type='button'
+                                className='ChannelSettingsModal__emojiRemove'
+                                onClick={handleEmojiClear}
+                            >
+                                {formatMessage({id: 'channel_settings.emoji.remove', defaultMessage: 'Remove emoji'})}
+                            </button>
+                        )}
+                    </div>
+                </div>
             )}
             {/* Default Sidebar Category Selector */}
             {showDefaultCategoryField && (
