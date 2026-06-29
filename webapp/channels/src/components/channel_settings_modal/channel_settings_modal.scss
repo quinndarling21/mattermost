@@ -161,18 +161,6 @@
         }
     }
 
-    &__emojiRemove {
-        border: none;
-        background: transparent;
-        color: var(--button-bg);
-        font-size: 12px;
-        font-weight: 600;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
     &__purposeContainer, &__headerContainer {
         margin-top: 28px;
 

@@ -6,6 +6,7 @@ import {useIntl} from 'react-intl';
 import {useDispatch, useSelector} from 'react-redux';
 
 import {EmoticonPlusOutlineIcon} from '@mattermost/compass-icons/components';
+import {Button} from '@mattermost/shared/components/button';
 import type {Channel, ChannelType} from '@mattermost/types/channels';
 import type {Emoji} from '@mattermost/types/emojis';
 import type {ServerError} from '@mattermost/types/errors';
@@ -567,13 +568,14 @@ function ChannelSettingsInfoTab({
                         </button>
                         {emojiPicker}
                         {channelEmoji && canManageChannelProperties && (
-                            <button
+                            <Button
                                 type='button'
-                                className='ChannelSettingsModal__emojiRemove'
+                                emphasis='tertiary'
+                                size='xs'
                                 onClick={handleEmojiClear}
                             >
                                 {formatMessage({id: 'channel_settings.emoji.remove', defaultMessage: 'Remove emoji'})}
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>
