@@ -16,6 +16,20 @@ jest.mock('mattermost-redux/actions/channels', () => ({
     updateChannelPrivacy: jest.fn(),
 }));
 
+jest.mock('components/emoji/render_emoji', () => ({emojiName}: {emojiName: string}) => (
+    <span data-testid='render-emoji'>{emojiName}</span>
+));
+
+jest.mock('components/emoji_picker/use_emoji_picker', () => (options: {onEmojiClick: (emoji: {short_name: string}) => void}) => ({
+    emojiPicker: (
+        <button onClick={() => options.onEmojiClick({short_name: 'dog'})}>
+            {'Pick dog'}
+        </button>
+    ),
+    getReferenceProps: () => ({}),
+    setReference: jest.fn(),
+}));
+
 // Mock the ConvertConfirmModal component
 jest.mock('components/admin_console/team_channel_settings/convert_confirm_modal', () => {
     return jest.fn().mockImplementation(({show, onCancel, onConfirm, displayName}) => {
@@ -134,6 +148,16 @@ const baseProps = {
     setAreThereUnsavedChanges: jest.fn(),
 };
 
+const initialStateWithEmojiPicker = {
+    entities: {
+        general: {
+            config: {
+                EnableEmojiPicker: 'true',
+            },
+        },
+    },
+};
+
 describe('ChannelSettingsInfoTab', () => {
     beforeEach(() => {
         mockChannelPropertiesPermission = true;
@@ -214,6 +238,44 @@ describe('ChannelSettingsInfoTab', () => {
             display_name: 'Updated Channel Name',
             purpose: 'Updated purpose',
             header: 'Updated header',
+        });
+    });
+
+    it('should save selected channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>, initialStateWithEmojiPicker);
+
+        await userEvent.click(screen.getByRole('button', {name: 'Select channel emoji'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Pick dog'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {
+            emoji_name: 'dog',
+        });
+    });
+
+    it('should clear selected channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                {...baseProps}
+                channel={{
+                    ...mockChannel,
+                    emoji_name: 'dog',
+                }}
+            />,
+            initialStateWithEmojiPicker,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: 'Clear'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {
+            emoji_name: '',
         });
     });
 
