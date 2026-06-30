@@ -1,0 +1,10 @@
+---
+description: Use the Mattermost Design System Figma file as the source of truth for design
+alwaysApply: true
+---
+
+# Figma
+
+- For anything related to design, UI components, styles, tokens, or visual specs in this repository, treat the Mattermost Design System Figma file as the source of truth.
+- File: https://www.figma.com/design/yqPk3ZBWpsYtnoOmNj9Yom/Mattermost-Design-System?node-id=0-1&p=f&t=u4wLboDdEqeqsPKH-0
+- When the user references a design, mockup, component, or style without naming another source, check or refer to this Figma file first.
