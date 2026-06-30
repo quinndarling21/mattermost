@@ -1,0 +1,16 @@
+---
+description: Write Mattermost-facing copy in the brand voice defined in brand-guidelines/
+alwaysApply: true
+---
+
+# Brand and voice
+
+When writing or editing user-facing copy in this repository (marketing text, landing pages, release notes, security bulletins, in-product microcopy, or docs prose), follow the guidelines in `brand-guidelines/`:
+
+- `brand-guidelines/brand.md` - brand attributes and anti-brand list.
+- `brand-guidelines/voice-and-tone.md` - voice, tone by context, formatting.
+- `brand-guidelines/lexicon.md` - product names, use/avoid words, forbidden patterns.
+
+Defaults: be clear, precise, and calm; lead with the point; make concrete, verifiable claims. Avoid hype, fear-based security marketing, absolute security claims, unsourced numbers, and undefined jargon. Always spell the product "Mattermost."
+
+This rule does not apply to code, identifiers, or test fixtures. To audit existing copy, run the `/content-review` skill.
