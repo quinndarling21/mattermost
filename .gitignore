@@ -187,6 +187,7 @@ docker-compose.override.yaml
 .cursor/scripts/*
 !.cursor/scripts/cloud-agent-install.sh
 !.cursor/scripts/cloud-agent-start.sh
+!.cursor/scripts/check-private-service.sh
 !.cursor/hooks.json
 !.cursor/hooks/
 !.cursor/hooks/**
@@ -203,3 +204,6 @@ server/shard-*.txt
 # Repository-local docs output
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+
+# Cloudflare Tunnel demo local secrets (never commit real tokens)
+demos/cloudflare-tunnel/.env

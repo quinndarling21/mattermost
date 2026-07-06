@@ -12,6 +12,7 @@ The Docker build context is `.cursor/` only. The Dockerfile intentionally does n
 - Node 24.11.1/npm 11 via nvm, matching `.nvmrc` and `webapp/package.json`.
 - `agent-browser@0.27.0` and browser dependencies for screenshot workflows.
 - AWS CLI v2 for S3 uploads.
+- `cloudflared` for the Cloudflare Tunnel demo (best-effort at build time; installable at runtime if the build network blocks it). See `demos/cloudflare-tunnel/`.
 - Common Mattermost build/test tools: `make`, `jq`, `xmlsec1`, `pgloader`, Git LFS, GitHub CLI, Python 3, and build essentials.
 
 ## Runtime Hooks
@@ -37,3 +38,4 @@ Configure these in the [Cursor Cloud Agents dashboard](https://cursor.com/dashbo
 
 - AWS uploads use the standard AWS CLI environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_S3_BUCKET_NAME`. The image only supplies the `aws` binary.
 - Docker Hub pulls use the same variable names as CI: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. The start hook runs `docker login` after `dockerd` is ready. Mark `DOCKERHUB_TOKEN` as **redacted** in the dashboard. When both are set, agents can pull the full default `make start-docker` image set without hitting anonymous rate limits.
+- The optional Cloudflare Tunnel demo (`demos/cloudflare-tunnel/`) uses `MM_TUNNEL_URL`, `CF_ACCESS_CLIENT_ID`, and `CF_ACCESS_CLIENT_SECRET`. When set, agents can reach a private Mattermost server through an Access-protected tunnel hostname; when unset, the demo is inactive and startup is unaffected. Mark `CF_ACCESS_CLIENT_SECRET` as **redacted**. See `demos/cloudflare-tunnel/README.md`.

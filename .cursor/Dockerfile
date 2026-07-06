@@ -138,6 +138,23 @@ RUN case "$(dpkg --print-architecture)" in \
     /tmp/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli && \
     rm -rf /tmp/aws /tmp/awscliv2.zip
 
+# Install cloudflared for the Cloudflare Tunnel demo (see demos/cloudflare-tunnel).
+# The HTTP demo does not require this binary in the agent image: the Cloud Agent
+# reaches the private origin over HTTPS using Cloudflare Access service-token
+# headers, and the connector runs on the private-network side. cloudflared is
+# included so agents can also run `cloudflared access tcp` for private TCP
+# targets such as databases. It is sourced from Cloudflare's apt repository,
+# which may not be on the build-network SNI allowlist; like `agent-browser
+# install` above, this step is best-effort and never fails the build. Runtime
+# egress is unrestricted, so it can be installed later via the update hook.
+RUN { install -m 0755 -d /usr/share/keyrings && \
+      curl --retry 5 --retry-delay 5 --retry-all-errors -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg -o /usr/share/keyrings/cloudflare-main.gpg && \
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared $(. /etc/os-release && echo "$VERSION_CODENAME") main" > /etc/apt/sources.list.d/cloudflared.list && \
+      apt-get update -o Dir::Etc::sourcelist='sources.list.d/cloudflared.list' -o Dir::Etc::sourceparts='-' -o APT::Get::List-Cleanup='0' && \
+      apt-get install -y --no-install-recommends cloudflared && \
+      rm -rf /var/lib/apt/lists/*; } || \
+    echo "[cloudflared] not installed at build time (pkg.cloudflare.com unreachable); install at runtime if the TCP demo is needed." >&2
+
 RUN install -m 0755 -d /var/run/sshd && \
     printf '%s\n' 'PasswordAuthentication no' 'ChallengeResponseAuthentication no' 'UsePAM no' > /etc/ssh/sshd_config.d/disable_password_auth.conf && \
     if ! id -u ubuntu >/dev/null 2>&1; then useradd -m -s /bin/bash ubuntu; fi && \
