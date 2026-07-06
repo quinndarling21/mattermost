@@ -127,7 +127,7 @@ Or call the private service directly. Every request must carry the Access servic
 curl -sS \
   -H "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID" \
   -H "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET" \
-  "$MM_TUNNEL_URL/api/v4/system/ping?get_server_status=true"
+  "${MM_TUNNEL_URL%/}/api/v4/system/ping?get_server_status=true"
 ```
 
 Notes:
