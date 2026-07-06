@@ -6,6 +6,7 @@ import {useIntl} from 'react-intl';
 
 import type {Channel} from '@mattermost/types/channels';
 
+import RenderEmoji from 'components/emoji/render_emoji';
 import LeaveChannelModal from 'components/leave_channel_modal';
 import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_channel_link';
 
@@ -44,7 +45,16 @@ const SidebarBaseChannel = ({
         channelLeaveHandler = handleLeaveWithConfirmation;
     }
 
-    const channelIcon = (
+    // When the channel has an emoji assigned, show it in place of the default
+    // public/private channel icon so users can visually categorize channels.
+    const channelIcon = channel.emoji ? (
+        <i className='icon SidebarChannelLink__emoji'>
+            <RenderEmoji
+                emojiName={channel.emoji}
+                size={16}
+            />
+        </i>
+    ) : (
         <SidebarBaseChannelIcon
             channelType={channel.type}
         />

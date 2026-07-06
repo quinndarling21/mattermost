@@ -8,6 +8,13 @@ exports[`components/sidebar/sidebar_channel/sidebar_base_channel should match sn
     >
       Options
     </button>
+    <div
+      data-testid="channel-icon"
+    >
+      <i
+        class="icon icon-globe"
+      />
+    </div>
     <div>
       channel_display_name
     </div>
@@ -23,6 +30,13 @@ exports[`components/sidebar/sidebar_channel/sidebar_base_channel should match sn
     >
       Options
     </button>
+    <div
+      data-testid="channel-icon"
+    >
+      <i
+        class="icon icon-lock-outline"
+      />
+    </div>
     <div>
       channel_display_name
     </div>
@@ -38,6 +52,13 @@ exports[`components/sidebar/sidebar_channel/sidebar_base_channel should match sn
     >
       Options
     </button>
+    <div
+      data-testid="channel-icon"
+    >
+      <i
+        class="icon icon-globe"
+      />
+    </div>
     <div>
       channel_display_name
     </div>
@@ -53,6 +74,13 @@ exports[`components/sidebar/sidebar_channel/sidebar_base_channel should match sn
     >
       Options
     </button>
+    <div
+      data-testid="channel-icon"
+    >
+      <i
+        class="icon icon-lock-outline"
+      />
+    </div>
     <div>
       channel_display_name
     </div>
