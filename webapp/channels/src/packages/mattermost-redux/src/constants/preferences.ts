@@ -88,6 +88,9 @@ const Preferences = {
     CATEGORY_BURN_ON_READ: 'burn_on_read',
     BURN_ON_READ_SKIP_CONFIRMATION: 'skip_delete_confirmation',
 
+    CATEGORY_QUIET_HOURS: 'quiet_hours',
+    QUIET_HOURS_SCHEDULE: 'schedule',
+
     CATEGORY_THEME: 'theme',
     THEMES: {
         denim: {
