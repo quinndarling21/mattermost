@@ -119,6 +119,11 @@ const mockChannel = TestHelper.getChannelMock({
     type: 'O',
 });
 
+const mockChannelWithEmoji = TestHelper.getChannelMock({
+    ...mockChannel,
+    channel_emoji: 'rocket',
+});
+
 const mockDirectMessageChannel = TestHelper.getChannelMock({
     id: 'dm-channel1',
     team_id: '',
@@ -214,6 +219,25 @@ describe('ChannelSettingsInfoTab', () => {
             display_name: 'Updated Channel Name',
             purpose: 'Updated purpose',
             header: 'Updated header',
+        });
+    });
+
+    it('should clear channel emoji when Remove emoji is clicked', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                channel={mockChannelWithEmoji}
+                setAreThereUnsavedChanges={jest.fn()}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: 'Remove emoji'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {
+            channel_emoji: '',
         });
     });
 
