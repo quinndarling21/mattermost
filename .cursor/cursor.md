@@ -106,6 +106,36 @@ aws sts get-caller-identity
 - If the configured S3 bucket is public, upload with `aws s3 cp` and share the plain object URL `https://$AWS_S3_BUCKET_NAME.s3.amazonaws.com/<key>` instead of generating a presigned URL.
 Do not hardcode AWS credentials or bucket secrets in the repository.
 
+## Reaching the private demo Mattermost via Cloudflare Tunnel
+
+This repo includes a Cloudflare Tunnel demo (`demos/cloudflare-tunnel/README.md`) that lets a Cloud Agent reach a private Mattermost server running on a field engineer's laptop, without exposing that server to the public internet. It mirrors the pattern in Cursor's Cloud Agent setup docs.
+
+When these Cursor Secrets are set, the private server is reachable over HTTPS:
+
+- `MM_TUNNEL_URL` - the tunnel hostname, such as `https://mm-internal.quinn-cloudflare-demo.com`
+- `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` - a Cloudflare Access service token
+
+Verify connectivity with the bundled check script:
+
+```bash
+bash .cursor/scripts/check-private-service.sh
+```
+
+Or call the private service directly. Every request must carry the Access service-token headers:
+
+```bash
+curl -sS \
+  -H "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID" \
+  -H "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET" \
+  "$MM_TUNNEL_URL/api/v4/system/ping?get_server_status=true"
+```
+
+Notes:
+
+- The connector runs on the private-network side (the laptop), dials outbound to Cloudflare, and forwards to `http://localhost:8065`. The agent never needs an inbound path to the origin.
+- For an HTTP origin like this one, the agent only needs `curl`; the `cloudflared` binary is not required. For private TCP targets such as a database, use `cloudflared access tcp` (the binary is installed in the image when the build network allows it).
+- If the secrets are not set, the demo is inactive and these instructions do not apply. Never hardcode tokens in the repository.
+
 ## Cursor Cloud specific instructions
 
 - Before `make start-docker` or `make run`, confirm Docker works with `docker info`. If the daemon is down, run `bash .cursor/scripts/cloud-agent-start.sh`. If you see `permission denied` on `/var/run/docker.sock`, fix group access (`sudo usermod -aG docker "$USER"` and re-login) or use `sudo chmod g+rw /var/run/docker.sock`. In some Cloud VMs, `usermod` does not take effect until a new login; `sudo chmod 666 /var/run/docker.sock` is a reliable same-session workaround.
