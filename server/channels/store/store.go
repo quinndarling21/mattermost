@@ -194,6 +194,8 @@ type TeamStore interface {
 	GetCommonTeamIDsForTwoUsers(userID, otherUserID string) ([]string, error)
 
 	GetCommonTeamIDsForMultipleUsers(userIDs []string) ([]string, error)
+
+	GetMembersMatchingDigestFilter(teamID, search string) ([]*model.DigestMemberActivity, error)
 }
 
 type ChannelStore interface {

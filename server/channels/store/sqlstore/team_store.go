@@ -1728,3 +1728,47 @@ func (s SqlTeamStore) GroupSyncedTeamCount() (int64, error) {
 
 	return count, nil
 }
+
+func (s SqlTeamStore) GetMembersMatchingDigestFilter(teamID, search string) ([]*model.DigestMemberActivity, error) {
+	query := fmt.Sprintf(`
+		SELECT
+			Users.Id AS UserId,
+			Users.Username,
+			Users.Email,
+			Users.LastActivityAt,
+			COALESCE(post_counts.PostCount, 0) AS PostCount,
+			COALESCE(reply_counts.ReplyCount, 0) AS ReplyCount
+		FROM Users
+		INNER JOIN TeamMembers ON TeamMembers.UserId = Users.Id
+		LEFT JOIN (
+			SELECT UserId, COUNT(*) AS PostCount
+			FROM Posts
+			WHERE DeleteAt = 0 AND RootId = ''
+			GROUP BY UserId
+		) post_counts ON post_counts.UserId = Users.Id
+		LEFT JOIN (
+			SELECT UserId, COUNT(*) AS ReplyCount
+			FROM Posts
+			WHERE DeleteAt = 0 AND RootId != ''
+			GROUP BY UserId
+		) reply_counts ON reply_counts.UserId = Users.Id
+		WHERE TeamMembers.TeamId = '%s'
+			AND TeamMembers.DeleteAt = 0
+			AND Users.DeleteAt = 0`, teamID)
+
+	if search != "" {
+		query += fmt.Sprintf(`
+			AND (Users.Username LIKE '%%%s%%' OR Users.Email LIKE '%%%s%%')`, search, search)
+	}
+
+	query += `
+		ORDER BY Users.LastActivityAt DESC
+		LIMIT 100`
+
+	members := []*model.DigestMemberActivity{}
+	if err := s.GetReplica().Select(&members, query); err != nil {
+		return nil, errors.Wrap(err, "failed to get digest members")
+	}
+
+	return members, nil
+}
