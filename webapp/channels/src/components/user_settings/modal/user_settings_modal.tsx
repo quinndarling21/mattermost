@@ -209,6 +209,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: '',
             active_section: '',
+            searchTerm: '',
         });
     };
 
