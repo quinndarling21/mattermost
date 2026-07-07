@@ -1699,6 +1699,73 @@ func TestPatchChannel(t *testing.T) {
 		require.Equal(t, newHeader, patchedChannel.Header)
 		require.True(t, patchedChannel.AutoTranslation)
 	})
+
+	t.Run("Should be able to set and clear the emoji on a channel", func(t *testing.T) {
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		th.LoginBasic(t)
+
+		channel := &model.Channel{
+			DisplayName: GenerateTestChannelName(),
+			Name:        GenerateTestChannelName(),
+			Type:        model.ChannelTypeOpen,
+			TeamId:      team.Id,
+		}
+		channel, _, err = client.CreateChannel(context.Background(), channel)
+		require.NoError(t, err)
+
+		emoji := "smile"
+		patch := &model.ChannelPatch{Emoji: &emoji}
+		patched, _, err := client.PatchChannel(context.Background(), channel.Id, patch)
+		require.NoError(t, err)
+		require.Equal(t, emoji, patched.Emoji)
+
+		fetched, _, err := client.GetChannel(context.Background(), channel.Id)
+		require.NoError(t, err)
+		require.Equal(t, emoji, fetched.Emoji)
+
+		empty := ""
+		clearPatch := &model.ChannelPatch{Emoji: &empty}
+		cleared, _, err := client.PatchChannel(context.Background(), channel.Id, clearPatch)
+		require.NoError(t, err)
+		require.Equal(t, "", cleared.Emoji)
+	})
+
+	t.Run("Should reject an emoji that exceeds the max length", func(t *testing.T) {
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		th.LoginBasic(t)
+
+		channel := &model.Channel{
+			DisplayName: GenerateTestChannelName(),
+			Name:        GenerateTestChannelName(),
+			Type:        model.ChannelTypeOpen,
+			TeamId:      team.Id,
+		}
+		channel, _, err = client.CreateChannel(context.Background(), channel)
+		require.NoError(t, err)
+
+		tooLong := strings.Repeat("a", model.ChannelEmojiMaxRunes+1)
+		patch := &model.ChannelPatch{Emoji: &tooLong}
+		_, resp, err := client.PatchChannel(context.Background(), channel.Id, patch)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+	})
+
+	t.Run("Should not be able to set the emoji without manage-channel-properties permission", func(t *testing.T) {
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		th.LoginBasic(t)
+
+		th.RemovePermissionFromRole(t, model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
+		defer th.AddPermissionToRole(t, model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
+
+		emoji := "smile"
+		patch := &model.ChannelPatch{Emoji: &emoji}
+		_, resp, err := client.PatchChannel(context.Background(), th.BasicChannel.Id, patch)
+		require.Error(t, err)
+		CheckForbiddenStatus(t, resp)
+	})
 }
 
 func TestCanEditChannelBanner(t *testing.T) {
