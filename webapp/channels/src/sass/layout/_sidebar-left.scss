@@ -1208,8 +1208,8 @@ $sidebarOpacityAnimationDuration: 0.15s;
 
     .SidebarChannelLinkLabel_emoji {
         display: flex;
-        align-items: center;
         flex-shrink: 0;
+        align-items: center;
 
         .emoticon {
             min-width: 16px;

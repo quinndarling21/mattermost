@@ -4,6 +4,7 @@
 import React, {useState} from 'react';
 import {useIntl} from 'react-intl';
 
+import {Button} from '@mattermost/shared/components/button';
 import type {Emoji} from '@mattermost/types/emojis';
 
 import RenderEmoji from 'components/emoji/render_emoji';
@@ -84,13 +85,15 @@ function ChannelSettingsEmojiSelector({value, onChange, disabled}: Props) {
                 </button>
                 {emojiPicker}
                 {Boolean(value) && !disabled && (
-                    <button
+                    <Button
                         type='button'
-                        className='ChannelSettingsModal__emojiClear style--none color--link'
+                        emphasis='tertiary'
+                        size='sm'
+                        className='ChannelSettingsModal__emojiClear'
                         onClick={handleClear}
                     >
                         {formatMessage({id: 'channel_settings.emoji.remove', defaultMessage: 'Remove emoji'})}
-                    </button>
+                    </Button>
                 )}
             </div>
             <div className='ChannelSettingsModal__emojiSelectorHelp'>
