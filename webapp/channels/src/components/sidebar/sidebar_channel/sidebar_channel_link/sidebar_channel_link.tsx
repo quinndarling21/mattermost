@@ -12,6 +12,7 @@ import type {Channel} from '@mattermost/types/channels';
 import {mark} from 'actions/telemetry_actions';
 
 import CustomStatusEmoji from 'components/custom_status/custom_status_emoji';
+import RenderEmoji from 'components/emoji/render_emoji';
 import SharedChannelIndicator from 'components/shared_channel_indicator';
 import {ChannelsAndDirectMessagesTour} from 'components/tours/onboarding_tour';
 
@@ -210,6 +211,17 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
             channelsTutorialTip = firstChannelName ? (<ChannelsAndDirectMessagesTour firstChannelName={channel.display_name}/>) : <ChannelsAndDirectMessagesTour/>;
         }
 
+        const channelEmoji = channel.channel_emoji ? (
+            <RenderEmoji
+                emojiName={channel.channel_emoji}
+                size={16}
+                emojiStyle={{
+                    marginRight: 5,
+                    flexShrink: 0,
+                }}
+            />
+        ) : null;
+
         let labelElement: JSX.Element = (
             <span
                 ref={this.labelRef}
@@ -261,6 +273,7 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
                 <div
                     className='SidebarChannelLinkLabel_wrapper'
                 >
+                    {channelEmoji}
                     {labelElement}
                     {customStatus}
                     <Pluggable
