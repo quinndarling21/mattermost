@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {fireEvent, screen} from '@testing-library/react';
+import {fireEvent, screen, within} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -186,8 +186,9 @@ describe('settings search', () => {
     it('navigates to a matching section when a result is selected', () => {
         renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
 
-        fireEvent.change(screen.getByPlaceholderText('Search settings'), {target: {value: 'theme'}});
-        fireEvent.click(screen.getByText('Theme'));
+        // Search within the default (Notifications) tab, which is already rendered.
+        fireEvent.change(screen.getByPlaceholderText('Search settings'), {target: {value: 'reply'}});
+        fireEvent.click(within(screen.getByRole('listbox')).getByText('Reply notifications'));
 
         // Navigating clears the search, restoring the tab list.
         expect(screen.queryByRole('listbox')).not.toBeInTheDocument();

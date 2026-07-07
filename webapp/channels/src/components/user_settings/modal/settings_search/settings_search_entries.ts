@@ -74,6 +74,7 @@ const messages = defineMessages({
 // matching setting. If a section id drifts, navigation gracefully falls back to
 // opening the parent tab.
 const entries: SettingsSearchEntry[] = [
+
     // Profile
     {tab: 'profile', section: 'name', label: messages.profileName, keywords: ['name', 'full name', 'first name', 'last name']},
     {tab: 'profile', section: 'username', label: messages.profileUsername, keywords: ['username', 'handle']},
