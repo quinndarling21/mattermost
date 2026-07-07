@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen, within} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -158,6 +158,48 @@ describe('tabs are properly rendered', () => {
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
         expect(screen.queryAllByText('plugin B Settings')).toHaveLength(2);
         expect(screen.queryByText('plugin A Settings')).not.toBeInTheDocument();
+    });
+});
+
+describe('settings search', () => {
+    it('renders a search input in the modal', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+        expect(screen.getByPlaceholderText('Search settings')).toBeInTheDocument();
+    });
+
+    it('shows results and hides the tab list while searching', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        // Sidebar tab list is visible before searching.
+        expect(screen.getByText('Display')).toBeInTheDocument();
+
+        fireEvent.change(screen.getByPlaceholderText('Search settings'), {target: {value: 'theme'}});
+
+        // Search results are shown.
+        expect(screen.getByRole('listbox')).toBeInTheDocument();
+        expect(screen.getByText('Theme')).toBeInTheDocument();
+
+        // The regular sidebar tab list is no longer rendered.
+        expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    });
+
+    it('navigates to a matching section when a result is selected', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        // Search within the default (Notifications) tab, which is already rendered.
+        fireEvent.change(screen.getByPlaceholderText('Search settings'), {target: {value: 'reply'}});
+        fireEvent.click(within(screen.getByRole('listbox')).getByText('Reply notifications'));
+
+        // Navigating clears the search, restoring the tab list.
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+        expect(screen.getByText('Display')).toBeInTheDocument();
+    });
+
+    it('shows an empty state when nothing matches', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        fireEvent.change(screen.getByPlaceholderText('Search settings'), {target: {value: 'zzzznotathing'}});
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
     });
 });
 
