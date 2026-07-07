@@ -416,6 +416,7 @@ func (o *Channel) PreSave() {
 
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = NormalizeChannelEmoji(o.Emoji)
 	if o.CreateAt == 0 {
 		o.CreateAt = GetMillis()
 	}
