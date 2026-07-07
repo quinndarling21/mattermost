@@ -93,6 +93,13 @@ export type Channel = {
     managed_category_name?: string;
     autotranslation?: boolean;
     discoverable?: boolean;
+
+    /**
+     * Optional emoji name (without surrounding colons) shown next to the
+     * channel in the sidebar so channels can be visually categorized.
+     * Empty or undefined means no emoji is set.
+     */
+    emoji?: string;
 };
 
 export type ServerChannel = Channel & {
