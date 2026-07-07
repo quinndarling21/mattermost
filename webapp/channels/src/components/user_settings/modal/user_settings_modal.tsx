@@ -68,6 +68,10 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     private afterConfirm: (() => void) | null;
     private modalBodyRef: React.RefObject<HTMLDivElement>;
 
+    // Set when a search result navigates to a specific section, so that the newly
+    // expanded section can be scrolled into view once it renders.
+    private scrollToSectionOnUpdate: boolean;
+
     constructor(props: Props) {
         super(props);
 
@@ -89,6 +93,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         // modal. It will be passed a function to call on modal confirm
         this.customConfirmAction = null;
         this.afterConfirm = null;
+        this.scrollToSectionOnUpdate = false;
 
         this.modalBodyRef = React.createRef();
     }
@@ -136,7 +141,28 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                 el.scrollTop = 0;
             }
         }
+
+        // When a search result opened a specific section, bring it into view. This
+        // runs after the tab-change scroll reset above so it takes precedence.
+        if (this.scrollToSectionOnUpdate && this.state.active_section) {
+            this.scrollToSectionOnUpdate = false;
+            this.scrollActiveSectionIntoView();
+        }
     }
+
+    scrollActiveSectionIntoView = () => {
+        // Defer to the next frame so the newly expanded section is in the DOM.
+        window.requestAnimationFrame(() => {
+            const body = this.modalBodyRef.current;
+            if (!body) {
+                return;
+            }
+            const section = body.querySelector('.section-max');
+            if (section && typeof section.scrollIntoView === 'function') {
+                section.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+        });
+    };
 
     setLoadingFinished = () => {
         this.setState({loading: false});
@@ -269,11 +295,14 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     // existing confirm flow so unsaved changes are still protected, and clears the
     // search once navigation actually happens.
     handleSearchNavigate = (tab: string, section?: string) => {
-        const navigate = () => this.setState({
-            active_tab: tab,
-            active_section: section ?? '',
-            searchTerm: '',
-        });
+        const navigate = () => {
+            this.scrollToSectionOnUpdate = Boolean(section);
+            this.setState({
+                active_tab: tab,
+                active_section: section ?? '',
+                searchTerm: '',
+            });
+        };
 
         if (this.requireConfirm) {
             this.showConfirmModal(navigate);
