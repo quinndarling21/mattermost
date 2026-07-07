@@ -27,6 +27,13 @@ import {getDisplayName} from 'utils/utils';
 
 import type {PluginConfiguration} from 'types/plugins/user_settings';
 
+import SettingsSearch from './settings_search';
+import {
+    buildSettingsSearchIndex,
+    filterSettingsSearchResults,
+} from './settings_search_index';
+import type {SettingsSearchResult} from './settings_search_index';
+
 import './user_settings_modal.scss';
 
 export type OwnProps = {
@@ -58,6 +65,8 @@ type State = {
     show: boolean;
     resendStatus: string;
     loading: boolean;
+    searchTerm: string;
+    searchNavigationKey: number;
 };
 
 class UserSettingsModal extends React.PureComponent<Props, State> {
@@ -77,6 +86,8 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             show: true,
             resendStatus: '',
             loading: false,
+            searchTerm: '',
+            searchNavigationKey: 0,
         };
 
         this.requireConfirm = false;
@@ -164,6 +175,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: this.props.isContentProductSettings ? 'notifications' : 'profile',
             active_section: '',
+            searchTerm: '',
         });
         if (this.props.focusOriginElement) {
             focusElement(this.props.focusOriginElement, true);
@@ -255,6 +267,36 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         } else {
             this.setState({active_section: section ?? ''});
         }
+    };
+
+    handleSearchTermChange = (searchTerm: string) => {
+        this.setState({searchTerm});
+    };
+
+    handleSearchResultSelect = (result: SettingsSearchResult) => {
+        const navigate = () => {
+            this.setState((state) => ({
+                active_tab: result.tab,
+                active_section: result.section ?? '',
+                searchTerm: '',
+                searchNavigationKey: state.searchNavigationKey + 1,
+            }));
+            document.querySelector('#accountSettingsModal')?.closest('.modal-dialog')?.classList.add('display--content');
+        };
+
+        if (this.requireConfirm) {
+            this.showConfirmModal(navigate);
+            return;
+        }
+
+        navigate();
+    };
+
+    getSettingsSearchIndex = () => {
+        return buildSettingsSearchIndex(this.props.intl.formatMessage, {
+            isContentProductSettings: this.props.isContentProductSettings,
+            pluginSettings: this.props.pluginSettings,
+        });
     };
 
     getUserSettingsTabs = () => {
@@ -355,6 +397,12 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             </div>
         );
 
+        const searchResults = filterSettingsSearchResults(
+            this.getSettingsSearchIndex(),
+            this.state.searchTerm,
+        );
+        const showSearchResults = this.state.searchTerm.trim().length > 0;
+
         return (
             <GenericModal
                 id='accountSettingsModal'
@@ -389,15 +437,24 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                         <>
                             <div className='settings-table'>
                                 <div className='settings-links'>
-                                    <SettingsSidebar
-                                        tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
-                                        pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
-                                        activeTab={this.state.active_tab}
-                                        updateTab={this.updateTab}
+                                    <SettingsSearch
+                                        searchTerm={this.state.searchTerm}
+                                        results={searchResults}
+                                        onSearchTermChange={this.handleSearchTermChange}
+                                        onSelectResult={this.handleSearchResultSelect}
                                     />
+                                    {!showSearchResults && (
+                                        <SettingsSidebar
+                                            tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
+                                            pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
+                                            activeTab={this.state.active_tab}
+                                            updateTab={this.updateTab}
+                                        />
+                                    )}
                                 </div>
                                 <div className='settings-content minimize-settings'>
                                     <UserSettings
+                                        key={this.state.searchNavigationKey}
                                         activeTab={this.state.active_tab}
                                         activeSection={this.state.active_section}
                                         updateSection={this.updateSection}
