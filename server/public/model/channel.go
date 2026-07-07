@@ -44,6 +44,7 @@ const (
 	ChannelPurposeMaxRunes     = 250
 	ChannelCacheSize           = 25000
 	ChannelBannerInfoMaxLength = 1024
+	ChannelEmojiMaxRunes       = 64
 
 	ChannelSortByUsername = "username"
 	ChannelSortByStatus   = "status"
@@ -118,6 +119,9 @@ type Channel struct {
 	DefaultCategoryName string          `json:"default_category_name"`
 	ManagedCategoryName string          `json:"managed_category_name"`
 	Discoverable        bool            `json:"discoverable"`
+	// Emoji is an optional emoji shortcode (without wrapping colons, e.g.
+	// "rocket") shown in place of the default channel icon in the sidebar.
+	Emoji string `json:"emoji"`
 }
 
 // HasPolicyAction reports whether the channel's policy declares the given
@@ -162,6 +166,7 @@ func (o *Channel) Auditable() map[string]any {
 		"autotranslation":      o.AutoTranslation,
 		"policy_is_active":     o.PolicyIsActive, // this field is only for logging purposes
 		"discoverable":         o.Discoverable,
+		"emoji":                o.Emoji,
 	}
 }
 
@@ -192,6 +197,7 @@ type ChannelPatch struct {
 	ManagedCategoryName *string            `json:"managed_category_name"`
 	DefaultCategoryName *string            `json:"default_category_name"`
 	Discoverable        *bool              `json:"discoverable"`
+	Emoji               *string            `json:"emoji"`
 }
 
 func (c *ChannelPatch) Auditable() map[string]any {
@@ -202,6 +208,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
+		"emoji":                 c.Emoji,
 	}
 }
 
@@ -376,6 +383,10 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.discoverable.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if utf8.RuneCountInString(o.Emoji) > ChannelEmojiMaxRunes {
+		return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.app_error", map[string]any{"MaxLength": ChannelEmojiMaxRunes}, "id="+o.Id, http.StatusBadRequest)
+	}
+
 	return nil
 }
 
@@ -500,6 +511,21 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 	if patch.Discoverable != nil {
 		o.Discoverable = *patch.Discoverable
 	}
+
+	if patch.Emoji != nil {
+		o.Emoji = NormalizeChannelEmoji(*patch.Emoji)
+	}
+}
+
+// NormalizeChannelEmoji trims surrounding whitespace and any wrapping colons
+// from an emoji shortcode so channel emojis are stored consistently as a bare
+// name (e.g. "rocket") regardless of how the client submitted them.
+func NormalizeChannelEmoji(emoji string) string {
+	emoji = strings.TrimSpace(emoji)
+	if len(emoji) >= 2 && strings.HasPrefix(emoji, ":") && strings.HasSuffix(emoji, ":") {
+		emoji = emoji[1 : len(emoji)-1]
+	}
+	return strings.TrimSpace(emoji)
 }
 
 func (o *Channel) MakeNonNil() {
