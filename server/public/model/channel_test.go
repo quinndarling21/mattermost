@@ -59,6 +59,71 @@ func TestChannelPatchDiscoverable(t *testing.T) {
 	})
 }
 
+func TestChannelPatchEmoji(t *testing.T) {
+	t.Run("applies emoji when set", func(t *testing.T) {
+		emoji := "smile"
+		p := &ChannelPatch{Emoji: &emoji}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypePrivate}
+		o.Patch(p)
+		require.Equal(t, "smile", o.Emoji)
+	})
+
+	t.Run("clears emoji when set to empty string", func(t *testing.T) {
+		empty := ""
+		p := &ChannelPatch{Emoji: &empty}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypePrivate, Emoji: "smile"}
+		o.Patch(p)
+		require.Equal(t, "", o.Emoji)
+	})
+
+	t.Run("trims surrounding whitespace", func(t *testing.T) {
+		emoji := "  smile  "
+		p := &ChannelPatch{Emoji: &emoji}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypePrivate}
+		o.Patch(p)
+		require.Equal(t, "smile", o.Emoji)
+	})
+
+	t.Run("nil emoji leaves channel untouched", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypePrivate, Emoji: "smile"}
+		o.Patch(&ChannelPatch{})
+		require.Equal(t, "smile", o.Emoji)
+	})
+}
+
+func TestChannelIsValidEmoji(t *testing.T) {
+	base := Channel{
+		Id:          NewId(),
+		CreateAt:    GetMillis(),
+		UpdateAt:    GetMillis(),
+		DisplayName: "x",
+		Name:        "valid-name",
+		Type:        ChannelTypeOpen,
+		Header:      "h",
+		Purpose:     "p",
+	}
+
+	t.Run("empty emoji is valid", func(t *testing.T) {
+		c := base
+		c.Emoji = ""
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("emoji at max length is valid", func(t *testing.T) {
+		c := base
+		c.Emoji = strings.Repeat("a", ChannelEmojiMaxRunes)
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("emoji over max length is rejected", func(t *testing.T) {
+		c := base
+		c.Emoji = strings.Repeat("a", ChannelEmojiMaxRunes+1)
+		err := c.IsValid()
+		require.NotNil(t, err)
+		require.Equal(t, "model.channel.is_valid.emoji.app_error", err.Id)
+	})
+}
+
 func TestChannelIsValidDiscoverable(t *testing.T) {
 	base := Channel{
 		Id:          NewId(),
