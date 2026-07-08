@@ -7272,6 +7272,8 @@
   "user.settings.modal.display": "Display",
   "user.settings.modal.notifications": "Notifications",
   "user.settings.modal.profile": "Profile Settings",
+  "user.settings.modal.search": "Search settings",
+  "user.settings.modal.search.noResults": "No settings match “{query}”",
   "user.settings.modal.security": "Security",
   "user.settings.modal.sidebar": "Sidebar",
   "user.settings.modal.title": "Profile",
