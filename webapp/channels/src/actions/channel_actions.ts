@@ -190,3 +190,13 @@ export function muteChannel(userId: UserProfile['id'], channelId: Channel['id'])
     });
 }
 
+export function setChannelSidebarEmoji(userId: UserProfile['id'], channelId: Channel['id'], emojiName: string) {
+    return ChannelActions.updateChannelNotifyProps(userId, channelId, {
+        sidebar_emoji: emojiName,
+    });
+}
+
+export function removeChannelSidebarEmoji(userId: UserProfile['id'], channelId: Channel['id']) {
+    return setChannelSidebarEmoji(userId, channelId, '');
+}
+
