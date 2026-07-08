@@ -57,6 +57,22 @@ func TestIsChannelMemberNotifyPropsValid(t *testing.T) {
 		err = IsChannelMemberNotifyPropsValid(notifyProps, true)
 		assert.Nil(t, err)
 	})
+
+	t.Run("should validate sidebar emoji notify prop", func(t *testing.T) {
+		notifyProps := GetDefaultChannelNotifyProps()
+		notifyProps[SidebarEmojiNotifyProp] = "rocket"
+
+		err := IsChannelMemberNotifyPropsValid(notifyProps, false)
+		assert.Nil(t, err)
+
+		notifyProps[SidebarEmojiNotifyProp] = ""
+		err = IsChannelMemberNotifyPropsValid(notifyProps, false)
+		assert.Nil(t, err)
+
+		notifyProps[SidebarEmojiNotifyProp] = "invalid emoji"
+		err = IsChannelMemberNotifyPropsValid(notifyProps, false)
+		assert.NotNil(t, err)
+	})
 }
 
 func TestChannelMemberSanitizeForCurrentUser(t *testing.T) {

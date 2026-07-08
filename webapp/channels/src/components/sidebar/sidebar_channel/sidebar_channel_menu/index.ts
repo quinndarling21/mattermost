@@ -10,11 +10,12 @@ import {favoriteChannel, unfavoriteChannel, readMultipleChannels} from 'mattermo
 import Permissions from 'mattermost-redux/constants/permissions';
 import {isFavoriteChannel} from 'mattermost-redux/selectors/entities/channels';
 import {getMyChannelMemberships, getCurrentUserId} from 'mattermost-redux/selectors/entities/common';
+import {getChannelSidebarEmoji} from 'mattermost-redux/utils/channel_utils';
 import {haveIChannelPermission} from 'mattermost-redux/selectors/entities/roles';
 import {getCurrentTeam} from 'mattermost-redux/selectors/entities/teams';
 import {isChannelMuted} from 'mattermost-redux/utils/channel_utils';
 
-import {unmuteChannel, muteChannel} from 'actions/channel_actions';
+import {unmuteChannel, muteChannel, setChannelSidebarEmoji, removeChannelSidebarEmoji} from 'actions/channel_actions';
 import {markMostRecentPostInChannelAsUnread} from 'actions/post_actions';
 import {openModal} from 'actions/views/modals';
 
@@ -48,6 +49,7 @@ function mapStateToProps(state: GlobalState, ownProps: OwnProps) {
         currentUserId: getCurrentUserId(state),
         isFavorite: isFavoriteChannel(state, ownProps.channel.id),
         isMuted: isChannelMuted(member),
+        sidebarEmoji: getChannelSidebarEmoji(member),
         channelLink: `${getSiteURL()}${ownProps.channelLink}`,
         managePublicChannelMembers,
         managePrivateChannelMembers,
@@ -61,6 +63,8 @@ const mapDispatchToProps = {
     unfavoriteChannel,
     muteChannel,
     unmuteChannel,
+    setChannelSidebarEmoji,
+    removeChannelSidebarEmoji,
     openModal,
 };
 

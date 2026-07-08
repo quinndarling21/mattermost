@@ -1510,6 +1510,10 @@ func (a *App) UpdateChannelMemberNotifyProps(rctx request.CTX, data map[string]s
 		filteredProps[model.ChannelAutoFollowThreads] = channelAutoFollowThreads
 	}
 
+	if sidebarEmoji, exists := data[model.SidebarEmojiNotifyProp]; exists {
+		filteredProps[model.SidebarEmojiNotifyProp] = sidebarEmoji
+	}
+
 	member, err := a.Srv().Store().Channel().UpdateMemberNotifyProps(channelID, userID, filteredProps)
 	if err != nil {
 		var appErr *model.AppError
