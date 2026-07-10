@@ -76,6 +76,18 @@ describe('ThemeUtils', () => {
             expect(ThemeUtils.setThemeDefaults(input)).toEqual(expected);
         });
 
+        it('defaults the main app theme colors to purple', () => {
+            expect(Preferences.THEMES.denim).toEqual(expect.objectContaining({
+                sidebarBg: '#4c1d95',
+                sidebarHeaderBg: '#3b1675',
+                sidebarTeamBarBg: '#2e1065',
+                sidebarTextHoverBg: '#5b21b6',
+                sidebarTextActiveBorder: '#a78bfa',
+                linkColor: '#7c3aed',
+                buttonBg: '#7c3aed',
+            }));
+        });
+
         it('correctly updates the sidebarTeamBarBg variable', () => {
             const input = {sidebarHeaderBg: '#ffaa55'};
 
@@ -158,8 +170,8 @@ describe('getContrastingSimpleColor', () => {
 
     // Test for more realistic use cases
     it('should return appropriate contrast colors for common UI colors', () => {
-        // Mattermost denim blue
-        expect(getContrastingSimpleColor('#1e325c')).toBe('#FFFFFF');
+        // Mattermost denim purple
+        expect(getContrastingSimpleColor('#4c1d95')).toBe('#FFFFFF');
 
         // Mattermost Onyx grey
         expect(getContrastingSimpleColor('#202228')).toBe('#FFFFFF');
