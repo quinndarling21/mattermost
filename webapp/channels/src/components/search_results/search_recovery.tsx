@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {MagnifyIcon, ClockOutlineIcon} from '@mattermost/compass-icons/components';
+import {Button} from '@mattermost/shared/components/button';
 import React, {useCallback, useMemo, useState} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useDispatch} from 'react-redux';
@@ -14,7 +15,10 @@ import './search_recovery.scss';
 
 type NarrowChip = {
     id: string;
-    label: string;
+    labelMessage: {
+        id: string;
+        defaultMessage: string;
+    };
     filterTerm: string;
 };
 
@@ -25,9 +29,30 @@ const MOCK_RECENT_SEARCHES = [
 ];
 
 const MOCK_NARROW_CHIPS: NarrowChip[] = [
-    {id: 'from', label: 'From: @quinn', filterTerm: 'from:@quinn'},
-    {id: 'in', label: 'In: #incident-response', filterTerm: 'in:incident-response'},
-    {id: 'after', label: 'After: last week', filterTerm: 'after:2026-07-14'},
+    {
+        id: 'from',
+        labelMessage: {
+            id: 'search_recovery.chip_from',
+            defaultMessage: 'From: @quinn',
+        },
+        filterTerm: 'from:@quinn',
+    },
+    {
+        id: 'in',
+        labelMessage: {
+            id: 'search_recovery.chip_in',
+            defaultMessage: 'In: #incident-response',
+        },
+        filterTerm: 'in:incident-response',
+    },
+    {
+        id: 'after',
+        labelMessage: {
+            id: 'search_recovery.chip_after',
+            defaultMessage: 'After: last week',
+        },
+        filterTerm: 'after:2026-07-14',
+    },
 ];
 
 export function getMockSuggestion(query: string): string | null {
@@ -63,8 +88,7 @@ export default function SearchRecovery({searchTerms}: Props) {
         dispatch(showSearchResults(false));
     }, [dispatch]);
 
-    const handleSuggestionClick = useCallback((event: React.MouseEvent | React.KeyboardEvent) => {
-        event.preventDefault();
+    const handleSuggestionClick = useCallback(() => {
         if (suggestion) {
             runSearch(suggestion);
         }
@@ -97,13 +121,6 @@ export default function SearchRecovery({searchTerms}: Props) {
         runSearch(query);
     }, [runSearch]);
 
-    const handleRecentKeyDown = useCallback((event: React.KeyboardEvent, query: string) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            handleRecentClick(query);
-        }
-    }, [handleRecentClick]);
-
     return (
         <div
             className='SearchRecovery'
@@ -129,8 +146,10 @@ export default function SearchRecovery({searchTerms}: Props) {
                     />
                 </p>
                 {suggestion && (
-                    <button
+                    <Button
                         type='button'
+                        emphasis='tertiary'
+                        size='sm'
                         className='SearchRecovery__suggestion'
                         onClick={handleSuggestionClick}
                     >
@@ -139,7 +158,7 @@ export default function SearchRecovery({searchTerms}: Props) {
                             defaultMessage='Did you mean “{suggestion}”?'
                             values={{suggestion}}
                         />
-                    </button>
+                    </Button>
                 )}
             </div>
 
@@ -160,7 +179,7 @@ export default function SearchRecovery({searchTerms}: Props) {
                     {MOCK_NARROW_CHIPS.map((chip) => (
                         <FilterChip
                             key={chip.id}
-                            label={chip.label}
+                            label={formatMessage(chip.labelMessage)}
                             selected={selectedChipIds.includes(chip.id)}
                             onClick={() => handleChipClick(chip)}
                         />
@@ -184,12 +203,10 @@ export default function SearchRecovery({searchTerms}: Props) {
                 <ul className='SearchRecovery__recents'>
                     {MOCK_RECENT_SEARCHES.map((query) => (
                         <li key={query}>
-                            <div
-                                role='button'
-                                tabIndex={0}
+                            <button
+                                type='button'
                                 className='SearchRecovery__recentRow'
                                 onClick={() => handleRecentClick(query)}
-                                onKeyDown={(event) => handleRecentKeyDown(event, query)}
                                 aria-label={formatMessage(
                                     {
                                         id: 'search_recovery.recent_aria',
@@ -204,7 +221,7 @@ export default function SearchRecovery({searchTerms}: Props) {
                                     aria-hidden={true}
                                 />
                                 <span className='SearchRecovery__recentText'>{query}</span>
-                            </div>
+                            </button>
                         </li>
                     ))}
                 </ul>

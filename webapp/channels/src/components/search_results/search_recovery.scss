@@ -15,7 +15,7 @@
 
     .SearchRecovery__icon {
         flex-shrink: 0;
-        color: rgba(var(--center-channel-color-rgb), 0.48);
+        color: rgba(var(--center-channel-color-rgb), 0.64);
     }
 
     .SearchRecovery__title {
@@ -36,19 +36,24 @@
         line-height: normal;
     }
 
-    .SearchRecovery__suggestion {
+    .SearchRecovery__suggestion.btn {
+        height: auto;
+        min-height: 0;
         padding: 0;
         border: none;
         background: transparent;
         color: var(--link-color);
-        cursor: pointer;
         font-family: 'Open Sans', sans-serif;
         font-size: 14px;
         font-weight: 600;
         line-height: normal;
         text-align: center;
 
-        &:hover {
+        &:hover,
+        &:active,
+        &:focus {
+            background: transparent;
+            color: var(--link-color);
             text-decoration: underline;
         }
 
@@ -106,12 +111,20 @@
         align-items: center;
         width: 100%;
         padding: 8px 4px;
+        border: none;
         border-radius: var(--radius-s);
+        background: transparent;
         color: var(--center-channel-color);
         cursor: pointer;
+        text-align: left;
 
         &:hover {
             background: rgba(var(--center-channel-color-rgb), 0.08);
+        }
+
+        &:active {
+            background: rgba(var(--button-bg-rgb), 0.08);
+            color: var(--button-bg);
         }
 
         &:focus-visible {

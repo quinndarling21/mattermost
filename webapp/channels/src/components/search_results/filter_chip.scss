@@ -17,6 +17,11 @@
         background: rgba(var(--center-channel-color-rgb), 0.08);
     }
 
+    &:active:not(.selected) {
+        background: rgba(var(--button-bg-rgb), 0.08);
+        color: var(--button-bg);
+    }
+
     &:focus-visible {
         border: solid 2px var(--button-bg);
         outline: none;

@@ -16,10 +16,20 @@
         align-items: center;
     }
 
-    // Figma Success Tag: tinted background with status-colored text (not solid fill).
+    // Figma Success Tag: 12% tint + status-colored text/dot (shared Tag--success is solid fill).
     .TopAnswerCard__tag.Tag {
         background: rgba(var(--semantic-color-success), 0.12);
         color: rgb(var(--semantic-color-success));
+
+        &::before {
+            display: block;
+            flex-shrink: 0;
+            width: 6px;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: currentColor;
+            content: '';
+        }
     }
 
     .TopAnswerCard__meta {

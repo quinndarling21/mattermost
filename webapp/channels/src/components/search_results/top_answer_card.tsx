@@ -31,13 +31,13 @@ export default function TopAnswerCard({post}: Props) {
     const channel = useSelector((state: GlobalState) => getChannel(state, post.channel_id));
 
     const username = user?.username ? `@${user.username}` : '';
-    const channelName = channel?.name ? `#${channel.name}` : '';
+    const channelLabel = channel?.name ? `#${channel.name}` : (channel?.display_name ? `#${channel.display_name}` : '');
     const dateLabel = formatDate(post.create_at, {
         month: 'short',
         day: 'numeric',
     });
 
-    const metaParts = [username, channelName, dateLabel].filter(Boolean);
+    const metaParts = [username, channelLabel, dateLabel].filter(Boolean);
 
     const handleJump = useCallback(() => {
         dispatch(selectPostFromRightHandSideSearch(post));
