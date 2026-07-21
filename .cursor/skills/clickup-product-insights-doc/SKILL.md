@@ -49,5 +49,5 @@ If an ID returns not-found (workspace was reseeded), resolve by name with `click
 
 ## API gotchas
 
-- Doc creation parent type is a numeric string: `{"id": "<space_id>", "type": "4"}` for a space.
+- `clickup_create_document_page` targets the existing Product Insights doc by ID (`2kydjj1w-554`); pass `doc_id`, `name`, and `content` — not a space parent like `{"id": "<space_id>", "type": "4"}`.
 - New reports get a new page (`clickup_create_document_page`); `clickup_update_document_page` wholesale-replaces existing content.
