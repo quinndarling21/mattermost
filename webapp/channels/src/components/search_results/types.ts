@@ -24,6 +24,7 @@ export type OwnProps = {
     getMoreFilesForSearch: () => void;
     getMorePostsForSearch: () => void;
     handleSearchHintSelection?: () => void;
+    runSearch?: (terms: string) => void;
     setSearchFilterType: (filterType: SearchFilterType) => void;
     updateSearchTeam: (teamId: string) => void;
     updateSearchTerms: (terms: string) => void;

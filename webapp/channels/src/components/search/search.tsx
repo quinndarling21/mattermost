@@ -334,6 +334,25 @@ const Search = ({
         }
     };
 
+    // Set the full query and immediately re-run the search. Used by the
+    // no-results recovery panel (did-you-mean, narrow chips, recent searches).
+    const handleRunSearch = (terms: string): void => {
+        const trimmed = terms.trim();
+        if (trimmed.length === 0) {
+            return;
+        }
+
+        updateSearchTerms(trimmed);
+        if (isMentionSearch) {
+            updateRhsState(RHSStates.SEARCH);
+        }
+
+        (showSearchResults(false) as Promise<unknown>).then(() => {
+            setKeepInputFocused(false);
+            setFocused(false);
+        });
+    };
+
     const handleClear = (): void => {
         if (isMentionSearch) {
             setFocused(false);
@@ -485,6 +504,7 @@ const Search = ({
                     updateSearchTerms={handleAddSearchTerm}
                     updateSearchTeam={handleUpdateSearchTeamFromResult}
                     handleSearchHintSelection={handleSearchHintSelection}
+                    runSearch={handleRunSearch}
                     isSideBarExpanded={isRhsExpanded}
                     getMorePostsForSearch={searchActions.getMorePostsForSearch}
                     getMoreFilesForSearch={searchActions.getMoreFilesForSearch}

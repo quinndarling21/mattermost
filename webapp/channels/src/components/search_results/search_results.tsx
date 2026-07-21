@@ -38,6 +38,8 @@ import FilesFilterMenu from './files_filter_menu';
 import MessageOrFileSelector from './messages_or_files_selector';
 import PostSearchResultsItem from './post_search_results_item';
 import SearchLimitsBanner from './search_limits_banner';
+import SearchRecovery from './search_recovery';
+import TopAnswerCard from './top_answer_card';
 import type {Props} from './types';
 
 import './search_results.scss';
@@ -248,6 +250,21 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
         updateSearchTerms(term);
     };
 
+    const handleRunSearch = (term: string): void => {
+        if (props.runSearch) {
+            props.runSearch(term);
+        } else {
+            updateSearchTerms(term);
+        }
+    };
+
+    // The channel-search (messages) path gets the recovery/top-answer
+    // treatment; mentions, flagged, pinned, files and card views keep their
+    // existing rendering.
+    const isChannelMessagesSearch = isMessagesSearch && searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE;
+    const messagesCountLabel = (isSearchAtEnd || props.searchPage === 0) ? `${messagesCount}` : `${messagesCount}+`;
+    const showResultCount = isChannelMessagesSearch && Boolean(searchTerms) && messagesCount > 0;
+
     const newWindowHandler = useCallback(() => {
         let mode: NonNullable<RhsState> = RHSStates.SEARCH;
         if (isMentionSearch) {
@@ -303,10 +320,17 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
                 ])}
                 aria-live='polite'
             >
-                <NoResultsIndicator
-                    style={{padding: '48px'}}
-                    {...noResultsProps}
-                />
+                {isChannelMessagesSearch && searchTerms ? (
+                    <SearchRecovery
+                        searchTerms={searchTerms}
+                        onRunSearch={handleRunSearch}
+                    />
+                ) : (
+                    <NoResultsIndicator
+                        style={{padding: '48px'}}
+                        {...noResultsProps}
+                    />
+                )}
             </div>
         );
         break;
@@ -326,12 +350,12 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
             </div>
         );
         break;
-    default:
+    default: {
         if (searchType === DataSearchTypes.FILES_SEARCH_TYPE || isChannelFiles) {
             sortedResults = fileResults;
         }
 
-        contentItems = sortedResults.map((item: string|Post|FileSearchResultItemType, index: number) => {
+        const renderResultItem = (item: string|Post|FileSearchResultItemType, index: number) => {
             if (searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && !props.isChannelFiles) {
                 if (typeof item === 'string' && isDateLine(item)) {
                     const date = getDateForDateLine(item);
@@ -366,7 +390,34 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
                     pluginMenuItems={filesDropdownPluginMenuItems}
                 />
             );
-        });
+        };
+
+        // For channel message search, promote the first result into a
+        // "Best Match" card and label the remainder "MORE RESULTS".
+        const bestPost = isChannelMessagesSearch ? (sortedResults.find((item: string|Post) => typeof item !== 'string') as Post | undefined) : undefined;
+
+        if (bestPost) {
+            const remainingResults = sortedResults.filter((item: string|Post) => item !== bestPost);
+            contentItems = (
+                <>
+                    <TopAnswerCard
+                        post={bestPost}
+                        teamName={props.currentTeamName}
+                    />
+                    {remainingResults.some((item: string|Post) => typeof item !== 'string') && (
+                        <div className='SearchResults__more-results-label'>
+                            <FormattedMessage
+                                id='search_results.more_results'
+                                defaultMessage='More results'
+                            />
+                        </div>
+                    )}
+                    {remainingResults.map(renderResultItem)}
+                </>
+            );
+        } else {
+            contentItems = sortedResults.map(renderResultItem);
+        }
 
         loadingMorePostsComponent = (showLoadMore) ? (
             <div className='loading-screen'>
@@ -377,6 +428,8 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
                 </div>
             </div>
         ) : null;
+        break;
+    }
     }
 
     return (
@@ -390,6 +443,15 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
                 <h2 id='rhsPanelTitle'>
                     {formattedTitle}
                 </h2>
+                {showResultCount && (
+                    <span className='SearchResults__result-count'>
+                        <FormattedMessage
+                            id='search_results.result_count'
+                            defaultMessage='{count} results for “{query}”'
+                            values={{count: messagesCountLabel, query: searchTerms}}
+                        />
+                    </span>
+                )}
                 {props.channelDisplayName && <div className='sidebar--right__title__channel'>{props.channelDisplayName}</div>}
             </SearchResultsHeader>
             {isMessagesSearch &&

@@ -1,0 +1,50 @@
+.FilterChip {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl);
+    background: transparent;
+    color: rgba(var(--center-channel-color-rgb), 0.75);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 16px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &__label {
+        max-width: 240px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    &:hover {
+        background: rgba(var(--center-channel-color-rgb), 0.08);
+    }
+
+    &:active {
+        background: rgba(var(--button-bg-rgb), 0.08);
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    &:focus-visible {
+        border-color: var(--button-bg);
+        box-shadow: 0 0 0 2px rgba(var(--button-bg-rgb), 0.32);
+    }
+
+    &.FilterChip--selected {
+        border-color: var(--button-bg);
+        background: rgba(var(--button-bg-rgb), 0.08);
+        color: var(--button-bg);
+
+        &:hover {
+            background: rgba(var(--button-bg-rgb), 0.12);
+        }
+    }
+}
