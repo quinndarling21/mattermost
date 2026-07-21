@@ -38,6 +38,8 @@ import FilesFilterMenu from './files_filter_menu';
 import MessageOrFileSelector from './messages_or_files_selector';
 import PostSearchResultsItem from './post_search_results_item';
 import SearchLimitsBanner from './search_limits_banner';
+import SearchRecovery from './search_recovery';
+import TopAnswerCard from './top_answer_card';
 import type {Props} from './types';
 
 import './search_results.scss';
@@ -156,11 +158,16 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
     // makeAddDateSeparatorsForSearchResults), so the messages counter only
     // counts the non-string entries. Otherwise the count is inflated by one
     // per date group (see MM-67904).
-    const messagesCount = Array.isArray(results) ? results.filter((item) => typeof item !== 'string').length : 0;
+    const messagePosts = Array.isArray(results) ? results.filter((item): item is Post => typeof item !== 'string') : [];
+    const messagesCount = messagePosts.length;
     const isLoading = isSearchingTerm || isSearchingFlaggedPost || isSearchingPinnedPost || !isOpened;
     const isAtEnd = (searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && isSearchAtEnd) || (searchType === DataSearchTypes.FILES_SEARCH_TYPE && isSearchFilesAtEnd);
     const showLoadMore = !isAtEnd && !isChannelFiles && !isFlaggedPosts && !isPinnedPosts;
     const isMessagesSearch = (!isFlaggedPosts && !isMentionSearch && !isCard && !isPinnedPosts && !isChannelFiles);
+    const showSearchRecovery = isMessagesSearch && Boolean(searchTerms) && noResults && searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE;
+    const showTopAnswer = isMessagesSearch && !noResults && searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE;
+    const topAnswerPost = showTopAnswer ? messagePosts[0] : undefined;
+    const showResultsSubtitle = isMessagesSearch && Boolean(searchTerms) && !isLoading && !noResults && searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE;
 
     let contentItems;
     let loadingMorePostsComponent;
@@ -295,7 +302,9 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
         );
         break;
     case noResults && (searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && !isChannelFiles):
-        contentItems = (
+        contentItems = showSearchRecovery ? (
+            <SearchRecovery searchTerms={searchTerms}/>
+        ) : (
             <div
                 className={classNames([
                     'sidebar--right__subheader a11y__section',
@@ -331,42 +340,92 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
             sortedResults = fileResults;
         }
 
-        contentItems = sortedResults.map((item: string|Post|FileSearchResultItemType, index: number) => {
-            if (searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && !props.isChannelFiles) {
-                if (typeof item === 'string' && isDateLine(item)) {
-                    const date = getDateForDateLine(item);
+        if (showTopAnswer && topAnswerPost) {
+            const moreResultsItems = sortedResults.
+                filter((item: string|Post|FileSearchResultItemType) => {
+                    if (typeof item === 'string') {
+                        return true;
+                    }
+                    return (item as Post).id !== topAnswerPost.id;
+                }).
+                map((item: string|Post|FileSearchResultItemType, index: number) => {
+                    if (typeof item === 'string' && isDateLine(item)) {
+                        const date = getDateForDateLine(item);
+                        return (
+                            <DateSeparator
+                                key={date}
+                                date={date}
+                            />
+                        );
+                    }
+
+                    const post = item as Post;
                     return (
-                        <DateSeparator
-                            key={date}
-                            date={date}
+                        <PostSearchResultsItem
+                            key={post.id}
+                            post={post}
+                            matches={props.matches[post.id]}
+                            searchTerm={searchTerms}
+                            isFlaggedPosts={props.isFlaggedPosts}
+                            isMentionSearch={props.isMentionSearch}
+                            isPinnedPosts={props.isPinnedPosts}
+                            a11yIndex={index}
+                        />
+                    );
+                });
+
+            contentItems = (
+                <>
+                    <div className='SearchResults__topAnswerSection'>
+                        <TopAnswerCard post={topAnswerPost}/>
+                    </div>
+                    <div className='SearchResults__moreResultsHeading'>
+                        <FormattedMessage
+                            id='search_results.more_results'
+                            defaultMessage='More results'
+                        />
+                    </div>
+                    {moreResultsItems}
+                </>
+            );
+        } else {
+            contentItems = sortedResults.map((item: string|Post|FileSearchResultItemType, index: number) => {
+                if (searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && !props.isChannelFiles) {
+                    if (typeof item === 'string' && isDateLine(item)) {
+                        const date = getDateForDateLine(item);
+                        return (
+                            <DateSeparator
+                                key={date}
+                                date={date}
+                            />
+                        );
+                    }
+
+                    const post = item as Post;
+                    return (
+                        <PostSearchResultsItem
+                            key={post.id}
+                            post={post}
+                            matches={props.matches[post.id]}
+                            searchTerm={searchTerms}
+                            isFlaggedPosts={props.isFlaggedPosts}
+                            isMentionSearch={props.isMentionSearch}
+                            isPinnedPosts={props.isPinnedPosts}
+                            a11yIndex={index}
                         />
                     );
                 }
-
-                const post = item as Post;
                 return (
-                    <PostSearchResultsItem
-                        key={post.id}
-                        post={post}
-                        matches={props.matches[post.id]}
-                        searchTerm={searchTerms}
-                        isFlaggedPosts={props.isFlaggedPosts}
-                        isMentionSearch={props.isMentionSearch}
-                        isPinnedPosts={props.isPinnedPosts}
-                        a11yIndex={index}
+                    <FileSearchResultItem
+                        key={(item as FileSearchResultItemType).id}
+                        channelId={(item as FileSearchResultItemType).channel_id}
+                        fileInfo={item as FileSearchResultItemType}
+                        teamName={props.currentTeamName}
+                        pluginMenuItems={filesDropdownPluginMenuItems}
                     />
                 );
-            }
-            return (
-                <FileSearchResultItem
-                    key={(item as FileSearchResultItemType).id}
-                    channelId={(item as FileSearchResultItemType).channel_id}
-                    fileInfo={item as FileSearchResultItemType}
-                    teamName={props.currentTeamName}
-                    pluginMenuItems={filesDropdownPluginMenuItems}
-                />
-            );
-        });
+            });
+        }
 
         loadingMorePostsComponent = (showLoadMore) ? (
             <div className='loading-screen'>
@@ -390,6 +449,18 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
                 <h2 id='rhsPanelTitle'>
                     {formattedTitle}
                 </h2>
+                {showResultsSubtitle && (
+                    <span className='SearchResults__subtitle'>
+                        <FormattedMessage
+                            id='search_results.results_subtitle'
+                            defaultMessage='{count} {count, plural, one {result} other {results}} for “{searchTerms}”'
+                            values={{
+                                count: messagesCount,
+                                searchTerms,
+                            }}
+                        />
+                    </span>
+                )}
                 {props.channelDisplayName && <div className='sidebar--right__title__channel'>{props.channelDisplayName}</div>}
             </SearchResultsHeader>
             {isMessagesSearch &&

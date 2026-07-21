@@ -26,4 +26,28 @@
     .channel-files-container {
         padding-top: 0;
     }
+
+    .SearchResults__subtitle {
+        margin-left: 8px;
+        color: rgba(var(--center-channel-color-rgb), 0.75);
+        font-family: 'Open Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: normal;
+    }
+
+    .SearchResults__topAnswerSection {
+        padding: 16px 16px 8px;
+    }
+
+    .SearchResults__moreResultsHeading {
+        padding: 12px 20px 8px;
+        color: rgba(var(--center-channel-color-rgb), 0.75);
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.48px;
+        line-height: normal;
+        text-transform: uppercase;
+    }
 }

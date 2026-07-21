@@ -1,0 +1,42 @@
+.FilterChip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border: var(--border-default);
+    border-radius: var(--radius-xl);
+    background: transparent;
+    color: var(--center-channel-color);
+    cursor: pointer;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: normal;
+    white-space: nowrap;
+
+    &:hover:not(.selected) {
+        background: rgba(var(--center-channel-color-rgb), 0.08);
+    }
+
+    &:focus-visible {
+        border: solid 2px var(--button-bg);
+        outline: none;
+        padding: 5px 11px;
+    }
+
+    &.selected {
+        border: solid 1px var(--button-bg);
+        background: rgba(var(--button-bg-rgb), 0.08);
+        color: var(--button-bg);
+    }
+
+    &.selected:focus-visible {
+        border: solid 2px var(--button-bg);
+        padding: 5px 11px;
+    }
+
+    .FilterChip__label {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

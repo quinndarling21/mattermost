@@ -39,6 +39,15 @@ jest.mock('components/search_results_header', () => ({
     ),
 }));
 
+jest.mock('components/search_results/post_search_results_item', () => ({
+    __esModule: true,
+    default: (props: {post: {id: string; message: string}}) => (
+        <div data-testid={`post-search-item-${props.post.id}`}>
+            {props.post.message}
+        </div>
+    ),
+}));
+
 window.HTMLElement.prototype.scrollTo = jest.fn();
 
 describe('components/SearchResults', () => {
@@ -167,6 +176,51 @@ describe('components/SearchResults', () => {
             expect(jest.mocked(popoutRhsSearch)).toHaveBeenCalledWith(
                 expect.any(String), team.name, 'hello', 'search', 'messages', undefined, team.id,
             );
+        });
+    });
+
+    describe('search recovery and top answer', () => {
+        test('should render search recovery when message search has no results', () => {
+            renderSearchResults({
+                results: [],
+                searchTerms: 'deploy rollback',
+                searchType: 'messages',
+                isSearchingTerm: false,
+                isOpened: true,
+            });
+
+            expect(within(document.body).getByText('No results for “deploy rollback”')).toBeInTheDocument();
+            expect(within(document.body).getByRole('button', {name: 'Did you mean “deployment rollback”?'})).toBeInTheDocument();
+            expect(within(document.body).getByText('Narrow your search')).toBeInTheDocument();
+            expect(within(document.body).getByText('Recent searches')).toBeInTheDocument();
+        });
+
+        test('should render top answer card and more results heading when message results exist', () => {
+            const post1 = TestHelper.getPostMock({
+                id: 'post1',
+                message: 'Rollback steps for a failed deploy.',
+                user_id: 'user1',
+                channel_id: channel.id,
+            });
+            const post2 = TestHelper.getPostMock({
+                id: 'post2',
+                message: 'We rolled back after health checks failed.',
+                user_id: 'user1',
+                channel_id: channel.id,
+            });
+
+            renderSearchResults({
+                results: [post1, post2],
+                searchTerms: 'deployment rollback',
+                searchType: 'messages',
+                isSearchingTerm: false,
+                isOpened: true,
+            });
+
+            expect(within(document.body).getByText('Best Match')).toBeInTheDocument();
+            expect(within(document.body).getByText('More results')).toBeInTheDocument();
+            expect(within(document.body).getByText(/2 results for/)).toBeInTheDocument();
+            expect(within(document.body).getByRole('button', {name: 'Jump to message'})).toBeInTheDocument();
         });
     });
 
