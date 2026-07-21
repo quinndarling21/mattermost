@@ -70,10 +70,32 @@ function getSuggestion(terms: string): string | null {
 }
 
 const SearchRecovery = ({searchTerms, onRunSearch}: Props) => {
-    const suggestion = useMemo(() => getSuggestion(searchTerms), [searchTerms]);
+    // Which narrow filters are already applied, and the underlying query with
+    // those modifiers stripped out. Deriving from the live query keeps the
+    // selected chip state consistent even when the search changes elsewhere.
+    const selectedKeys = useMemo(
+        () => NARROW_CHIPS.filter((chip) => searchTerms.includes(chip.modifier)).map((chip) => chip.key),
+        [searchTerms],
+    );
+    const baseTerms = useMemo(() => {
+        let base = searchTerms;
+        NARROW_CHIPS.forEach((chip) => {
+            base = base.replace(chip.modifier, '');
+        });
+        return base.replace(/\s+/g, ' ').trim();
+    }, [searchTerms]);
+
+    const suggestion = useMemo(() => getSuggestion(baseTerms), [baseTerms]);
 
     const handleNarrow = (chip: NarrowChip) => {
-        onRunSearch(`${searchTerms} ${chip.modifier}`.trim());
+        const isSelected = selectedKeys.includes(chip.key);
+        const nextKeys = isSelected ? selectedKeys.filter((key) => key !== chip.key) : [...selectedKeys, chip.key];
+
+        const modifiers = NARROW_CHIPS.
+            filter((c) => nextKeys.includes(c.key)).
+            map((c) => c.modifier).
+            join(' ');
+        onRunSearch(`${baseTerms} ${modifiers}`.trim());
     };
 
     return (
@@ -88,7 +110,7 @@ const SearchRecovery = ({searchTerms, onRunSearch}: Props) => {
                     <FormattedMessage
                         id='search_recovery.title'
                         defaultMessage='No results for “{query}”'
-                        values={{query: searchTerms}}
+                        values={{query: baseTerms || searchTerms}}
                     />
                 </h3>
                 <p className='SearchRecovery__guidance'>
@@ -124,6 +146,7 @@ const SearchRecovery = ({searchTerms, onRunSearch}: Props) => {
                         <FilterChip
                             key={chip.key}
                             label={chip.label}
+                            selected={selectedKeys.includes(chip.key)}
                             onClick={() => handleNarrow(chip)}
                         />
                     ))}
