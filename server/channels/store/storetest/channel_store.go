@@ -225,6 +225,7 @@ func testChannelStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
 		Text:            new("banner text"),
 		BackgroundColor: new("#000000"),
 	}
+	o1.EmojiName = "dog"
 
 	savedChannel, nErr := ss.Channel().Save(rctx, &o1, -1)
 	require.NoError(t, nErr, "should have saved channel")
@@ -232,6 +233,7 @@ func testChannelStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.True(t, *savedChannel.BannerInfo.Enabled)
 	require.Equal(t, "banner text", *savedChannel.BannerInfo.Text)
 	require.Equal(t, "#000000", *savedChannel.BannerInfo.BackgroundColor)
+	require.Equal(t, "dog", savedChannel.EmojiName)
 }
 
 func testChannelStoreSaveDirectChannel(t *testing.T, rctx request.CTX, ss store.Store, s SqlStore) {
@@ -496,6 +498,18 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.NotNil(t, updatedChannel.BannerInfo)
 	require.Equal(t, "updated text", *updatedChannel.BannerInfo.Text)
 	require.Equal(t, "#FFFFFF", *updatedChannel.BannerInfo.BackgroundColor)
+
+	channel.EmojiName = "dog"
+
+	updatedChannel, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err, err)
+	require.Equal(t, "dog", updatedChannel.EmojiName)
+
+	channel.EmojiName = ""
+
+	updatedChannel, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err, err)
+	require.Empty(t, updatedChannel.EmojiName)
 }
 
 func testGetChannelUnread(t *testing.T, rctx request.CTX, ss store.Store) {
