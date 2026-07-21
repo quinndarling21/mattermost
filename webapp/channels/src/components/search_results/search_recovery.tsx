@@ -1,10 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {ClockOutlineIcon, MagnifyIcon} from '@mattermost/compass-icons/components';
-import {Button} from '@mattermost/shared/components/button';
 import React from 'react';
 import {defineMessages, FormattedMessage, useIntl} from 'react-intl';
+
+import {ClockOutlineIcon, MagnifyIcon} from '@mattermost/compass-icons/components';
+import {Button} from '@mattermost/shared/components/button';
 
 import FilterChip from './filter_chip';
 

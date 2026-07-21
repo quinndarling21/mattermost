@@ -37,8 +37,8 @@ import type {RhsState, SearchType} from 'types/store/rhs';
 import FilesFilterMenu from './files_filter_menu';
 import MessageOrFileSelector from './messages_or_files_selector';
 import PostSearchResultsItem from './post_search_results_item';
-import SearchRecovery from './search_recovery';
 import SearchLimitsBanner from './search_limits_banner';
+import SearchRecovery from './search_recovery';
 import TopAnswerCard from './top_answer_card';
 import type {Props} from './types';
 
@@ -336,7 +336,7 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
             </div>
         );
         break;
-    default:
+    default: {
         if (searchType === DataSearchTypes.FILES_SEARCH_TYPE || isChannelFiles) {
             sortedResults = fileResults;
         }
@@ -408,6 +408,7 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
                 </div>
             </div>
         ) : null;
+    }
     }
 
     return (

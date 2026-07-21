@@ -2,13 +2,13 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
-    margin: 16px 16px 8px;
     padding: 16px;
     border: 1px solid var(--button-bg);
     border-radius: var(--radius-m);
+    margin: 16px 16px 8px;
     background: rgba(var(--button-bg-rgb), 0.08);
     color: var(--center-channel-color);
+    gap: 8px;
 
     &__meta {
         display: flex;
@@ -38,10 +38,10 @@
 
     &__message {
         display: -webkit-box;
-        margin: 0;
         overflow: hidden;
-        font-size: 14px;
+        margin: 0;
         -webkit-box-orient: vertical;
+        font-size: 14px;
         -webkit-line-clamp: 5;
         line-height: 20px;
     }
