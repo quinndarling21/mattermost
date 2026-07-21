@@ -212,6 +212,68 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
         expect(screen.getByRole('link')).not.toHaveAccessibleName(/including an urgent mention/i);
     });
 
+    describe('channel emoji marker', () => {
+        const stateWithChannelEmoji = {
+            entities: {
+                preferences: {
+                    myPreferences: {
+                        'channel_emoji--channel_id': {
+                            user_id: 'user_id',
+                            category: 'channel_emoji',
+                            name: 'channel_id',
+                            value: 'smile',
+                        },
+                    },
+                },
+            },
+        };
+
+        test('should not render a marker when no channel emoji is set', () => {
+            const {container} = renderLink();
+
+            expect(container.querySelector('.ChannelEmoji')).not.toBeInTheDocument();
+        });
+
+        test('should render the marker immediately after the channel label', () => {
+            const {container} = renderWithContext(
+                <SidebarChannelLink {...baseProps}/>,
+                stateWithChannelEmoji,
+            );
+
+            const wrapper = container.querySelector('.SidebarChannelLinkLabel_wrapper')!;
+            const label = wrapper.querySelector('.SidebarChannelLinkLabel')!;
+            const marker = wrapper.querySelector('.ChannelEmoji')!;
+
+            expect(marker).toBeInTheDocument();
+            expect(label.nextElementSibling).toBe(marker);
+            expect(marker).toHaveAttribute('aria-hidden', 'true');
+        });
+
+        test('should keep unread state and mention badge behavior with a marker present', () => {
+            const {container} = renderWithContext(
+                <SidebarChannelLink
+                    {...baseProps}
+                    isUnread={true}
+                    unreadMentions={3}
+                />,
+                stateWithChannelEmoji,
+            );
+
+            expect(container.querySelector('.ChannelEmoji')).toBeInTheDocument();
+            expect(container.querySelector('.SidebarLink')).toHaveClass('unread-title');
+            expect(screen.getByText('3').closest('.badge')).toBeInTheDocument();
+        });
+
+        test('should keep the marker out of the accessible name of the link', () => {
+            renderWithContext(
+                <SidebarChannelLink {...baseProps}/>,
+                stateWithChannelEmoji,
+            );
+
+            expect(screen.getByRole('link')).not.toHaveAccessibleName(/smile/i);
+        });
+    });
+
     test('should refetch when channel changes', () => {
         const props = {
             isSharedChannel: true,
