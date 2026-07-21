@@ -1,0 +1,28 @@
+.FilterChip {
+    padding: 6px 12px;
+    height: auto;
+    border: var(--border-default);
+    border-radius: var(--radius-xl);
+    background: var(--center-channel-bg);
+    color: var(--center-channel-color);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+
+    &:hover {
+        background: rgba(var(--center-channel-color-rgb), 0.08);
+    }
+
+    &:active,
+    &.selected {
+        border-color: var(--button-bg);
+        background: rgba(var(--button-bg-rgb), 0.08);
+        color: var(--button-bg);
+    }
+
+    &:focus-visible {
+        border-color: var(--button-bg);
+        outline: 2px solid var(--button-bg);
+        outline-offset: 1px;
+    }
+}

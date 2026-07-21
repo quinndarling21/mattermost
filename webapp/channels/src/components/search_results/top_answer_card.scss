@@ -1,0 +1,48 @@
+.TopAnswerCard {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 16px 16px 8px;
+    padding: 16px;
+    border: 1px solid var(--button-bg);
+    border-radius: var(--radius-m);
+    background: rgba(var(--button-bg-rgb), 0.08);
+    color: var(--center-channel-color);
+
+    &__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__tag.Tag--success {
+        background: rgba(var(--semantic-color-success), 0.12);
+        color: rgb(var(--semantic-color-success));
+
+        &::before {
+            width: 6px;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: rgb(var(--semantic-color-success));
+            content: '';
+        }
+    }
+
+    &__byline {
+        color: rgba(var(--center-channel-color-rgb), 0.75);
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    &__message {
+        display: -webkit-box;
+        margin: 0;
+        overflow: hidden;
+        font-size: 14px;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 5;
+        line-height: 20px;
+    }
+}

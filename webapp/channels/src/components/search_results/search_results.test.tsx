@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {within} from '@testing-library/react';
+import {fireEvent, screen, within} from '@testing-library/react';
 import React from 'react';
 
 import {DATE_LINE} from 'mattermost-redux/utils/post_list';
@@ -42,6 +42,7 @@ jest.mock('components/search_results_header', () => ({
 window.HTMLElement.prototype.scrollTo = jest.fn();
 
 describe('components/SearchResults', () => {
+    const historyPush = jest.fn();
     const team = TestHelper.getTeamMock({id: 'team1', name: 'test-team'});
     const channel = TestHelper.getChannelMock({
         id: 'channel1',
@@ -121,7 +122,7 @@ describe('components/SearchResults', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.mocked(getHistory).mockReturnValue({push: jest.fn()} as any);
+        jest.mocked(getHistory).mockReturnValue({push: historyPush} as any);
     });
 
     function renderSearchResults(propOverrides?: Partial<Props>) {
@@ -220,6 +221,49 @@ describe('components/SearchResults', () => {
 
             const counter = container.querySelector('.messages-tab .counter');
             expect(counter?.textContent).toBe('1+');
+        });
+    });
+
+    describe('search recovery', () => {
+        test('shows recovery controls and reruns searches from each action', () => {
+            const updateSearchTerms = jest.fn();
+
+            renderSearchResults({
+                searchTerms: 'deploy rollback',
+                updateSearchTerms,
+            });
+
+            expect(screen.getByText('No results for “deploy rollback”')).toBeInTheDocument();
+            fireEvent.click(screen.getByRole('button', {name: 'Did you mean “deployment rollback”?'}));
+            expect(updateSearchTerms).toHaveBeenCalledWith('deployment rollback');
+
+            fireEvent.click(screen.getByRole('button', {name: 'In: #incident-response'}));
+            expect(updateSearchTerms).toHaveBeenCalledWith('deploy rollback in:incident-response');
+
+            fireEvent.click(screen.getByRole('button', {name: 'rollback runbook'}));
+            expect(updateSearchTerms).toHaveBeenCalledWith('rollback runbook');
+        });
+    });
+
+    describe('best match', () => {
+        test('promotes the first post and navigates to it', () => {
+            const post = TestHelper.getPostMock({
+                id: 'best-post',
+                user_id: 'user1',
+                channel_id: channel.id,
+                message: 'Rollback using the previous release.',
+                create_at: new Date('2026-06-12T12:00:00Z').getTime(),
+            });
+
+            renderSearchResults({results: [post]});
+
+            expect(screen.getByText('Best match')).toBeInTheDocument();
+            expect(screen.getByText('1 result for “hello”')).toBeInTheDocument();
+            expect(screen.getByText('Rollback using the previous release.')).toBeInTheDocument();
+            expect(screen.getByText('More results')).toBeInTheDocument();
+
+            fireEvent.click(screen.getByRole('button', {name: 'Jump to message'}));
+            expect(historyPush).toHaveBeenCalledWith('/test-team/pl/best-post');
         });
     });
 

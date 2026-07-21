@@ -37,7 +37,9 @@ import type {RhsState, SearchType} from 'types/store/rhs';
 import FilesFilterMenu from './files_filter_menu';
 import MessageOrFileSelector from './messages_or_files_selector';
 import PostSearchResultsItem from './post_search_results_item';
+import SearchRecovery from './search_recovery';
 import SearchLimitsBanner from './search_limits_banner';
+import TopAnswerCard from './top_answer_card';
 import type {Props} from './types';
 
 import './search_results.scss';
@@ -294,6 +296,14 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
             </div>
         );
         break;
+    case noResults && isMessagesSearch && searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE:
+        contentItems = (
+            <SearchRecovery
+                searchTerms={searchTerms}
+                updateSearchTerms={updateSearchTerms}
+            />
+        );
+        break;
     case noResults && (searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && !isChannelFiles):
         contentItems = (
             <div
@@ -331,7 +341,12 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
             sortedResults = fileResults;
         }
 
-        contentItems = sortedResults.map((item: string|Post|FileSearchResultItemType, index: number) => {
+        const topAnswer = isMessagesSearch && searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE ?
+            sortedResults.find((item: string|Post|FileSearchResultItemType) => typeof item !== 'string') as Post | undefined :
+            undefined;
+        const remainingResults = topAnswer ? sortedResults.filter((item: string|Post|FileSearchResultItemType) => item !== topAnswer) : sortedResults;
+
+        const resultItems = remainingResults.map((item: string|Post|FileSearchResultItemType, index: number) => {
             if (searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && !props.isChannelFiles) {
                 if (typeof item === 'string' && isDateLine(item)) {
                     const date = getDateForDateLine(item);
@@ -368,6 +383,22 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
             );
         });
 
+        contentItems = topAnswer ? (
+            <>
+                <TopAnswerCard
+                    currentTeamName={props.currentTeamName}
+                    post={topAnswer}
+                />
+                <div className='SearchResults__moreResults'>
+                    <FormattedMessage
+                        id='search_results.more_results'
+                        defaultMessage='More results'
+                    />
+                </div>
+                {resultItems}
+            </>
+        ) : resultItems;
+
         loadingMorePostsComponent = (showLoadMore) ? (
             <div className='loading-screen'>
                 <div className='loading__content'>
@@ -387,9 +418,21 @@ const SearchResults: React.FC<Props> = (props: Props): JSX.Element => {
             <SearchResultsHeader
                 newWindowHandler={newWindowHandler}
             >
-                <h2 id='rhsPanelTitle'>
+                <h2
+                    id='rhsPanelTitle'
+                    className='SearchResults__title'
+                >
                     {formattedTitle}
                 </h2>
+                {!isLoading && isMessagesSearch && !noResults && searchType === DataSearchTypes.MESSAGES_SEARCH_TYPE && (
+                    <div className='SearchResults__count'>
+                        <FormattedMessage
+                            id='search_results.result_count'
+                            defaultMessage='{count, plural, one {# result} other {# results}} for “{searchTerms}”'
+                            values={{count: messagesCount, searchTerms}}
+                        />
+                    </div>
+                )}
                 {props.channelDisplayName && <div className='sidebar--right__title__channel'>{props.channelDisplayName}</div>}
             </SearchResultsHeader>
             {isMessagesSearch &&

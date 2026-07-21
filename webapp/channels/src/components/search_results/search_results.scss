@@ -1,4 +1,34 @@
 .SearchResults {
+    .sidebar--right__title {
+        display: flex;
+        min-width: 0;
+        align-items: baseline;
+        gap: 8px;
+
+        .SearchResults__title {
+            flex: 0 0 auto;
+        }
+    }
+
+    &__count {
+        overflow: hidden;
+        color: rgba(var(--center-channel-color-rgb), 0.75);
+        font-size: 13px;
+        font-weight: 400;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__moreResults {
+        padding: 12px 20px 8px;
+        color: var(--center-channel-color);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        line-height: 16px;
+        text-transform: uppercase;
+    }
+
     .messages-or-files {
         .active {
             background-color: rgba(var(--buton-bg-rgb), 0.08);
