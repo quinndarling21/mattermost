@@ -171,6 +171,8 @@ docker-compose.override.yaml
 !.cursor/BUGBOT.md
 !.cursor/rules/
 !.cursor/rules/**
+!.cursor/agents/
+!.cursor/agents/**
 !.cursor/insights/
 !.cursor/insights/**
 !.cursor/skills/
