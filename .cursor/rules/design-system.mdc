@@ -1,0 +1,67 @@
+---
+description: Mattermost web app design system — tokens, typography, components, and interaction states. Apply to all UI work in the webapp.
+globs: webapp/**/*.tsx,webapp/**/*.scss
+alwaysApply: false
+---
+
+# Mattermost design system
+
+The single source of truth for visual design is the Mattermost Design System Figma file. In code, the design system is expressed through the theme tokens in `webapp/channels/src/sass/base/_css_variables.scss` and the shared component packages. All new UI must be built from these primitives.
+
+## Color
+
+- Never hardcode color values in themed areas of the app. Always use theme variables, e.g. `color: var(--center-channel-color)`.
+- Core variables: `--center-channel-bg` / `--center-channel-color` (main content), `--button-bg` / `--button-color` (primary actions), `--link-color`, `--error-text`, `--warning-text`, `--online-indicator`, `--away-indicator`, `--dnd-indicator`, `--sidebar-*` (left sidebar), `--mention-*` (mentions and highlights).
+- For transparency, use the `-rgb` variants with `rgba()`: `rgba(var(--center-channel-color-rgb), 0.64)`. Standard text opacities: 1.0 primary, 0.75 secondary, 0.64 hint/icon, 0.32 disabled.
+- Every surface must work in both light and dark themes. If it looks right only because the default theme is light, it is wrong.
+
+## Elevation and radius
+
+- Shadows come from the elevation scale, never hand-written `box-shadow` values: `--elevation-1` (cards, subtle lift) through `--elevation-6` (full-screen modals). Right-hand-side panels and popovers typically use `--elevation-2` to `--elevation-4`.
+- Corner rounding comes from the radius scale, never raw pixel values: `--radius-xs` (2px, inputs), `--radius-s` (4px, buttons, chips, cards), `--radius-m` (8px), `--radius-l` (12px, modals), `--radius-xl` (16px), `--radius-full` (circular, avatars).
+- Borders use `--border-default`, `--border-light`, or `--border-dark`.
+
+## Typography
+
+- Headings: Metropolis (SemiBold for emphasis). Body and UI text: Open Sans.
+- Do not introduce new font families, weights outside Regular/SemiBold/Bold, or ad-hoc font sizes. Match the sizes already used by neighboring components.
+
+## Spacing and layout
+
+- Space on a 4px grid: 4, 8, 12, 16, 20, 24, 32. No odd or arbitrary values.
+- Do not hardcode `@media` queries; use the breakpoint mixins in `webapp/channels/src/sass/utils/_mixins.scss` (`@include tablet`, `@include mobile`).
+
+## Components
+
+Reuse before building. In order of preference:
+
+1. `Button` from `@mattermost/shared/components/button` for all text-button UI — never bespoke `<button class="btn ...">` styling.
+2. `WithTooltip` from `@mattermost/shared/components/tooltip` for tooltips.
+3. `GenericModal` from `@mattermost/components` for modals — never React Bootstrap `Modal`.
+4. Icons from `@mattermost/compass-icons` — never inline SVGs or emoji as icons.
+5. Existing patterns in `webapp/platform/components` (e.g. `skeleton_loader` for loading states) before writing new primitives.
+
+Import shared components via the full package name (`@mattermost/shared/...`), never relative paths into `platform/shared/`.
+
+## SCSS conventions
+
+- Co-locate styles: `my_component.scss` next to `my_component.tsx`, imported by the component.
+- Root class in PascalCase matching the component name; children as BEM suffixes (`SearchRecovery__title`); modifiers as chained classes (`&.compact`).
+- No `!important`. No element selectors as style hooks in new code.
+
+## Interaction states
+
+Every interactive surface must define all of its states, not just the resting one:
+
+- **Hover** — typically `rgba(var(--center-channel-color-rgb), 0.08)` background.
+- **Active/pressed** — typically `rgba(var(--button-bg-rgb), 0.08)` background with `--button-bg` text.
+- **Focus** — visible keyboard focus (the `a11y--focused` pattern or `:focus-visible`); never remove focus outlines.
+- **Loading** — skeleton loaders or spinners from existing components; no layout shift when content arrives.
+- **Empty** — a designed empty state with guidance on what to do next, never a blank panel.
+- **Error** — `--error-text` with a recovery action, not a dead end.
+
+## Accessibility and copy
+
+- Follow the accessibility section of `webapp/STYLE_GUIDE.md`: semantic HTML first, accessible names on interactive elements, standard keyboard patterns.
+- All UI text goes through i18n (`FormattedMessage`); no hardcoded user-facing strings.
+- User-facing copy follows `brand-guidelines/voice-and-tone.md`: clear, calm, lead with the point.
