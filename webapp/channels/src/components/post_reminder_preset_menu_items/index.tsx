@@ -28,7 +28,7 @@ export default function PostReminderPresetMenuItems({idPrefix, isMilitaryTime, t
                     const tomorrow = getPostReminderPresetTargetTime(PostReminderPresets.TOMORROW, timezone).toDate();
 
                     trailingElements = (
-                        <span className={`postReminder-${preset}_timestamp`}>
+                        <span>
                             <FormattedDate
                                 value={tomorrow}
                                 weekday='short'

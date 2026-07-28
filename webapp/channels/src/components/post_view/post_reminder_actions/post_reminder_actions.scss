@@ -7,3 +7,12 @@
         gap: 4px;
     }
 }
+
+// Rendered inside the MUI menu portal, outside the component root.
+.PostReminderActions__menuHeader {
+    padding: 6px 20px;
+    margin: 0;
+    color: var(--center-channel-color);
+    font-weight: bold;
+    pointer-events: none;
+}

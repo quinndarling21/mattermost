@@ -45,22 +45,30 @@ export default function MessageRemindersModal({onExited}: Props) {
     const currentTeamName = useSelector(getCurrentTeam)?.name ?? '';
 
     const [reminders, setReminders] = useState<PostReminderListItem[] | undefined>();
+    const [loadError, setLoadError] = useState(false);
+    const [cancelError, setCancelError] = useState(false);
 
-    useEffect(() => {
-        let mounted = true;
-        dispatch(getPostRemindersForUser(userId)).then(({data}) => {
-            if (mounted) {
-                setReminders(data ?? []);
-            }
-        });
-        return () => {
-            mounted = false;
-        };
+    const fetchReminders = useCallback(async () => {
+        setLoadError(false);
+        setReminders(undefined);
+        const {data, error} = await dispatch(getPostRemindersForUser(userId));
+        if (error) {
+            setLoadError(true);
+        } else {
+            setReminders(data ?? []);
+        }
     }, [dispatch, userId]);
 
+    useEffect(() => {
+        fetchReminders();
+    }, [fetchReminders]);
+
     const handleCancelReminder = useCallback(async (postId: string) => {
+        setCancelError(false);
         const {error} = await dispatch(deletePostReminder(userId, postId));
-        if (!error) {
+        if (error) {
+            setCancelError(true);
+        } else {
             setReminders((prev) => prev?.filter((reminder) => reminder.post_id !== postId));
         }
     }, [dispatch, userId]);
@@ -71,7 +79,28 @@ export default function MessageRemindersModal({onExited}: Props) {
     }, [currentTeamName, dispatch]);
 
     let content;
-    if (reminders === undefined) {
+    if (loadError) {
+        content = (
+            <div className='MessageRemindersModal__error'>
+                <p className='MessageRemindersModal__error-text'>
+                    <FormattedMessage
+                        id='message_reminders_modal.load_error'
+                        defaultMessage='Something went wrong loading your reminders.'
+                    />
+                </p>
+                <Button
+                    emphasis='tertiary'
+                    size='sm'
+                    onClick={fetchReminders}
+                >
+                    <FormattedMessage
+                        id='message_reminders_modal.retry'
+                        defaultMessage='Try again'
+                    />
+                </Button>
+            </div>
+        );
+    } else if (reminders === undefined) {
         content = (
             <div className='MessageRemindersModal__loading'>
                 <LoadingSpinner/>
@@ -97,84 +126,97 @@ export default function MessageRemindersModal({onExited}: Props) {
         );
     } else {
         content = (
-            <ul className='MessageRemindersModal__list'>
-                {reminders.map((reminder) => {
-                    const dueTime = new Date(reminder.target_time * 1000);
+            <>
+                {cancelError && (
+                    <p
+                        className='MessageRemindersModal__error-text'
+                        role='alert'
+                    >
+                        <FormattedMessage
+                            id='message_reminders_modal.cancel_error'
+                            defaultMessage='We couldn’t cancel that reminder. Please try again.'
+                        />
+                    </p>
+                )}
+                <ul className='MessageRemindersModal__list'>
+                    {reminders.map((reminder) => {
+                        const dueTime = new Date(reminder.target_time * 1000);
 
-                    return (
-                        <li
-                            className='MessageRemindersModal__item'
-                            key={reminder.post_id}
-                            data-testid={`message_reminder_${reminder.post_id}`}
-                        >
-                            <div className='MessageRemindersModal__item-content'>
-                                <span className='MessageRemindersModal__item-message'>{reminder.message}</span>
-                                <span className='MessageRemindersModal__item-meta'>
-                                    <FormattedMessage
-                                        id='message_reminders_modal.item_meta'
-                                        defaultMessage='From @{username} • Due {date} at {time}'
-                                        values={{
-                                            username: reminder.username,
-                                            date: (
-                                                <FormattedDate
-                                                    value={dueTime}
-                                                    weekday='short'
-                                                    day='numeric'
-                                                    month='short'
-                                                    timeZone={timezone}
-                                                />
-                                            ),
-                                            time: (
-                                                <FormattedTime
-                                                    value={dueTime}
-                                                    timeStyle='short'
-                                                    hour12={!isMilitaryTime}
-                                                    timeZone={timezone}
-                                                />
-                                            ),
-                                        }}
-                                    />
-                                </span>
-                            </div>
-                            <div className='MessageRemindersModal__item-actions'>
-                                <Button
-                                    emphasis='tertiary'
-                                    size='sm'
-                                    onClick={() => handleViewMessage(reminder)}
-                                >
-                                    <FormattedMessage
-                                        id='message_reminders_modal.view_message'
-                                        defaultMessage='View message'
-                                    />
-                                </Button>
-                                <WithTooltip
-                                    title={
+                        return (
+                            <li
+                                className='MessageRemindersModal__item'
+                                key={reminder.post_id}
+                                data-testid={`message_reminder_${reminder.post_id}`}
+                            >
+                                <div className='MessageRemindersModal__item-content'>
+                                    <span className='MessageRemindersModal__item-message'>{reminder.message}</span>
+                                    <span className='MessageRemindersModal__item-meta'>
                                         <FormattedMessage
-                                            id='message_reminders_modal.cancel_reminder'
-                                            defaultMessage='Cancel reminder'
+                                            id='message_reminders_modal.item_meta'
+                                            defaultMessage='From @{username} • Due {date} at {time}'
+                                            values={{
+                                                username: reminder.username,
+                                                date: (
+                                                    <FormattedDate
+                                                        value={dueTime}
+                                                        weekday='short'
+                                                        day='numeric'
+                                                        month='short'
+                                                        timeZone={timezone}
+                                                    />
+                                                ),
+                                                time: (
+                                                    <FormattedTime
+                                                        value={dueTime}
+                                                        timeStyle='short'
+                                                        hour12={!isMilitaryTime}
+                                                        timeZone={timezone}
+                                                    />
+                                                ),
+                                            }}
                                         />
-                                    }
-                                >
+                                    </span>
+                                </div>
+                                <div className='MessageRemindersModal__item-actions'>
                                     <Button
                                         emphasis='tertiary'
                                         size='sm'
-                                        variant='destructive'
-                                        className='MessageRemindersModal__cancel'
-                                        onClick={() => handleCancelReminder(reminder.post_id)}
-                                        aria-label={formatMessage({
-                                            id: 'message_reminders_modal.cancel_reminder',
-                                            defaultMessage: 'Cancel reminder',
-                                        })}
-                                        data-testid={`cancel_reminder_${reminder.post_id}`}
+                                        onClick={() => handleViewMessage(reminder)}
                                     >
-                                        <TrashCanOutlineIcon size={16}/>
+                                        <FormattedMessage
+                                            id='message_reminders_modal.view_message'
+                                            defaultMessage='View message'
+                                        />
                                     </Button>
-                                </WithTooltip>
-                            </div>
-                        </li>
-                    );
-                })}
-            </ul>
+                                    <WithTooltip
+                                        title={
+                                            <FormattedMessage
+                                                id='message_reminders_modal.cancel_reminder'
+                                                defaultMessage='Cancel reminder'
+                                            />
+                                        }
+                                    >
+                                        <Button
+                                            emphasis='tertiary'
+                                            size='sm'
+                                            variant='destructive'
+                                            className='btn-icon'
+                                            onClick={() => handleCancelReminder(reminder.post_id)}
+                                            aria-label={formatMessage({
+                                                id: 'message_reminders_modal.cancel_reminder',
+                                                defaultMessage: 'Cancel reminder',
+                                            })}
+                                            data-testid={`cancel_reminder_${reminder.post_id}`}
+                                        >
+                                            <TrashCanOutlineIcon size={16}/>
+                                        </Button>
+                                    </WithTooltip>
+                                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </>
         );
     }
 

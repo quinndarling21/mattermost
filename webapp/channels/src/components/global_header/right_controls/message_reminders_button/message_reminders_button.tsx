@@ -38,6 +38,7 @@ const MessageRemindersButton = (): JSX.Element | null => {
             <IconButton
                 icon={'clock-outline'}
                 onClick={messageRemindersButtonClick}
+                aria-haspopup='dialog'
                 aria-label={formatMessage({id: 'global_header.message_reminders', defaultMessage: 'Message reminders'})}
             />
         </WithTooltip>

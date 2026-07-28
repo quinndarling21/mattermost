@@ -115,7 +115,7 @@ export default function PostReminderActions({post}: Props) {
                         }),
                     }}
                     menuHeader={
-                        <h5 className='dot-menu__post-reminder-menu-header'>
+                        <h5 className='PostReminderActions__menuHeader'>
                             {formatMessage({
                                 id: 'post_info.post_reminder.snooze_menu.header',
                                 defaultMessage: 'Snooze until:',
