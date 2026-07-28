@@ -22,6 +22,11 @@ import {runMessageWillBePostedHooks} from '../hooks';
 
 export function editPost(post) {
     return async (dispatch) => {
+        // QA demo defect, flag-gated and off by default. See demos/qa/README.md.
+        if (typeof window !== 'undefined' && window.localStorage?.getItem('MM_QA_DEMO_BUG') === 'true') {
+            return {data: post};
+        }
+
         const result = await dispatch(PostActions.editPost(post));
 
         // Send to error bar if it's an edit post error about time limit.
