@@ -5856,11 +5856,14 @@ func TestGetPostRemindersForUser(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, reminders, 2)
 
+	author, _, err := client.GetUser(context.Background(), th.BasicPost.UserId, "")
+	require.NoError(t, err)
+
 	// Sorted by target time ascending.
 	assert.Equal(t, th.BasicPost.Id, reminders[0].PostId)
 	assert.Equal(t, targetTime, reminders[0].TargetTime)
 	assert.Equal(t, th.BasicPost.Message, reminders[0].Message)
-	assert.Equal(t, th.BasicUser.Username, reminders[0].Username)
+	assert.Equal(t, author.Username, reminders[0].Username)
 	assert.Equal(t, th.BasicTeam.Name, reminders[0].TeamName)
 	assert.Equal(t, th.BasicChannel.Id, reminders[0].ChannelId)
 	assert.Equal(t, secondPost.Id, reminders[1].PostId)
