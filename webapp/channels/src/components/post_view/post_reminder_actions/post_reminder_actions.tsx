@@ -53,23 +53,28 @@ export default function PostReminderActions({post}: Props) {
         dispatch(dismissPostReminder(post.id));
     }, [dispatch, post.id]);
 
-    const handleSnooze = useCallback((preset: PostReminderPreset) => {
+    const handleSnooze = useCallback(async (preset: PostReminderPreset) => {
         if (preset === PostReminderPresets.CUSTOM) {
-            // The custom picker schedules on confirm; the reminder DM stays
-            // visible so the user can still mark it done if they cancel.
+            // Keep the reminder DM until confirm succeeds so cancel still
+            // leaves Done/Snooze available.
             dispatch(openModal({
                 modalId: ModalIdentifiers.POST_REMINDER_CUSTOM_TIME_PICKER,
                 dialogType: PostReminderCustomTimePicker,
                 dialogProps: {
                     postId: targetPostId,
+                    onSuccess: () => {
+                        dispatch(dismissPostReminder(post.id));
+                    },
                 },
             }));
             return;
         }
 
         const endTime = getPostReminderPresetTargetTime(preset, timezone);
-        dispatch(addPostReminder(userId, targetPostId, toUTCUnixInSeconds(endTime.toDate())));
-        dispatch(dismissPostReminder(post.id));
+        const {error} = await dispatch(addPostReminder(userId, targetPostId, toUTCUnixInSeconds(endTime.toDate())));
+        if (!error) {
+            dispatch(dismissPostReminder(post.id));
+        }
     }, [dispatch, post.id, targetPostId, timezone, userId]);
 
     return (
