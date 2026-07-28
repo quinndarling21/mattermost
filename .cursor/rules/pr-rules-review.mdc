@@ -1,0 +1,12 @@
+---
+description: Before submitting a PR, review whether the session warrants Cursor rule updates and propose them first
+alwaysApply: true
+---
+
+# PR Cursor Rules Review
+
+Before pushing a branch or creating a pull request:
+
+1. Reflect on the session: new conventions, gotchas, source-of-truth preferences, workflow steps, or project boundaries that came up and are not already captured in `.cursor/rules/`.
+2. If updates are warranted, propose concrete rule changes (new `.mdc` files or edits to existing ones) and wait for approval before pushing the PR.
+3. Prefer small, actionable rule updates over broad rewrites. Skip this step when nothing durable or reusable emerged from the session.
