@@ -23,6 +23,7 @@ import {Mark} from 'utils/performance_telemetry';
 
 import type {RhsState} from 'types/store/rhs';
 
+import ChannelEmoji, {ChannelEmojiPicker} from '../channel_emoji';
 import ChannelMentionBadge from '../channel_mention_badge';
 import ChannelPencilIcon from '../channel_pencil_icon';
 import SidebarChannelIcon from '../sidebar_channel_icon';
@@ -86,19 +87,23 @@ type Props = WrappedComponentProps & {
 type State = {
     isMenuOpen: boolean;
     showTooltip: boolean;
+    isEmojiPickerOpen: boolean;
 };
 
 export class SidebarChannelLink extends React.PureComponent<Props, State> {
     labelRef: React.RefObject<HTMLDivElement>;
+    linkRef: React.RefObject<HTMLAnchorElement>;
 
     constructor(props: Props) {
         super(props);
 
         this.labelRef = React.createRef();
+        this.linkRef = React.createRef();
 
         this.state = {
             isMenuOpen: false,
             showTooltip: false,
+            isEmojiPickerOpen: false,
         };
     }
 
@@ -187,6 +192,14 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
         this.setState({isMenuOpen});
     };
 
+    handleOpenChannelEmojiPicker = () => {
+        this.setState({isEmojiPickerOpen: true});
+    };
+
+    setEmojiPickerOpen = (isEmojiPickerOpen: boolean) => {
+        this.setState({isEmojiPickerOpen});
+    };
+
     render(): JSX.Element {
         const {
             channel,
@@ -262,6 +275,7 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
                     className='SidebarChannelLinkLabel_wrapper'
                 >
                     {labelElement}
+                    <ChannelEmoji channel={channel}/>
                     {customStatus}
                     <Pluggable
                         pluggableName='SidebarChannelLinkLabel'
@@ -289,6 +303,7 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
                         isUnread={isUnread}
                         channelLeaveHandler={this.props.channelLeaveHandler}
                         onMenuToggle={this.handleMenuToggle}
+                        onOpenChannelEmojiPicker={this.handleOpenChannelEmojiPicker}
                     />
                 </div>
             </>
@@ -305,17 +320,27 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
             },
         ]);
         return (
-            <Link
-                className={className}
-                id={`sidebarItem_${channel.name}`}
-                aria-label={this.getAriaLabel()}
-                to={link}
-                onClick={this.handleChannelClick}
-                tabIndex={0}
-            >
-                {content}
-                {channelsTutorialTip}
-            </Link>
+            <>
+                <Link
+                    className={className}
+                    id={`sidebarItem_${channel.name}`}
+                    aria-label={this.getAriaLabel()}
+                    to={link}
+                    onClick={this.handleChannelClick}
+                    tabIndex={0}
+                    innerRef={this.linkRef}
+                >
+                    {content}
+                    {channelsTutorialTip}
+                </Link>
+                {this.state.isEmojiPickerOpen && (
+                    <ChannelEmojiPicker
+                        channel={channel}
+                        setShow={this.setEmojiPickerOpen}
+                        anchorRef={this.linkRef}
+                    />
+                )}
+            </>
         );
     }
 }

@@ -9,6 +9,7 @@ const Preferences = {
     CATEGORY_CHANNEL_APPROXIMATE_VIEW_TIME: 'channel_approximate_view_time',
     CATEGORY_DIRECT_CHANNEL_SHOW: 'direct_channel_show',
     CATEGORY_GROUP_CHANNEL_SHOW: 'group_channel_show',
+    CATEGORY_CHANNEL_EMOJI: 'channel_emoji',
     CATEGORY_FLAGGED_POST: 'flagged_post',
     CATEGORY_AUTO_RESET_MANUAL_STATUS: 'auto_reset_manual_status',
     CATEGORY_NOTIFICATIONS: 'notifications',
