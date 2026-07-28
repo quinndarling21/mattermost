@@ -8,7 +8,7 @@ import type {Channel, ChannelUnread} from '@mattermost/types/channels';
 import type {FetchPaginatedThreadOptions} from '@mattermost/types/client4';
 import type {Group} from '@mattermost/types/groups';
 import {isMessageAttachmentArray} from '@mattermost/types/message_attachments';
-import type {Post, PostList, PostAcknowledgement} from '@mattermost/types/posts';
+import type {Post, PostList, PostAcknowledgement, PostReminderListItem} from '@mattermost/types/posts';
 import type {Reaction} from '@mattermost/types/reactions';
 import type {GlobalState} from '@mattermost/types/store';
 import type {UserProfile} from '@mattermost/types/users';
@@ -1218,6 +1218,46 @@ export function addPostReminder(userId: string, postId: string, timestamp: numbe
     return async (dispatch, getState) => {
         try {
             await Client4.addPostReminder(userId, postId, timestamp);
+        } catch (error) {
+            forceLogoutIfNecessary(error, dispatch, getState);
+            dispatch(logError(error));
+            return {error};
+        }
+        return {data: true};
+    };
+}
+
+export function getPostRemindersForUser(userId: string): ActionFuncAsync<PostReminderListItem[]> {
+    return async (dispatch, getState) => {
+        let reminders;
+        try {
+            reminders = await Client4.getPostRemindersForUser(userId);
+        } catch (error) {
+            forceLogoutIfNecessary(error, dispatch, getState);
+            dispatch(logError(error));
+            return {error};
+        }
+        return {data: reminders};
+    };
+}
+
+export function deletePostReminder(userId: string, postId: string): ActionFuncAsync {
+    return async (dispatch, getState) => {
+        try {
+            await Client4.deletePostReminder(userId, postId);
+        } catch (error) {
+            forceLogoutIfNecessary(error, dispatch, getState);
+            dispatch(logError(error));
+            return {error};
+        }
+        return {data: true};
+    };
+}
+
+export function dismissPostReminder(postId: string): ActionFuncAsync {
+    return async (dispatch, getState) => {
+        try {
+            await Client4.dismissPostReminder(postId);
         } catch (error) {
             forceLogoutIfNecessary(error, dispatch, getState);
             dispatch(logError(error));
