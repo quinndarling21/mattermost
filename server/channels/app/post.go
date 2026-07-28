@@ -2814,6 +2814,61 @@ func (a *App) SetPostReminder(rctx request.CTX, postID, userID string, targetTim
 	return nil
 }
 
+func (a *App) GetPostRemindersForUser(rctx request.CTX, userID string) ([]*model.PostReminderListItem, *model.AppError) {
+	reminders, err := a.Srv().Store().Post().GetPostRemindersForUser(userID)
+	if err != nil {
+		return nil, model.NewAppError("GetPostRemindersForUser", model.NoTranslation, nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return reminders, nil
+}
+
+func (a *App) DeletePostReminder(rctx request.CTX, userID, postID string) *model.AppError {
+	err := a.Srv().Store().Post().DeletePostReminder(userID, postID)
+	if err != nil {
+		var nfErr *store.ErrNotFound
+		if errors.As(err, &nfErr) {
+			return model.NewAppError("DeletePostReminder", "app.post.delete_post_reminder.not_found.app_error", nil, "", http.StatusNotFound).Wrap(err)
+		}
+		return model.NewAppError("DeletePostReminder", model.NoTranslation, nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return nil
+}
+
+// DismissPostReminder deletes a reminder DM sent by the system bot. Users
+// cannot delete bot posts themselves, so the server validates that the post
+// is a reminder DM addressed to the user before removing it on their behalf.
+func (a *App) DismissPostReminder(rctx request.CTX, userID, postID string) *model.AppError {
+	post, appErr := a.GetSinglePost(rctx, postID, false)
+	if appErr != nil {
+		return appErr
+	}
+
+	if post.Type != model.PostTypeReminder {
+		return model.NewAppError("DismissPostReminder", "app.post.dismiss_post_reminder.not_reminder.app_error", nil, "", http.StatusBadRequest)
+	}
+
+	systemBot, appErr := a.GetSystemBot(rctx)
+	if appErr != nil {
+		return appErr
+	}
+	if post.UserId != systemBot.UserId {
+		return model.NewAppError("DismissPostReminder", "app.post.dismiss_post_reminder.not_reminder.app_error", nil, "", http.StatusBadRequest)
+	}
+
+	channel, appErr := a.GetChannel(rctx, post.ChannelId)
+	if appErr != nil {
+		return appErr
+	}
+	if channel.Type != model.ChannelTypeDirect || channel.Name != model.GetDMNameFromIds(userID, systemBot.UserId) {
+		return model.NewAppError("DismissPostReminder", "app.post.dismiss_post_reminder.not_reminder.app_error", nil, "", http.StatusForbidden)
+	}
+
+	if _, appErr := a.DeletePost(rctx, postID, userID); appErr != nil {
+		return appErr
+	}
+	return nil
+}
+
 func (a *App) CheckPostReminders(rctx request.CTX) {
 	rctx = rctx.WithLogFields(mlog.String("component", "post_reminders"))
 	systemBot, appErr := a.GetSystemBot(rctx)

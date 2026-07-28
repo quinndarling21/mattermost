@@ -5829,6 +5829,145 @@ func TestPostReminderReplyEphemeralUsesThreadRoot(t *testing.T) {
 	require.Equal(t, th.BasicTeam.Name, parsedPost.GetProp("team_name").(string))
 }
 
+func TestGetPostRemindersForUser(t *testing.T) {
+	th := Setup(t).InitBasic(t)
+	client := th.Client
+
+	targetTime := time.Now().UTC().Unix() + 3600
+	resp, err := client.SetPostReminder(context.Background(), &model.PostReminder{
+		TargetTime: targetTime,
+		PostId:     th.BasicPost.Id,
+		UserId:     th.BasicUser.Id,
+	})
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	secondPost := th.CreatePost(t)
+	laterTargetTime := targetTime + 3600
+	resp, err = client.SetPostReminder(context.Background(), &model.PostReminder{
+		TargetTime: laterTargetTime,
+		PostId:     secondPost.Id,
+		UserId:     th.BasicUser.Id,
+	})
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	reminders, _, err := client.GetPostRemindersForUser(context.Background(), th.BasicUser.Id)
+	require.NoError(t, err)
+	require.Len(t, reminders, 2)
+
+	// Sorted by target time ascending.
+	assert.Equal(t, th.BasicPost.Id, reminders[0].PostId)
+	assert.Equal(t, targetTime, reminders[0].TargetTime)
+	assert.Equal(t, th.BasicPost.Message, reminders[0].Message)
+	assert.Equal(t, th.BasicUser.Username, reminders[0].Username)
+	assert.Equal(t, th.BasicTeam.Name, reminders[0].TeamName)
+	assert.Equal(t, th.BasicChannel.Id, reminders[0].ChannelId)
+	assert.Equal(t, secondPost.Id, reminders[1].PostId)
+
+	t.Run("cannot list another user's reminders", func(t *testing.T) {
+		_, resp, err := client.GetPostRemindersForUser(context.Background(), th.BasicUser2.Id)
+		require.Error(t, err)
+		CheckForbiddenStatus(t, resp)
+	})
+}
+
+func TestDeletePostReminder(t *testing.T) {
+	th := Setup(t).InitBasic(t)
+	client := th.Client
+
+	targetTime := time.Now().UTC().Unix() + 3600
+	resp, err := client.SetPostReminder(context.Background(), &model.PostReminder{
+		TargetTime: targetTime,
+		PostId:     th.BasicPost.Id,
+		UserId:     th.BasicUser.Id,
+	})
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	resp, err = client.DeletePostReminder(context.Background(), th.BasicUser.Id, th.BasicPost.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	reminders, _, err := client.GetPostRemindersForUser(context.Background(), th.BasicUser.Id)
+	require.NoError(t, err)
+	require.Empty(t, reminders)
+
+	t.Run("deleting a non-existent reminder returns not found", func(t *testing.T) {
+		resp, err := client.DeletePostReminder(context.Background(), th.BasicUser.Id, th.BasicPost.Id)
+		require.Error(t, err)
+		CheckNotFoundStatus(t, resp)
+	})
+
+	t.Run("cannot cancel another user's reminder", func(t *testing.T) {
+		resp, err := client.DeletePostReminder(context.Background(), th.BasicUser2.Id, th.BasicPost.Id)
+		require.Error(t, err)
+		CheckForbiddenStatus(t, resp)
+	})
+}
+
+func TestDismissPostReminder(t *testing.T) {
+	th := Setup(t).InitBasic(t)
+	client := th.Client
+
+	// Schedule a reminder already due, then run the delivery job to produce
+	// the reminder DM from the system bot.
+	targetTime := time.Now().UTC().Unix() - 1
+	resp, err := client.SetPostReminder(context.Background(), &model.PostReminder{
+		TargetTime: targetTime,
+		PostId:     th.BasicPost.Id,
+		UserId:     th.BasicUser.Id,
+	})
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	th.App.CheckPostReminders(th.Context)
+
+	systemBot, appErr := th.App.GetSystemBot(th.Context)
+	require.Nil(t, appErr)
+
+	dmChannel, appErr := th.App.GetOrCreateDirectChannel(th.Context, th.BasicUser.Id, systemBot.UserId)
+	require.Nil(t, appErr)
+
+	posts, _, err := client.GetPostsForChannel(context.Background(), dmChannel.Id, 0, 10, "", false, false)
+	require.NoError(t, err)
+
+	var reminderPost *model.Post
+	for _, p := range posts.Posts {
+		if p.Type == model.PostTypeReminder {
+			reminderPost = p
+			break
+		}
+	}
+	require.NotNil(t, reminderPost, "expected a reminder DM from the system bot")
+
+	t.Run("cannot dismiss a regular post", func(t *testing.T) {
+		resp, err := client.DismissPostReminder(context.Background(), th.BasicPost.Id)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+	})
+
+	t.Run("another user cannot dismiss the reminder DM", func(t *testing.T) {
+		client2 := th.CreateClient()
+		_, _, err := client2.Login(context.Background(), th.BasicUser2.Username, th.BasicUser2.Password)
+		require.NoError(t, err)
+
+		resp, err := client2.DismissPostReminder(context.Background(), reminderPost.Id)
+		require.Error(t, err)
+		CheckForbiddenStatus(t, resp)
+	})
+
+	t.Run("owner dismisses the reminder DM", func(t *testing.T) {
+		resp, err := client.DismissPostReminder(context.Background(), reminderPost.Id)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+
+		_, resp, err = client.GetPost(context.Background(), reminderPost.Id, "")
+		require.Error(t, err)
+		CheckNotFoundStatus(t, resp)
+	})
+}
+
 func TestPostGetInfo(t *testing.T) {
 	mainHelper.Parallel(t)
 
