@@ -574,15 +574,21 @@ export function renderReminderSystemBotMessage(post: Post, currentTeam: Team): R
     const teamUrl = `${getSiteURL()}/${post.props.team_name || currentTeam.name}`;
     const link = `${teamUrl}/pl/${post.props.post_id}`;
     const permaLink = renderFormattedText(`[${link}](${link})`);
+    const reminderMessage = typeof post.props.reminder_message === 'string' ? post.props.reminder_message : '';
     return (
-        <FormattedMessage
-            id={'post.reminder.systemBot'}
-            defaultMessage="Hi there, here's your reminder about this message from {username}: {permaLink}"
-            values={{
-                username,
-                permaLink,
-            }}
-        />
+        <>
+            <FormattedMessage
+                id={'post.reminder.systemBot'}
+                defaultMessage="Hi there, here's your reminder about this message from {username}: {permaLink}"
+                values={{
+                    username,
+                    permaLink,
+                }}
+            />
+            {Boolean(reminderMessage) && (
+                <blockquote>{reminderMessage}</blockquote>
+            )}
+        </>
     );
 }
 

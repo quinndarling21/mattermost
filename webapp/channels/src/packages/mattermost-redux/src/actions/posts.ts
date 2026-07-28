@@ -1263,6 +1263,15 @@ export function dismissPostReminder(postId: string): ActionFuncAsync {
             dispatch(logError(error));
             return {error};
         }
+
+        // The deletion happens server-side (the system bot owns the DM), so
+        // remove the post locally right away. Otherwise the websocket event
+        // would leave a "(message deleted)" placeholder for the dismisser.
+        const post = PostSelectors.getPost(getState(), postId);
+        if (post) {
+            dispatch(removePost(post));
+        }
+
         return {data: true};
     };
 }

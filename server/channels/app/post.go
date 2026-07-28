@@ -2913,6 +2913,13 @@ func (a *App) CheckPostReminders(rctx request.CTX) {
 				continue
 			}
 
+			// Include the original message so the reminder DM shows its content
+			// even when permalink previews are unavailable.
+			originalMessage := ""
+			if originalPost, appErr := a.GetSinglePost(rctx, postID, false); appErr == nil {
+				originalMessage = originalPost.Message
+			}
+
 			T := i18n.GetUserTranslations(metadata.UserLocale)
 			dm := &model.Post{
 				ChannelId: ch.Id,
@@ -2925,9 +2932,10 @@ func (a *App) CheckPostReminders(rctx request.CTX) {
 				Type:   model.PostTypeReminder,
 				UserId: systemBot.UserId,
 				Props: model.StringInterface{
-					"team_name": metadata.TeamName,
-					"post_id":   postID,
-					"username":  metadata.Username,
+					"team_name":        metadata.TeamName,
+					"post_id":          postID,
+					"username":         metadata.Username,
+					"reminder_message": originalMessage,
 				},
 			}
 
