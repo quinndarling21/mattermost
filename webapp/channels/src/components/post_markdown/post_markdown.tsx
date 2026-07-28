@@ -10,6 +10,7 @@ import {Posts} from 'mattermost-redux/constants';
 
 import Markdown from 'components/markdown';
 import {DataSpillageReport} from 'components/post_view/data_spillage_report/data_spillage_report';
+import PostReminderActions from 'components/post_view/post_reminder_actions/post_reminder_actions';
 
 import {PostTypes} from 'utils/constants';
 import {isChannelNamesMap, type TextFormattingOptions} from 'utils/text_formatting';
@@ -92,7 +93,12 @@ export default class PostMarkdown extends React.PureComponent<Props> {
                 return null;
             }
             const renderedSystemBotMessage = renderReminderSystemBotMessage(this.props.post, this.props.currentTeam);
-            return <div>{renderedSystemBotMessage}</div>;
+            return (
+                <div>
+                    {renderedSystemBotMessage}
+                    <PostReminderActions post={this.props.post}/>
+                </div>
+            );
         }
 
         if (this.props.post && this.props.post.type === Posts.POST_TYPES.WRANGLER) {

@@ -3250,6 +3250,42 @@ func (s *SqlPostStore) GetPostRemindersForPost(postId string) ([]*model.PostRemi
 	return reminders, nil
 }
 
+func (s *SqlPostStore) GetPostRemindersForUser(userID string) ([]*model.PostReminderListItem, error) {
+	reminders := []*model.PostReminderListItem{}
+	err := s.GetReplica().Select(&reminders, `SELECT pr.PostId,
+		pr.TargetTime,
+		p.Message,
+		u.Username,
+		COALESCE(t.Name, '') AS TeamName,
+		c.Id AS ChannelId
+	FROM PostReminders pr
+	JOIN Posts p ON pr.PostId = p.Id
+	JOIN Channels c ON p.ChannelId = c.Id
+	LEFT JOIN Teams t ON c.TeamId = t.Id
+	JOIN Users u ON p.UserId = u.Id
+	WHERE pr.UserId = ?
+	ORDER BY pr.TargetTime ASC`, userID)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get post reminders for userId %s", userID)
+	}
+	return reminders, nil
+}
+
+func (s *SqlPostStore) DeletePostReminder(userID, postID string) error {
+	result, err := s.GetMaster().Exec(`DELETE FROM PostReminders WHERE PostId = ? AND UserId = ?`, postID, userID)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete post reminder for postId %s", postID)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "failed to get rows affected")
+	}
+	if rows == 0 {
+		return store.NewErrNotFound("PostReminder", postID)
+	}
+	return nil
+}
+
 func (s *SqlPostStore) DeleteAllPostRemindersForPost(postId string) error {
 	_, err := s.GetMaster().Exec(`DELETE from PostReminders WHERE PostId = ?`, postId)
 	if err != nil {

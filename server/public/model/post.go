@@ -217,6 +217,17 @@ type PostReminder struct {
 	UserId string `json:",omitempty"`
 }
 
+// PostReminderListItem is a pending post reminder enriched with display
+// metadata for the pending reminders list.
+type PostReminderListItem struct {
+	PostId     string `json:"post_id"`
+	TargetTime int64  `json:"target_time"`
+	Message    string `json:"message"`
+	Username   string `json:"username"`
+	TeamName   string `json:"team_name"`
+	ChannelId  string `json:"channel_id"`
+}
+
 type PostPriority struct {
 	Priority                *string `json:"priority"`
 	RequestedAck            *bool   `json:"requested_ack"`

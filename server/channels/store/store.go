@@ -430,6 +430,8 @@ type PostStore interface {
 	SetPostReminder(reminder *model.PostReminder) error
 	GetPostReminders(now int64) ([]*model.PostReminder, error)
 	GetPostRemindersForPost(postId string) ([]*model.PostReminder, error)
+	GetPostRemindersForUser(userID string) ([]*model.PostReminderListItem, error)
+	DeletePostReminder(userID, postID string) error
 	DeleteAllPostRemindersForPost(postId string) error
 	GetPostReminderMetadata(postID string) (*PostReminderMetadata, error)
 	// GetNthRecentPostTime returns the CreateAt time of the nth most recent post.

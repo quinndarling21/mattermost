@@ -1,0 +1,97 @@
+.MessageRemindersModal {
+    &__loading {
+        display: flex;
+        justify-content: center;
+        padding: 32px 0;
+    }
+
+    &__error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px;
+        gap: 8px;
+    }
+
+    &__error-text {
+        margin: 0;
+        color: var(--error-text);
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    &__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 32px 24px;
+        color: rgba(var(--center-channel-color-rgb), 0.64);
+        text-align: center;
+    }
+
+    &__empty-title {
+        margin: 12px 0 4px;
+        color: var(--center-channel-color);
+        font-family: Metropolis, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 24px;
+    }
+
+    &__empty-subtitle {
+        max-width: 400px;
+        margin: 0;
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    &__list {
+        margin: 0;
+        list-style: none;
+        padding-inline-start: 0;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        gap: 12px;
+
+        + .MessageRemindersModal__item {
+            border-top: var(--border-light);
+        }
+    }
+
+    &__item-content {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    &__item-message {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        color: var(--center-channel-color);
+        font-size: 14px;
+        -webkit-line-clamp: 2;
+        line-height: 20px;
+        overflow-wrap: anywhere;
+    }
+
+    &__item-meta {
+        color: rgba(var(--center-channel-color-rgb), 0.64);
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    &__item-actions {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: 4px;
+    }
+}

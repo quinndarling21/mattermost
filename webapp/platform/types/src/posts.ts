@@ -59,6 +59,15 @@ export type PostAcknowledgement = {
     acknowledged_at: number;
 }
 
+export type PostReminderListItem = {
+    post_id: Post['id'];
+    target_time: number;
+    message: string;
+    username: string;
+    team_name: string;
+    channel_id: string;
+}
+
 export type PostPriorityMetadata = {
     priority: PostPriority|'';
     requested_ack?: boolean;
