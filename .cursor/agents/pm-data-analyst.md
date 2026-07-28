@@ -21,7 +21,7 @@ Join keys:
 
 - `accounts.account_id` joins to `users`, `activity_events`, and `feature_feedback`.
 - `users.user_id` joins to `activity_events` and `feature_feedback`.
-- `roadmap_candidates.candidate_id` identifies each opportunity; match candidates to telemetry through `feature_area` and `target_persona`.
+- `roadmap_candidates.candidate_id` identifies each opportunity; join each candidate to telemetry `feature_area` via this map (do not join on `theme`, which does not match telemetry values): `rc_search` → `search`, `rc_mobile_notif` → `mobile_notifications`, `rc_integration_setup` → `integrations`, `rc_admin_perms` → `admin_permissions`, `rc_boards_templates` → `boards`, `rc_calls_recording` → `calls`, `rc_thread_summaries` → `threaded_replies`, `rc_compliance_export` → `channel_browse`. Segment by `target_persona` through `users.persona`.
 
 ## How to work
 
