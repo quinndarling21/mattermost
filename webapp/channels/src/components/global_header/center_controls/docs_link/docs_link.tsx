@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import ExternalLink from 'components/external_link';
 
-export const LOCAL_DOCS_URL = 'http://localhost:3001';
+export const LOCAL_DOCS_URL = 'http://localhost:3002';
 
 const DocsLinkAnchor = styled(ExternalLink)`
     display: flex;
