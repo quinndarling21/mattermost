@@ -25,6 +25,7 @@ import {
 import {getChannelHeaderMenuPluginComponents} from 'selectors/plugins';
 
 import {getIsChannelBookmarksEnabled} from 'components/channel_bookmarks/utils';
+import ChannelEmoji from 'components/channel_emoji/channel_emoji';
 import * as Menu from 'components/menu';
 
 import {Constants} from 'utils/constants';
@@ -126,6 +127,12 @@ export default function ChannelHeaderMenu({dmUser, gmMembers, isMobile, archived
                 children: (
                     <>
                         {archivedIcon}
+                        {!isDirect && !isGroup && (
+                            <ChannelEmoji
+                                emoji={channel.channel_emoji}
+                                size={18}
+                            />
+                        )}
                         <strong
                             id='channelHeaderTitle'
                             className='heading'

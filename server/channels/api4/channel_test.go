@@ -829,13 +829,15 @@ func TestPatchChannel(t *testing.T) {
 
 	t.Run("should be able to patch values", func(t *testing.T) {
 		patch := &model.ChannelPatch{
-			Name:        new(string),
-			DisplayName: new(string),
-			Header:      new(string),
-			Purpose:     new(string),
+			Name:         new(string),
+			DisplayName:  new(string),
+			ChannelEmoji: new(string),
+			Header:       new(string),
+			Purpose:      new(string),
 		}
 		*patch.Name = model.NewId()
 		*patch.DisplayName = model.NewId()
+		*patch.ChannelEmoji = "rocket"
 		*patch.Header = model.NewId()
 		*patch.Purpose = model.NewId()
 
@@ -844,8 +846,13 @@ func TestPatchChannel(t *testing.T) {
 
 		require.Equal(t, *patch.Name, channel.Name, "do not match")
 		require.Equal(t, *patch.DisplayName, channel.DisplayName, "do not match")
+		require.Equal(t, *patch.ChannelEmoji, channel.ChannelEmoji, "do not match")
 		require.Equal(t, *patch.Header, channel.Header, "do not match")
 		require.Equal(t, *patch.Purpose, channel.Purpose, "do not match")
+
+		fetched, _, err := client.GetChannel(context.Background(), channel.Id)
+		require.NoError(t, err)
+		require.Equal(t, *patch.ChannelEmoji, fetched.ChannelEmoji)
 	})
 
 	t.Run("should be able to patch with no name", func(t *testing.T) {

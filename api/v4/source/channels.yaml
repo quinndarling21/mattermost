@@ -99,6 +99,9 @@
                 display_name:
                   type: string
                   description: The non-unique UI name for the channel
+                channel_emoji:
+                  type: string
+                  description: Optional emoji name to display next to the channel name
                 purpose:
                   type: string
                   description: A short description of the purpose of the channel
@@ -543,6 +546,9 @@
                 display_name:
                   type: string
                   description: The non-unique UI name for the channel
+                channel_emoji:
+                  type: string
+                  description: Optional emoji name to display next to the channel name
                 purpose:
                   type: string
                   description: A short description of the purpose of the channel
@@ -619,12 +625,12 @@
         fields must be provided.
 
         **Public and private channels:** Can update `name`, `display_name`,
-        `purpose`, `header`, `group_constrained`, `autotranslation`, and
+        `channel_emoji`, `purpose`, `header`, `group_constrained`, `autotranslation`, and
         `banner_info` (subject to permissions and channel type).
 
         **Direct and group message channels:** Only `header` and (when not
         restricted by config) `autotranslation` can be updated; the caller
-        must be a channel member. Updating `name`, `display_name`, or `purpose`
+        must be a channel member. Updating `name`, `display_name`, `channel_emoji`, or `purpose`
         is not allowed.
 
         The default channel (e.g. Town Square) cannot have its `name` changed.
@@ -663,6 +669,11 @@
                   type: string
                   description: The non-unique UI name for the channel. Cannot be updated
                     for direct or group message channels.
+                channel_emoji:
+                  type: string
+                  description: Optional emoji name to display next to the channel name.
+                    Cannot be updated for direct or group message channels. Set to an
+                    empty string to clear.
                 purpose:
                   type: string
                   description: A short description of the purpose of the channel. Cannot

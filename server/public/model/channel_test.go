@@ -18,9 +18,10 @@ func TestChannelCopy(t *testing.T) {
 }
 
 func TestChannelPatch(t *testing.T) {
-	p := &ChannelPatch{Name: new(string), DisplayName: new(string), Header: new(string), Purpose: new(string), GroupConstrained: new(bool)}
+	p := &ChannelPatch{Name: new(string), DisplayName: new(string), ChannelEmoji: new(string), Header: new(string), Purpose: new(string), GroupConstrained: new(bool)}
 	*p.Name = NewId()
 	*p.DisplayName = NewId()
+	*p.ChannelEmoji = ":rocket:"
 	*p.Header = NewId()
 	*p.Purpose = NewId()
 	*p.GroupConstrained = true
@@ -30,6 +31,7 @@ func TestChannelPatch(t *testing.T) {
 
 	require.Equal(t, *p.Name, o.Name)
 	require.Equal(t, *p.DisplayName, o.DisplayName)
+	require.Equal(t, "rocket", o.ChannelEmoji)
 	require.Equal(t, *p.Header, o.Header)
 	require.Equal(t, *p.Purpose, o.Purpose)
 	require.Equal(t, *p.GroupConstrained, *o.GroupConstrained)
@@ -90,6 +92,41 @@ func TestChannelIsValidDiscoverable(t *testing.T) {
 
 		c.Type = ChannelTypePrivate
 		require.Nil(t, c.IsValid())
+	})
+}
+
+func TestChannelIsValidChannelEmoji(t *testing.T) {
+	base := Channel{
+		Id:          NewId(),
+		CreateAt:    GetMillis(),
+		UpdateAt:    GetMillis(),
+		DisplayName: "x",
+		Name:        "valid-name",
+		Type:        ChannelTypeOpen,
+	}
+
+	t.Run("valid emoji name", func(t *testing.T) {
+		c := base
+		c.ChannelEmoji = "+1"
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("empty emoji clears the value", func(t *testing.T) {
+		c := base
+		c.ChannelEmoji = ""
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("invalid emoji name", func(t *testing.T) {
+		c := base
+		c.ChannelEmoji = "smile:"
+		require.NotNil(t, c.IsValid())
+	})
+
+	t.Run("emoji name too long", func(t *testing.T) {
+		c := base
+		c.ChannelEmoji = strings.Repeat("a", ChannelEmojiMaxLength+1)
+		require.NotNil(t, c.IsValid())
 	})
 }
 
