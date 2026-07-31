@@ -37,6 +37,8 @@ const (
 
 	ManagedCategoryPropertyGroupName = "managed_channel_categories"
 	ManagedCategoryPropertyFieldName = "category_name"
+	ChannelEmojiPropertyGroupName    = "channel_emojis"
+	ChannelEmojiPropertyFieldName    = "emoji"
 )
 
 // SidebarCategory represents the corresponding DB table

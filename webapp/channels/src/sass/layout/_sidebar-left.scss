@@ -1225,6 +1225,17 @@ $sidebarOpacityAnimationDuration: 0.15s;
         }
     }
 
+    .SidebarChannelEmojiIcon {
+        display: flex;
+        width: 18px;
+        height: 18px;
+        align-items: center;
+        justify-content: center;
+        margin: 0 6px 0 -2px;
+        font-size: 15px;
+        line-height: 18px;
+    }
+
     .icon {
         display: inline-block;
         font-size: inherit;

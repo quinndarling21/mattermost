@@ -73,7 +73,7 @@
                 position: relative;
             }
 
-            .channel-settings-name-container, .AdvancedTextbox {
+            .channel-settings-name-container, .AdvancedTextbox, .ChannelSettingsModal__emojiField {
                 margin-top: 24px;
             }
         }
@@ -110,6 +110,15 @@
 
     &__typeSelector {
         margin-top: 16px;
+    }
+
+    &__emojiField {
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--center-channel-color);
+            font-weight: 600;
+        }
     }
 
     &__purposeContainer, &__headerContainer {

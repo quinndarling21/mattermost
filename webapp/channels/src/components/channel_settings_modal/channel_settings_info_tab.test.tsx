@@ -5,6 +5,10 @@ import React from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
+import {Client4} from 'mattermost-redux/client';
+
+import useChannelEmoji from 'components/common/hooks/useChannelEmoji';
+
 import {act, renderWithContext, screen, userEvent} from 'tests/react_testing_utils';
 import {TestHelper} from 'utils/test_helper';
 
@@ -15,6 +19,22 @@ jest.mock('mattermost-redux/actions/channels', () => ({
     patchChannel: jest.fn(),
     updateChannelPrivacy: jest.fn(),
 }));
+
+jest.mock('mattermost-redux/client', () => ({
+    Client4: {
+        patchPropertyValues: jest.fn(),
+    },
+}));
+
+jest.mock('components/common/hooks/useChannelEmoji', () => {
+    const actual = jest.requireActual('components/common/hooks/useChannelEmoji');
+
+    return {
+        ...actual,
+        __esModule: true,
+        default: jest.fn(() => ({emoji: '', field: {id: 'emoji_field_id'}, loading: false})),
+    };
+});
 
 // Mock the ConvertConfirmModal component
 jest.mock('components/admin_console/team_channel_settings/convert_confirm_modal', () => {
@@ -33,6 +53,7 @@ jest.mock('components/admin_console/team_channel_settings/convert_confirm_modal'
 });
 
 let mockChannelPropertiesPermission = true;
+let mockChannelRolesPermission = true;
 let mockConvertToPublicPermission = true;
 let mockConvertToPrivatePermission = true;
 
@@ -47,6 +68,9 @@ jest.mock('mattermost-redux/selectors/entities/roles', () => ({
         }
         if (permission === 'convert_private_channel_to_public') {
             return mockConvertToPublicPermission;
+        }
+        if (permission === 'manage_channel_roles') {
+            return mockChannelRolesPermission;
         }
         return true;
     }),
@@ -136,9 +160,17 @@ const baseProps = {
 
 describe('ChannelSettingsInfoTab', () => {
     beforeEach(() => {
+        jest.clearAllMocks();
         mockChannelPropertiesPermission = true;
+        mockChannelRolesPermission = true;
         mockConvertToPublicPermission = true;
         mockConvertToPrivatePermission = true;
+        (useChannelEmoji as jest.Mock).mockReturnValue({emoji: '', field: {id: 'emoji_field_id'}, loading: false});
+        (Client4.patchPropertyValues as jest.Mock).mockResolvedValue([{
+            target_id: 'channel1',
+            field_id: 'emoji_field_id',
+            value: ':rocket:',
+        }]);
     });
 
     it('should render with the correct initial values', () => {
@@ -215,6 +247,66 @@ describe('ChannelSettingsInfoTab', () => {
             purpose: 'Updated purpose',
             header: 'Updated header',
         });
+    });
+
+    it('should save a channel emoji as a normalized property value', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        const emojiInput = screen.getByRole('textbox', {name: 'Channel emoji (optional)'});
+        await userEvent.clear(emojiInput);
+        await userEvent.type(emojiInput, 'rocket');
+
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(Client4.patchPropertyValues).toHaveBeenCalledWith(
+            'channel_emojis',
+            'channel',
+            'channel1',
+            [{field_id: 'emoji_field_id', value: ':rocket:'}],
+        );
+        expect(patchChannel).not.toHaveBeenCalled();
+    });
+
+    it('should not patch channel fields when saving the channel emoji fails', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+        (Client4.patchPropertyValues as jest.Mock).mockRejectedValueOnce({message: 'Error saving emoji'});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        const nameInput = screen.getByRole('textbox', {name: 'Channel name'});
+        await userEvent.clear(nameInput);
+        await userEvent.type(nameInput, 'Updated Channel Name');
+
+        const emojiInput = screen.getByRole('textbox', {name: 'Channel emoji (optional)'});
+        await userEvent.clear(emojiInput);
+        await userEvent.type(emojiInput, 'rocket');
+
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(Client4.patchPropertyValues).toHaveBeenCalled();
+        expect(patchChannel).not.toHaveBeenCalled();
+    });
+
+    it('should preserve local channel emoji edits when the server emoji loads', async () => {
+        (useChannelEmoji as jest.Mock).mockReturnValue({emoji: '', field: {id: 'emoji_field_id'}, loading: false});
+
+        const {rerender} = renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        const emojiInput = screen.getByRole('textbox', {name: 'Channel emoji (optional)'});
+        await userEvent.clear(emojiInput);
+        await userEvent.type(emojiInput, 'custom');
+
+        (useChannelEmoji as jest.Mock).mockReturnValue({emoji: ':rocket:', field: {id: 'emoji_field_id'}, loading: false});
+        await act(async () => {
+            rerender(<ChannelSettingsInfoTab {...baseProps}/>);
+        });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(screen.getByRole('textbox', {name: 'Channel emoji (optional)'})).toHaveValue('custom');
     });
 
     it('should save DM header from channel settings without requiring channel name', async () => {
@@ -463,6 +555,15 @@ describe('ChannelSettingsInfoTab', () => {
 
         // When in readOnly mode, the preview toggle button should not be present
         expect(screen.queryByTestId('mock-show-format')).not.toBeInTheDocument();
+    });
+
+    it('should disable channel emoji when user lacks channel properties permission', () => {
+        mockChannelPropertiesPermission = false;
+        mockChannelRolesPermission = true;
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        expect(screen.getByRole('textbox', {name: 'Channel emoji (optional)'})).toBeDisabled();
     });
 
     it('should render ChannelNameFormField and AdvancedTextbox as not readOnly when user has permission', () => {

@@ -6,6 +6,7 @@ import {useIntl} from 'react-intl';
 
 import type {Channel} from '@mattermost/types/channels';
 
+import useChannelEmoji, {formatChannelEmojiForDisplay} from 'components/common/hooks/useChannelEmoji';
 import LeaveChannelModal from 'components/leave_channel_modal';
 import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_channel_link';
 
@@ -26,6 +27,8 @@ const SidebarBaseChannel = ({
     actions,
 }: Props) => {
     const intl = useIntl();
+    const {emoji} = useChannelEmoji(channel.id);
+    const channelEmoji = formatChannelEmojiForDisplay(emoji);
 
     const handleLeavePublicChannel = useCallback((callback: () => void) => {
         actions.leaveChannel(channel.id);
@@ -44,7 +47,14 @@ const SidebarBaseChannel = ({
         channelLeaveHandler = handleLeaveWithConfirmation;
     }
 
-    const channelIcon = (
+    const channelIcon = channelEmoji ? (
+        <span
+            className='SidebarChannelEmojiIcon'
+            aria-hidden='true'
+        >
+            {channelEmoji}
+        </span>
+    ) : (
         <SidebarBaseChannelIcon
             channelType={channel.type}
         />

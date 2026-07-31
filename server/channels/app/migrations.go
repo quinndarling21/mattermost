@@ -51,6 +51,9 @@ const (
 
 	boardsPropertySetupDoneKey     = "boards_property_setup_done"
 	boardsPropertyMigrationVersion = "v1"
+
+	channelEmojiSetupDoneKey     = "channel_emoji_setup_done"
+	channelEmojiMigrationVersion = "v1"
 )
 
 // This function migrates the default built in roles from code/config to the database.
@@ -930,6 +933,50 @@ func (s *Server) doSetupManagedCategoryProperties() error {
 	return s.cacheManagedCategoryIDs()
 }
 
+func (s *Server) doSetupChannelEmojiProperties() error {
+	var nfErr *store.ErrNotFound
+	data, err := s.Store().System().GetByName(channelEmojiSetupDoneKey)
+	if err != nil && !errors.As(err, &nfErr) {
+		return fmt.Errorf("could not query channel emoji migration: %w", err)
+	}
+	if data != nil && data.Value == channelEmojiMigrationVersion {
+		return nil
+	}
+
+	group, err := s.propertyService.RegisterPropertyGroup(&model.PropertyGroup{Name: model.ChannelEmojiPropertyGroupName, Version: model.PropertyGroupVersionV2})
+	if err != nil {
+		return fmt.Errorf("failed to register channel emoji group: %w", err)
+	}
+
+	_, err = s.propertyService.GetPropertyFieldByName(nil, group.ID, "", model.ChannelEmojiPropertyFieldName)
+	if err != nil {
+		field := &model.PropertyField{
+			GroupID:           group.ID,
+			Name:              model.ChannelEmojiPropertyFieldName,
+			Type:              model.PropertyFieldTypeText,
+			ObjectType:        model.PropertyValueTargetTypeChannel,
+			TargetType:        "system",
+			TargetID:          "",
+			Protected:         true,
+			PermissionField:   model.NewPointer(model.PermissionLevelNone),
+			PermissionValues:  model.NewPointer(model.PermissionLevelAdmin),
+			PermissionOptions: model.NewPointer(model.PermissionLevelNone),
+		}
+
+		if _, err := s.propertyService.CreatePropertyField(nil, field); err != nil {
+			if _, retryErr := s.propertyService.GetPropertyFieldByName(nil, group.ID, "", model.ChannelEmojiPropertyFieldName); retryErr != nil {
+				return fmt.Errorf("failed to create channel emoji field: %w", err)
+			}
+		}
+	}
+
+	if err := s.Store().System().SaveOrUpdate(&model.System{Name: channelEmojiSetupDoneKey, Value: channelEmojiMigrationVersion}); err != nil {
+		return fmt.Errorf("failed to save channel emoji setup done flag: %w", err)
+	}
+
+	return nil
+}
+
 func (s *Server) doSetupCPADisplayNameBackfill(rctx request.CTX) error {
 	var nfErr *store.ErrNotFound
 	data, err := s.Store().System().GetByName(cpaDisplayNameBackfillKey)
@@ -1172,6 +1219,7 @@ func (s *Server) doAppMigrations() {
 		{"Content Flagging Properties Setup", s.doSetupContentFlaggingProperties},
 		{"Boards Properties Setup", s.doSetupBoardsProperties},
 		{"Managed Category Properties Setup", s.doSetupManagedCategoryProperties},
+		{"Channel Emoji Properties Setup", s.doSetupChannelEmojiProperties},
 	}
 
 	for i := range m1 {

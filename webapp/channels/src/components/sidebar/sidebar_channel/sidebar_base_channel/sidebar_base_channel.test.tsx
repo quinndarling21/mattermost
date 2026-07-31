@@ -1,10 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- JSX in this test still requires React at runtime.
 import React from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
+import useChannelEmoji from 'components/common/hooks/useChannelEmoji';
 import SidebarBaseChannel from 'components/sidebar/sidebar_channel/sidebar_base_channel/sidebar_base_channel';
 
 import {renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
@@ -13,10 +15,16 @@ jest.mock('components/tours/onboarding_tour', () => ({
     ChannelsAndDirectMessagesTour: () => null,
 }));
 
+jest.mock('components/common/hooks/useChannelEmoji', () => ({
+    __esModule: true,
+    default: jest.fn(() => ({emoji: '', field: null, loading: false})),
+    formatChannelEmojiForDisplay: (emoji: string) => emoji,
+}));
+
 jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
     const React = require('react');
 
-    return ({label, channelLeaveHandler}: {label: string; channelLeaveHandler?: (callback: () => void) => void}) => {
+    return ({label, icon, channelLeaveHandler}: {label: string; icon?: React.ReactNode; channelLeaveHandler?: (callback: () => void) => void}) => {
         const [isOpen, setIsOpen] = React.useState(false);
 
         return (
@@ -40,6 +48,7 @@ jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
                         </button>
                     </div>
                 )}
+                {icon}
                 <div>{label}</div>
             </div>
         );
@@ -78,6 +87,16 @@ describe('components/sidebar/sidebar_channel/sidebar_base_channel', () => {
         );
 
         expect(container).toMatchSnapshot();
+    });
+
+    test('should show the configured channel emoji', () => {
+        (useChannelEmoji as jest.Mock).mockReturnValueOnce({emoji: '🚀', field: {id: 'field_id'}, loading: false});
+
+        renderWithContext(
+            <SidebarBaseChannel {...baseProps}/>,
+        );
+
+        expect(screen.getByText('🚀')).toBeInTheDocument();
     });
 
     test('should match snapshot when shared channel', () => {
