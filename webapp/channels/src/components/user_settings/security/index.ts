@@ -15,6 +15,7 @@ import {getBool} from 'mattermost-redux/selectors/entities/preferences';
 import * as UserUtils from 'mattermost-redux/utils/user_utils';
 
 import {Preferences} from 'utils/constants';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import SecurityTab from './user_settings_security';
 
@@ -25,6 +26,7 @@ type Props = {
     closeModal: () => void;
     collapseModal: () => void;
     setRequireConfirm: () => void;
+    searchFilter?: UserSettingsSearchFilter;
 };
 
 function mapStateToProps(state: GlobalState, ownProps: Props) {

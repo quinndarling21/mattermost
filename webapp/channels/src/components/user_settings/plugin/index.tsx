@@ -7,12 +7,14 @@ import {useIntl} from 'react-intl';
 import PluggableErrorBoundary from 'plugins/pluggable/error_boundary';
 
 import type {PluginConfiguration} from 'types/plugins/user_settings';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import PluginAction from './plugin_action';
 import PluginSetting from './plugin_setting';
 
 import SettingDesktopHeader from '../headers/setting_desktop_header';
 import SettingMobileHeader from '../headers/setting_mobile_header';
+import UserSettingsSearchSection from '../search/user_settings_search_section';
 
 type Props = {
     updateSection: (section: string) => void;
@@ -20,6 +22,7 @@ type Props = {
     closeModal: () => void;
     collapseModal: () => void;
     settings: PluginConfiguration;
+    searchFilter?: UserSettingsSearchFilter;
 }
 
 const PluginTab = ({
@@ -28,8 +31,10 @@ const PluginTab = ({
     collapseModal,
     settings,
     updateSection,
+    searchFilter,
 }: Props) => {
     const intl = useIntl();
+    const resolvedSearchFilter = searchFilter ?? {query: '', matchingSections: null};
 
     const headerText = intl.formatMessage(
         {id: 'user.settings.plugins.title', defaultMessage: '{pluginName} Settings'},
@@ -74,10 +79,15 @@ const PluginTab = ({
                     }
 
                     return (
-                        <React.Fragment key={v.title}>
+                        <UserSettingsSearchSection
+                            key={v.title}
+                            tab={settings.id}
+                            section={v.title}
+                            searchFilter={resolvedSearchFilter}
+                        >
                             {sectionEl}
                             <div className='divider-light'/>
-                        </React.Fragment>
+                        </UserSettingsSearchSection>
                     );
                 },
                 )}

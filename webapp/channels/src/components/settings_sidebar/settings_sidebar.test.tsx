@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -89,6 +89,79 @@ describe('show PLUGIN PREFERENCES only when plugin tabs are added', () => {
         renderWithContext(<SettingsSidebar {...props}/>);
 
         expect(screen.queryByText('PLUGIN PREFERENCES')).toBeInTheDocument();
+    });
+});
+
+describe('settings search', () => {
+    it('filters tabs when matchingTabs is provided', () => {
+        const props: Props = {
+            ...baseProps,
+            enableSearch: true,
+            searchQuery: 'theme',
+            searchPlaceholder: 'Find settings',
+            onSearchChange: jest.fn(),
+            onSearchClear: jest.fn(),
+            matchingTabs: new Set(['display']),
+            tabs: [
+                {
+                    icon: 'icon',
+                    iconTitle: 'Notifications icon',
+                    name: 'notifications',
+                    uiName: 'Notifications',
+                },
+                {
+                    icon: 'icon',
+                    iconTitle: 'Display icon',
+                    name: 'display',
+                    uiName: 'Display',
+                },
+            ],
+        };
+
+        renderWithContext(<SettingsSidebar {...props}/>);
+
+        expect(screen.queryByText('Display')).toBeInTheDocument();
+        expect(screen.queryByText('Notifications')).not.toBeInTheDocument();
+    });
+
+    it('shows no results message when requested', () => {
+        const props: Props = {
+            ...baseProps,
+            enableSearch: true,
+            searchQuery: 'missing',
+            showNoSearchResults: true,
+            onSearchChange: jest.fn(),
+            onSearchClear: jest.fn(),
+            matchingTabs: new Set(),
+            tabs: [{
+                icon: 'icon',
+                iconTitle: 'title',
+                name: 'tab',
+                uiName: 'Tab UI Name',
+            }],
+        };
+
+        renderWithContext(<SettingsSidebar {...props}/>);
+
+        expect(screen.getByTestId('userSettingsSidebarNoResults')).toBeInTheDocument();
+        expect(screen.queryByText('Tab UI Name')).not.toBeInTheDocument();
+    });
+
+    it('calls onSearchChange when typing in the search input', () => {
+        const onSearchChange = jest.fn();
+        const props: Props = {
+            ...baseProps,
+            enableSearch: true,
+            searchQuery: '',
+            onSearchChange,
+            onSearchClear: jest.fn(),
+            tabs: [],
+        };
+
+        renderWithContext(<SettingsSidebar {...props}/>);
+
+        fireEvent.change(screen.getByTestId('userSettingsSidebarSearch'), {target: {value: 'theme'}});
+        expect(onSearchChange).toHaveBeenCalled();
     });
 });
 

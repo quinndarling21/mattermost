@@ -19,6 +19,7 @@ import {isCallsEnabled, isCallsRingingEnabledOnServer} from 'selectors/calls';
 import {isEnterpriseOrCloudOrSKUStarterFree} from 'utils/license_utils';
 
 import type {GlobalState} from 'types/store';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import UserSettingsNotifications from './user_settings_notifications';
 
@@ -30,6 +31,7 @@ export type OwnProps = {
     collapseModal: () => void;
     adminMode?: boolean;
     userPreferences?: PreferencesType;
+    searchFilter?: UserSettingsSearchFilter;
 }
 
 const mapStateToProps = (state: GlobalState, props: OwnProps) => {

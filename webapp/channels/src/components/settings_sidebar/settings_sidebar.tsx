@@ -5,6 +5,9 @@ import classNames from 'classnames';
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
+import QuickInput from 'components/quick_input';
+import SearchIcon from 'components/widgets/icons/search_icon';
+
 import Constants from 'utils/constants';
 import {isKeyPressed} from 'utils/keyboard';
 
@@ -23,6 +26,14 @@ export type Props = {
     pluginTabs?: Tab[];
     updateTab: (name: string) => void;
     isMobileView: boolean;
+    enableSearch?: boolean;
+    searchQuery?: string;
+    searchPlaceholder?: string;
+    searchAriaLabel?: string;
+    onSearchChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onSearchClear?: () => void;
+    matchingTabs?: Set<string> | null;
+    showNoSearchResults?: boolean;
 };
 
 export default class SettingsSidebar extends React.PureComponent<Props> {
@@ -34,10 +45,22 @@ export default class SettingsSidebar extends React.PureComponent<Props> {
         this.buttonRefs = new Map();
     }
 
+    private isTabVisible(tab: Tab): boolean {
+        if (tab.display === false) {
+            return false;
+        }
+
+        if (this.props.matchingTabs && !this.props.matchingTabs.has(tab.name)) {
+            return false;
+        }
+
+        return true;
+    }
+
     // Get all visible tabs in the correct order
     private getVisibleTabs(): Tab[] {
-        const visibleTabs = this.props.tabs.filter((tab) => tab.display !== false);
-        const visiblePluginTabs = this.props.pluginTabs?.filter((tab) => tab.display !== false) || [];
+        const visibleTabs = this.props.tabs.filter((tab) => this.isTabVisible(tab));
+        const visiblePluginTabs = this.props.pluginTabs?.filter((tab) => this.isTabVisible(tab)) || [];
         return [...visibleTabs, ...visiblePluginTabs];
     }
 
@@ -148,16 +171,43 @@ export default class SettingsSidebar extends React.PureComponent<Props> {
         );
     }
 
+    private renderSearchInput() {
+        if (!this.props.enableSearch) {
+            return null;
+        }
+
+        return (
+            <div className='settings-sidebar__search'>
+                <SearchIcon
+                    className='search__icon'
+                    aria-hidden='true'
+                />
+                <QuickInput
+                    id='userSettingsSidebarSearch'
+                    data-testid='userSettingsSidebarSearch'
+                    className={classNames('settings-sidebar__search-input', {active: Boolean(this.props.searchQuery)})}
+                    type='text'
+                    value={this.props.searchQuery}
+                    onChange={this.props.onSearchChange}
+                    placeholder={this.props.searchPlaceholder}
+                    aria-label={this.props.searchAriaLabel}
+                    clearable={true}
+                    onClear={this.props.onSearchClear}
+                />
+            </div>
+        );
+    }
+
     public render() {
         // Filter regular tabs and plugin tabs separately for rendering
-        const visibleTabs = this.props.tabs.filter((tab) => tab.display !== false);
+        const visibleTabs = this.props.tabs.filter((tab) => this.isTabVisible(tab));
 
         // Map regular tabs
         const tabList = visibleTabs.map((tab) => this.renderTab(tab));
 
         let pluginTabList: React.ReactNode;
         if (this.props.pluginTabs?.length) {
-            const visiblePluginTabs = this.props.pluginTabs.filter((tab) => tab.display !== false);
+            const visiblePluginTabs = this.props.pluginTabs.filter((tab) => this.isTabVisible(tab));
             if (visiblePluginTabs.length) {
                 pluginTabList = (
                     <>
@@ -185,18 +235,35 @@ export default class SettingsSidebar extends React.PureComponent<Props> {
             }
         }
 
+        const noResults = this.props.showNoSearchResults && this.props.searchQuery;
+
         return (
-            <div
-                id='tabList'
-                className='nav nav-pills nav-stacked'
-                role='tablist'
-                aria-orientation='vertical'
-            >
-                <div role='group'>
-                    {tabList}
-                </div>
-                {pluginTabList}
-            </div>
+            <>
+                {this.renderSearchInput()}
+                {noResults ? (
+                    <div
+                        className='settings-sidebar__no-results'
+                        data-testid='userSettingsSidebarNoResults'
+                    >
+                        <FormattedMessage
+                            id='user.settings.search.noResults'
+                            defaultMessage='No settings match your search.'
+                        />
+                    </div>
+                ) : (
+                    <div
+                        id='tabList'
+                        className='nav nav-pills nav-stacked'
+                        role='tablist'
+                        aria-orientation='vertical'
+                    >
+                        <div role='group'>
+                            {tabList}
+                        </div>
+                        {pluginTabList}
+                    </div>
+                )}
+            </>
         );
     }
 }

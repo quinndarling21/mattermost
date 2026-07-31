@@ -23,6 +23,8 @@ import type {Language} from 'i18n/i18n';
 import Constants from 'utils/constants';
 import {getBrowserTimezone} from 'utils/timezone';
 import {a11yFocus} from 'utils/utils';
+import {isUserSettingsSectionVisible} from 'utils/user_settings_search';
+import type {UserSettingsSearchFilter} from 'utils/user_settings_search';
 
 import ManageLanguages from './manage_languages';
 import ManageTimezones from './manage_timezones';
@@ -84,6 +86,7 @@ export type OwnProps = {
     user: UserProfile;
     adminMode?: boolean;
     userPreferences?: PreferencesType;
+    searchFilter?: UserSettingsSearchFilter;
 }
 
 type Props = OwnProps & {
@@ -374,6 +377,11 @@ export default class UserSettingsDisplay extends React.PureComponent<Props, Stat
         this.setState({isSaving: false});
     };
 
+    isSectionVisible(section: string) {
+        const searchFilter = this.props.searchFilter ?? {query: '', matchingSections: null};
+        return isUserSettingsSectionVisible('display', section, searchFilter);
+    }
+
     createSection(props: SectionProps) {
         const {
             section,
@@ -387,6 +395,10 @@ export default class UserSettingsDisplay extends React.PureComponent<Props, Stat
             disabled,
             onSubmit,
         } = props;
+
+        if (!this.isSectionVisible(section)) {
+            return null;
+        }
         let extraInfo = null;
         let submit: (() => Promise<void>) | (() => void) | null = onSubmit || this.handleSubmit;
 
@@ -854,7 +866,7 @@ export default class UserSettingsDisplay extends React.PureComponent<Props, Stat
         });
 
         let timezoneSelection;
-        if (!this.props.shouldAutoUpdateTimezone) {
+        if (!this.props.shouldAutoUpdateTimezone && this.isSectionVisible('timezone')) {
             const userTimezone = this.props.userTimezone;
             const active = this.props.activeSection === 'timezone';
             let max = null;
@@ -1047,43 +1059,41 @@ export default class UserSettingsDisplay extends React.PureComponent<Props, Stat
             }),
         });
 
-        let languagesSection;
-        const userLocale = this.props.userLocale;
-        const localeName = getLanguageInfo(userLocale).name;
+        let languagesSection = null;
+        if (Object.keys(this.props.locales).length !== 1 && this.isSectionVisible('languages')) {
+            const userLocale = this.props.userLocale;
+            const localeName = getLanguageInfo(userLocale)?.name ?? userLocale;
 
-        languagesSection = (
-            <div>
-                <SettingItem
-                    active={this.props.activeSection === 'languages'}
-                    areAllSectionsInactive={this.props.activeSection === ''}
-                    title={
-                        <FormattedMessage
-                            id='user.settings.display.language'
-                            defaultMessage='Language'
-                        />
-                    }
-                    describe={localeName}
-                    section={'languages'}
-                    updateSection={this.updateSection}
-                    max={(
-                        <ManageLanguages
-                            user={this.props.user}
-                            locale={userLocale}
-                            updateSection={this.updateSection}
-                            adminMode={this.props.adminMode}
-                        />
-                    )}
-                />
-                <div className='divider-dark'/>
-            </div>
-        );
-
-        if (Object.keys(this.props.locales).length === 1) {
-            languagesSection = null;
+            languagesSection = (
+                <div>
+                    <SettingItem
+                        active={this.props.activeSection === 'languages'}
+                        areAllSectionsInactive={this.props.activeSection === ''}
+                        title={
+                            <FormattedMessage
+                                id='user.settings.display.language'
+                                defaultMessage='Language'
+                            />
+                        }
+                        describe={localeName}
+                        section={'languages'}
+                        updateSection={this.updateSection}
+                        max={(
+                            <ManageLanguages
+                                user={this.props.user}
+                                locale={userLocale}
+                                updateSection={this.updateSection}
+                                adminMode={this.props.adminMode}
+                            />
+                        )}
+                    />
+                    <div className='divider-dark'/>
+                </div>
+            );
         }
 
         let themeSection;
-        if (this.props.enableThemeSelection && !this.props.adminMode) {
+        if (this.props.enableThemeSelection && !this.props.adminMode && this.isSectionVisible('theme')) {
             themeSection = (
                 <div>
                     <ThemeSetting
@@ -1134,7 +1144,7 @@ export default class UserSettingsDisplay extends React.PureComponent<Props, Stat
             });
         }
 
-        const renderEmoticonsAsEmojiSection = (
+        const renderEmoticonsAsEmojiSection = this.isSectionVisible('renderEmoticonsAsEmoji') ? (
             <div>
                 <SettingItem
                     active={this.props.activeSection === 'renderEmoticonsAsEmoji'}
@@ -1170,7 +1180,7 @@ export default class UserSettingsDisplay extends React.PureComponent<Props, Stat
                 />
                 <div className='divider-dark'/>
             </div>
-        );
+        ) : null;
 
         return (
             <div
