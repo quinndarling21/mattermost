@@ -27,6 +27,9 @@ import {getDisplayName} from 'utils/utils';
 
 import type {PluginConfiguration} from 'types/plugins/user_settings';
 
+import UserSettingsSearch from './user_settings_search';
+import {buildUserSettingsSearchIndex} from './user_settings_search_index';
+
 import './user_settings_modal.scss';
 
 export type OwnProps = {
@@ -58,6 +61,7 @@ type State = {
     show: boolean;
     resendStatus: string;
     loading: boolean;
+    searchTerm: string;
 };
 
 class UserSettingsModal extends React.PureComponent<Props, State> {
@@ -77,6 +81,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             show: true,
             resendStatus: '',
             loading: false,
+            searchTerm: '',
         };
 
         this.requireConfirm = false;
@@ -164,6 +169,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: this.props.isContentProductSettings ? 'notifications' : 'profile',
             active_section: '',
+            searchTerm: '',
         });
         if (this.props.focusOriginElement) {
             focusElement(this.props.focusOriginElement, true);
@@ -257,6 +263,28 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         }
     };
 
+    handleSearchTermChange = (searchTerm: string) => {
+        this.setState({searchTerm});
+    };
+
+    navigateToSetting = (tab?: string, section?: string, skipConfirm?: boolean) => {
+        if (!skipConfirm && this.requireConfirm) {
+            this.showConfirmModal(() => this.navigateToSetting(tab, section, true));
+            return;
+        }
+
+        this.setState({
+            active_tab: tab,
+            active_section: section ?? '',
+            searchTerm: '',
+        });
+    };
+
+    handleSearchResultSelect = (tab: string, section?: string) => {
+        this.navigateToSetting(tab, section);
+        document.querySelector('.UserSettingsModal.settings-modal .modal-dialog')?.classList.add('display--content');
+    };
+
     getUserSettingsTabs = () => {
         const {formatMessage} = this.props.intl;
         return [
@@ -333,6 +361,13 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             modalTitle = formatMessage({id: 'user.settings.modal.title', defaultMessage: 'Profile'});
         }
 
+        const searchIndex = buildUserSettingsSearchIndex(
+            formatMessage,
+            this.props.isContentProductSettings,
+            this.props.pluginSettings,
+        );
+        const showSearchResults = this.state.searchTerm.trim().length > 0;
+
         const headerTitle = (
             <div
                 className='UserSettingsModal__headerWrapper'
@@ -389,12 +424,20 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                         <>
                             <div className='settings-table'>
                                 <div className='settings-links'>
-                                    <SettingsSidebar
-                                        tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
-                                        pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
-                                        activeTab={this.state.active_tab}
-                                        updateTab={this.updateTab}
+                                    <UserSettingsSearch
+                                        searchTerm={this.state.searchTerm}
+                                        entries={searchIndex}
+                                        onSearchTermChange={this.handleSearchTermChange}
+                                        onSelectResult={this.handleSearchResultSelect}
                                     />
+                                    {!showSearchResults && (
+                                        <SettingsSidebar
+                                            tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
+                                            pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
+                                            activeTab={this.state.active_tab}
+                                            updateTab={this.updateTab}
+                                        />
+                                    )}
                                 </div>
                                 <div className='settings-content minimize-settings'>
                                     <UserSettings

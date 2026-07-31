@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -252,5 +253,101 @@ describe('plugin tabs use the correct icon', () => {
         expect(element).toBeInTheDocument();
         expect(element!.nodeName).toBe('I');
         expect(element?.className).toBe('icon icon-phone-in-talk');
+    });
+});
+
+describe('settings search', () => {
+    it('renders search input in the settings modal', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        expect(screen.getByTestId('settings-search-input')).toBeInTheDocument();
+    });
+
+    it('shows matching results and navigates to a tab', async () => {
+        renderWithContext(
+            <UserSettingsModal
+                {...baseProps}
+                isContentProductSettings={false}
+            />,
+            baseState,
+        );
+
+        await userEvent.type(screen.getByTestId('settings-search-input'), 'security');
+
+        expect(screen.getByTestId('settings-search-results')).toBeInTheDocument();
+        expect(screen.getByTestId('settings-search-result-security')).toBeInTheDocument();
+        expect(screen.queryByTestId('profile-tab-button')).not.toBeInTheDocument();
+
+        await userEvent.click(screen.getByTestId('settings-search-result-security'));
+
+        expect(screen.getByTestId('settings-search-input')).toHaveValue('');
+        expect(screen.getByTestId('security-tab-button')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('opens a matching section from search results', async () => {
+        renderWithContext(
+            <UserSettingsModal
+                {...baseProps}
+                isContentProductSettings={false}
+            />,
+            baseState,
+        );
+
+        await userEvent.type(screen.getByTestId('settings-search-input'), 'password');
+        await userEvent.click(screen.getByTestId('settings-search-result-security-password'));
+
+        expect(screen.getByTestId('security-tab-button')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByText('Password')).toBeInTheDocument();
+    });
+
+    it('shows empty state for unmatched queries', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        await userEvent.type(screen.getByTestId('settings-search-input'), 'zzzznotfound');
+
+        expect(screen.getByTestId('settings-search-empty')).toBeInTheDocument();
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+    });
+
+    it('restores sidebar after clearing search', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        await userEvent.type(screen.getByTestId('settings-search-input'), 'notifications');
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+
+        await userEvent.click(screen.getByTestId('settings-search-clear'));
+
+        expect(screen.getByTestId('settings-search-input')).toHaveValue('');
+        expect(screen.getByTestId('notifications-tab-button')).toBeInTheDocument();
+    });
+
+    it('searches plugin tabs and sections', async () => {
+        const uiName = 'Plugin A';
+        const sectionTitle = 'Plugin A Section';
+        const state: DeepPartial<GlobalState> = {
+            plugins: {
+                userSettings: {
+                    plugin_a: {
+                        id: 'plugin_a',
+                        sections: [
+                            {
+                                title: sectionTitle,
+                                settings: [{name: 'setting'}],
+                            },
+                        ],
+                        uiName,
+                    },
+                },
+            },
+        };
+
+        renderWithContext(<UserSettingsModal {...baseProps}/>, mergeObjects(baseState, state));
+
+        await userEvent.type(screen.getByTestId('settings-search-input'), uiName);
+        expect(screen.getByTestId('settings-search-result-plugin_a')).toBeInTheDocument();
+
+        await userEvent.clear(screen.getByTestId('settings-search-input'));
+        await userEvent.type(screen.getByTestId('settings-search-input'), sectionTitle);
+        expect(screen.getByTestId(`settings-search-result-plugin_a-${sectionTitle}`)).toBeInTheDocument();
     });
 });
