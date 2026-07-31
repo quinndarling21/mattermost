@@ -15,6 +15,7 @@ import type {ActionResult} from 'mattermost-redux/types/actions';
 import ConfirmModal from 'components/confirm_modal';
 import SettingsSidebar from 'components/settings_sidebar';
 import UserSettings from 'components/user_settings';
+import SettingsSearch from 'components/user_settings/modal/settings_search/settings_search';
 import LoadingSpinner from 'components/widgets/loading/loading_spinner';
 import SmartLoader from 'components/widgets/smart_loader';
 
@@ -53,6 +54,7 @@ export type Props = OwnProps & {
 type State = {
     active_tab?: string;
     active_section: string;
+    searchTerm: string;
     showConfirmModal: boolean;
     enforceFocus?: boolean;
     show: boolean;
@@ -66,12 +68,17 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     private afterConfirm: (() => void) | null;
     private modalBodyRef: React.RefObject<HTMLDivElement>;
 
+    // Set when a search result navigates to a specific section, so that the newly
+    // expanded section can be scrolled into view once it renders.
+    private scrollToSectionOnUpdate: boolean;
+
     constructor(props: Props) {
         super(props);
 
         this.state = {
             active_tab: props.activeTab ?? (props.isContentProductSettings ? 'notifications' : 'profile'),
             active_section: '',
+            searchTerm: '',
             showConfirmModal: false,
             enforceFocus: true,
             show: true,
@@ -86,6 +93,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         // modal. It will be passed a function to call on modal confirm
         this.customConfirmAction = null;
         this.afterConfirm = null;
+        this.scrollToSectionOnUpdate = false;
 
         this.modalBodyRef = React.createRef();
     }
@@ -133,7 +141,28 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                 el.scrollTop = 0;
             }
         }
+
+        // When a search result opened a specific section, bring it into view. This
+        // runs after the tab-change scroll reset above so it takes precedence.
+        if (this.scrollToSectionOnUpdate && this.state.active_section) {
+            this.scrollToSectionOnUpdate = false;
+            this.scrollActiveSectionIntoView();
+        }
     }
+
+    scrollActiveSectionIntoView = () => {
+        // Defer to the next frame so the newly expanded section is in the DOM.
+        window.requestAnimationFrame(() => {
+            const body = this.modalBodyRef.current;
+            if (!body) {
+                return;
+            }
+            const section = body.querySelector('.section-max');
+            if (section && typeof section.scrollIntoView === 'function') {
+                section.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+        });
+    };
 
     setLoadingFinished = () => {
         this.setState({loading: false});
@@ -164,6 +193,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: this.props.isContentProductSettings ? 'notifications' : 'profile',
             active_section: '',
+            searchTerm: '',
         });
         if (this.props.focusOriginElement) {
             focusElement(this.props.focusOriginElement, true);
@@ -179,6 +209,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: '',
             active_section: '',
+            searchTerm: '',
         });
     };
 
@@ -257,6 +288,30 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         }
     };
 
+    handleSearchChange = (searchTerm: string) => {
+        this.setState({searchTerm});
+    };
+
+    // Navigates to a setting selected from the search results. Routes through the
+    // existing confirm flow so unsaved changes are still protected, and clears the
+    // search once navigation actually happens.
+    handleSearchNavigate = (tab: string, section?: string) => {
+        const navigate = () => {
+            this.scrollToSectionOnUpdate = Boolean(section);
+            this.setState({
+                active_tab: tab,
+                active_section: section ?? '',
+                searchTerm: '',
+            });
+        };
+
+        if (this.requireConfirm) {
+            this.showConfirmModal(navigate);
+        } else {
+            navigate();
+        }
+    };
+
     getUserSettingsTabs = () => {
         const {formatMessage} = this.props.intl;
         return [
@@ -320,6 +375,10 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
 
     render() {
         const {formatMessage} = this.props.intl;
+
+        const settingsTabs = this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab();
+        const pluginTabs = this.props.isContentProductSettings ? this.getPluginsSettingsTab() : [];
+        const isSearching = this.state.searchTerm.trim().length > 0;
 
         let modalTitle: string;
         if (this.props.adminMode && this.props.user) {
@@ -389,12 +448,21 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                         <>
                             <div className='settings-table'>
                                 <div className='settings-links'>
-                                    <SettingsSidebar
-                                        tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
-                                        pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
-                                        activeTab={this.state.active_tab}
-                                        updateTab={this.updateTab}
+                                    <SettingsSearch
+                                        searchTerm={this.state.searchTerm}
+                                        onChange={this.handleSearchChange}
+                                        tabs={settingsTabs}
+                                        pluginTabs={pluginTabs}
+                                        onNavigate={this.handleSearchNavigate}
                                     />
+                                    {!isSearching &&
+                                        <SettingsSidebar
+                                            tabs={settingsTabs}
+                                            pluginTabs={pluginTabs}
+                                            activeTab={this.state.active_tab}
+                                            updateTab={this.updateTab}
+                                        />
+                                    }
                                 </div>
                                 <div className='settings-content minimize-settings'>
                                     <UserSettings
