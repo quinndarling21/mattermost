@@ -24,6 +24,7 @@ const (
 	ChannelAutoFollowThreadsOff      = "off"
 	ChannelAutoFollowThreadsOn       = "on"
 	ChannelAutoFollowThreads         = "channel_auto_follow_threads"
+	SidebarEmojiNotifyProp           = "sidebar_emoji"
 	ChannelMemberNotifyPropsMaxRunes = 800000
 )
 
@@ -184,6 +185,12 @@ func IsChannelMemberNotifyPropsValid(notifyProps map[string]string, allowMissing
 		}
 	}
 
+	if sidebarEmoji, ok := notifyProps[SidebarEmojiNotifyProp]; ok {
+		if !IsSidebarEmojiValid(sidebarEmoji) {
+			return NewAppError("ChannelMember.IsValid", "model.channel_member.is_valid.sidebar_emoji_value.app_error", nil, "sidebar_emoji="+sidebarEmoji, http.StatusBadRequest)
+		}
+	}
+
 	jsonStringNotifyProps := string(ToJSON(notifyProps))
 	if utf8.RuneCountInString(jsonStringNotifyProps) > ChannelMemberNotifyPropsMaxRunes {
 		return NewAppError("ChannelMember.IsValid", "model.channel_member.is_valid.notify_props.app_error", nil, fmt.Sprint("length=", utf8.RuneCountInString(jsonStringNotifyProps)), http.StatusBadRequest)
@@ -237,6 +244,14 @@ func IsIgnoreChannelMentionsValid(ignoreChannelMentions string) bool {
 
 func IsChannelAutoFollowThreadsValid(channelAutoFollowThreads string) bool {
 	return channelAutoFollowThreads == ChannelAutoFollowThreadsOn || channelAutoFollowThreads == ChannelAutoFollowThreadsOff
+}
+
+func IsSidebarEmojiValid(sidebarEmoji string) bool {
+	if sidebarEmoji == "" {
+		return true
+	}
+
+	return len(sidebarEmoji) <= EmojiNameMaxLength && IsValidAlphaNumHyphenUnderscorePlus(sidebarEmoji)
 }
 
 func GetDefaultChannelNotifyProps() StringMap {

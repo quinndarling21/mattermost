@@ -30,6 +30,7 @@ export type ChannelNotifyProps = {
     push_threads: 'default' | 'all' | 'mention' | 'none';
     ignore_channel_mentions: 'default' | 'off' | 'on';
     channel_auto_follow_threads: 'off' | 'on';
+    sidebar_emoji?: string;
 };
 
 export type ChannelBanner = {
