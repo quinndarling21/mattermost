@@ -872,6 +872,12 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         );
     };
 
+    const getCloudDemoBadge = () => (
+        <p className='login-body-cloud-demo-badge'>
+            {formatMessage({id: 'login.cloudDemoBadge', defaultMessage: 'Cursor Cloud UI change is live'})}
+        </p>
+    );
+
     const getResetPasswordLink = () => {
         if (!PasswordEnableForgotLink || PasswordEnableForgotLink === 'false' || onlyLdapEnabled) {
             return null;
@@ -963,6 +969,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                         </h1>
                     )}
                     {getMessageSubtitle()}
+                    {!enableCustomBrand && getCloudDemoBadge()}
                 </div>
                 <div className='login-body-action'>
                     {!isMobileView && getAlternateLink()}

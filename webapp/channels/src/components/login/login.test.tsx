@@ -141,6 +141,7 @@ describe('components/login/Login', () => {
 
         expect(screen.queryByText('This server doesn’t have any sign-in methods enabled')).not.toBeInTheDocument();
         expect(screen.queryByText('Log in to your account')).toBeVisible();
+        expect(screen.queryByText('Cursor Cloud UI change is live')).toBeVisible();
     });
 
     it('should handle session expired', async () => {
