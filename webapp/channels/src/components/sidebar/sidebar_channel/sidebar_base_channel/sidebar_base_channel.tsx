@@ -6,10 +6,12 @@ import {useIntl} from 'react-intl';
 
 import type {Channel} from '@mattermost/types/channels';
 
+import RenderEmoji from 'components/emoji/render_emoji';
 import LeaveChannelModal from 'components/leave_channel_modal';
 import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_channel_link';
 
 import Constants, {ModalIdentifiers} from 'utils/constants';
+import {trimmedEmojiName} from 'utils/emoji_utils';
 
 import SidebarBaseChannelIcon from './sidebar_base_channel_icon';
 
@@ -44,7 +46,13 @@ const SidebarBaseChannel = ({
         channelLeaveHandler = handleLeaveWithConfirmation;
     }
 
-    const channelIcon = (
+    const emojiName = channel.emoji ? trimmedEmojiName(channel.emoji) : '';
+    const channelIcon = emojiName ? (
+        <RenderEmoji
+            emojiName={emojiName}
+            size={16}
+        />
+    ) : (
         <SidebarBaseChannelIcon
             channelType={channel.type}
         />

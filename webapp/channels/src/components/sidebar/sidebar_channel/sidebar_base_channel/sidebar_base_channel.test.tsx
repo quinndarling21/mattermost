@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import type {ReactNode} from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
@@ -13,10 +14,17 @@ jest.mock('components/tours/onboarding_tour', () => ({
     ChannelsAndDirectMessagesTour: () => null,
 }));
 
+jest.mock('components/emoji/render_emoji', () => {
+    const React = require('react');
+    return ({emojiName}: {emojiName: string}) => (
+        <span data-testid='render-emoji'>{emojiName}</span>
+    );
+});
+
 jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
     const React = require('react');
 
-    return ({label, channelLeaveHandler}: {label: string; channelLeaveHandler?: (callback: () => void) => void}) => {
+    return ({label, icon, channelLeaveHandler}: {label: string; icon?: ReactNode; channelLeaveHandler?: (callback: () => void) => void}) => {
         const [isOpen, setIsOpen] = React.useState(false);
 
         return (
@@ -40,6 +48,7 @@ jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
                         </button>
                     </div>
                 )}
+                <div data-testid='channel-icon'>{icon}</div>
                 <div>{label}</div>
             </div>
         );
@@ -127,6 +136,44 @@ describe('components/sidebar/sidebar_channel/sidebar_base_channel', () => {
         );
 
         expect(container).toMatchSnapshot();
+    });
+
+    test('renders default public channel icon when no emoji is set', () => {
+        renderWithContext(<SidebarBaseChannel {...baseProps}/>);
+
+        const iconContainer = screen.getByTestId('channel-icon');
+        expect(iconContainer.querySelector('.icon-globe')).toBeInTheDocument();
+        expect(screen.queryByTestId('render-emoji')).not.toBeInTheDocument();
+    });
+
+    test('renders the channel emoji instead of the default icon when emoji is set', () => {
+        const props = {
+            ...baseProps,
+            channel: {
+                ...baseProps.channel,
+                emoji: 'rocket',
+            },
+        };
+
+        renderWithContext(<SidebarBaseChannel {...props}/>);
+
+        const iconContainer = screen.getByTestId('channel-icon');
+        expect(iconContainer.querySelector('.icon-globe')).not.toBeInTheDocument();
+        expect(screen.getByTestId('render-emoji')).toHaveTextContent('rocket');
+    });
+
+    test('strips wrapping colons from a stored emoji shortcode', () => {
+        const props = {
+            ...baseProps,
+            channel: {
+                ...baseProps.channel,
+                emoji: ':rocket:',
+            },
+        };
+
+        renderWithContext(<SidebarBaseChannel {...props}/>);
+
+        expect(screen.getByTestId('render-emoji')).toHaveTextContent('rocket');
     });
 
     test('expect leaveChannel to be called when leave public channel ', async () => {
