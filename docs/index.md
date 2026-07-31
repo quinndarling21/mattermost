@@ -17,7 +17,7 @@ cd docs
 npm run dev
 ```
 
-The local docs site listens at `http://localhost:3001`. The Mattermost web app header links to that address when you are signed in.
+The local docs site listens at `http://localhost:3002`. The Mattermost web app header links to that address when you are signed in.
 
 ## Source of truth
 
