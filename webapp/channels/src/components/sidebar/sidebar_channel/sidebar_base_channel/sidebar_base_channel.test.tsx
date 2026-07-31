@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {type ReactNode} from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
@@ -16,7 +16,7 @@ jest.mock('components/tours/onboarding_tour', () => ({
 jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
     const React = require('react');
 
-    return ({label, channelLeaveHandler}: {label: string; channelLeaveHandler?: (callback: () => void) => void}) => {
+    return ({label, icon, channelLeaveHandler}: {label: string; icon?: ReactNode; channelLeaveHandler?: (callback: () => void) => void}) => {
         const [isOpen, setIsOpen] = React.useState(false);
 
         return (
@@ -40,6 +40,7 @@ jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
                         </button>
                     </div>
                 )}
+                <div data-testid='channel-icon'>{icon}</div>
                 <div>{label}</div>
             </div>
         );
@@ -127,6 +128,34 @@ describe('components/sidebar/sidebar_channel/sidebar_base_channel', () => {
         );
 
         expect(container).toMatchSnapshot();
+    });
+
+    test('should render the default channel icon when no emoji is set', () => {
+        renderWithContext(
+            <SidebarBaseChannel {...baseProps}/>,
+        );
+
+        const iconContainer = screen.getByTestId('channel-icon');
+        expect(iconContainer.querySelector('.icon-globe')).toBeInTheDocument();
+        expect(iconContainer.querySelector('.SidebarChannelLink__emoji')).not.toBeInTheDocument();
+    });
+
+    test('should render the channel emoji in place of the default icon when an emoji is set', () => {
+        const props = {
+            ...baseProps,
+            channel: {
+                ...baseProps.channel,
+                emoji: 'rocket',
+            },
+        };
+
+        renderWithContext(
+            <SidebarBaseChannel {...props}/>,
+        );
+
+        const iconContainer = screen.getByTestId('channel-icon');
+        expect(iconContainer.querySelector('.SidebarChannelLink__emoji')).toBeInTheDocument();
+        expect(iconContainer.querySelector('.icon-globe')).not.toBeInTheDocument();
     });
 
     test('expect leaveChannel to be called when leave public channel ', async () => {

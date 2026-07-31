@@ -93,6 +93,14 @@ export type Channel = {
     managed_category_name?: string;
     autotranslation?: boolean;
     discoverable?: boolean;
+
+    /**
+     * Optional emoji name (without surrounding colons, e.g. "rocket")
+     * associated with the channel. When set, it is displayed next to the
+     * channel in the left-hand sidebar so users can visually categorize
+     * channels.
+     */
+    emoji?: string;
 };
 
 export type ServerChannel = Channel & {
