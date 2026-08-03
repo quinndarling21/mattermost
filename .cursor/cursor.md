@@ -151,4 +151,6 @@ Notes:
 
 - Team Edition dev works without the sibling `enterprise` checkout. If the install hook fails on enterprise verification, set `CLOUD_AGENT_SKIP_ENTERPRISE=true` (runtime still uses `server/enterprise` source-available code).
 - Use tmux for long-running `make run` / `make run-server` sessions so the stack survives beyond a single shell command.
+- The running app UI is served by the Go server at `http://localhost:8065` (it serves the compiled webapp via the `server/client` symlink). Port `9005` is the webapp/webpack dev server used for assets and hot reload; it does not serve the full app at `/`, so verify UI at `:8065`.
+- If Docker ever has to be (re)installed at runtime on a bare VM and resolves to Docker 29+, fuse-overlayfs only works with `"features": { "containerd-snapshotter": false }` in `/etc/docker/daemon.json` (the pinned Dockerfile version 28.5.2 does not need this).
 - Quick verification commands after startup: `curl http://127.0.0.1:8065/api/v4/system/ping`, `cd server && make validate-go-version vet`, `cd server && make test-public`, `cd webapp && npm run test --workspace platform/client`.
