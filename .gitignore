@@ -165,7 +165,9 @@ docker-compose.override.yaml
 
 **/CLAUDE.local.md
 **/CLAUDE.md
-.claude
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 .cursorrules
 .cursor/*
 !.cursor/BUGBOT.md
