@@ -239,8 +239,9 @@ const NewSearch = (): JSX.Element => {
 
     const runSearch = useCallback(
         (searchType: string, searchTeam: string, searchTerms: string) => {
+            const trimmedTerms = searchTerms.trim();
             dispatch(updateSearchType(searchType));
-            dispatch(updateSearchTerms(searchTerms));
+            dispatch(updateSearchTerms(trimmedTerms));
             dispatch(updateSearchTeam(searchTeam));
 
             if (searchType === '' || searchType === 'messages' || searchType === 'files') {
@@ -248,7 +249,7 @@ const NewSearch = (): JSX.Element => {
             } else {
                 pluginSearch.forEach((pluginData: any) => {
                     if (pluginData.pluginId === searchType) {
-                        pluginData.action(searchTerms);
+                        pluginData.action(trimmedTerms);
                     }
                 });
             }
