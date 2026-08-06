@@ -4809,6 +4809,10 @@ func TestSearchPosts(t *testing.T) {
 	require.Error(t, err)
 	CheckBadRequestStatus(t, resp)
 
+	_, resp, err = client.SearchPosts(context.Background(), th.BasicTeam.Id, "   ", false)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
+
 	_, err = client.Logout(context.Background())
 	require.NoError(t, err)
 	_, resp, err = client.SearchPosts(context.Background(), th.BasicTeam.Id, "#sgtitlereview", false)
