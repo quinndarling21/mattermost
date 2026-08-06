@@ -1589,6 +1589,12 @@ func TestSearchFilesInTeam(t *testing.T) {
 	require.Len(t, fileInfos.Order, 1, "wrong number of fileInfos")
 	require.Equal(t, fileInfo2.Id, fileInfos.Order[0], "wrong search")
 
+	// MAT-6: leading/trailing whitespace should be trimmed before searching
+	fileInfos, _, err = client.SearchFiles(context.Background(), th.BasicTeam.Id, "  fileInfo2  ", false)
+	require.NoError(t, err)
+	require.Len(t, fileInfos.Order, 1, "search with leading/trailing spaces should still match")
+	require.Equal(t, fileInfo2.Id, fileInfos.Order[0], "wrong search for trimmed terms")
+
 	terms = "tagged"
 	includeDeletedChannels := true
 	searchParams = model.SearchParameter{
