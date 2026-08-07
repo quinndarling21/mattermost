@@ -1,0 +1,14 @@
+---
+description: Use the Storybook MCP server to discover and verify shared components when building or modifying webapp UI
+globs: webapp/**/*.tsx,webapp/**/*.scss
+alwaysApply: false
+---
+
+# Storybook MCP
+
+The webapp has a Storybook (hosted in `webapp/platform/shared`) that documents the shared component packages, with the Storybook MCP server (`storybook`, endpoint `http://localhost:6006/mcp`) exposed to agents.
+
+- When building or modifying webapp UI, if the Storybook MCP server is available, use its documentation tools (`list-all-documentation`, `get-documentation`) to discover existing shared components and verify their props before writing new UI. Never guess component props — if a prop is not documented, treat it as nonexistent.
+- Prefer reusing `@mattermost/shared` components (`Button`, `WithTooltip`, `ShortcutKey`, ...) and `@mattermost/components` (`GenericModal`, skeleton loaders, ...) over hand-rolling equivalents.
+- When adding or changing stories, follow the MCP server's `get-storybook-story-instructions` output; stories live next to components as `*.stories.tsx` in CSF3 format.
+- If the MCP server is not responding, Storybook probably isn't running. Start it with `npm run storybook` from `webapp/` (serves on http://localhost:6006).

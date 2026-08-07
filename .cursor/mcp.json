@@ -5,6 +5,9 @@
     },
     "clickup": {
       "url": "https://mcp.clickup.com/mcp"
+    },
+    "storybook": {
+      "url": "http://localhost:6006/mcp"
     }
   }
 }

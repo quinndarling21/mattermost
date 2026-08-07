@@ -1,0 +1,56 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+// Design tokens (radius, elevation, borders, z-index) and fallback theme
+// variables from the web app. Resolved via the sass load path configured in
+// main.ts.
+@use "base/css_variables";
+
+// Styles for the btn/btn-primary/etc. classes used by @mattermost/shared Button.
+@use "components/buttons";
+
+// Denim (default light) theme values, matching Preferences.THEMES.denim in
+// mattermost-redux. In the app these are applied at runtime by applyTheme().
+:root {
+    --away-indicator: #ffbc1f;
+    --button-bg: #1c58d9;
+    --button-color: #ffffff;
+    --center-channel-bg: #ffffff;
+    --center-channel-color: #3f4350;
+    --dnd-indicator: #d24b4e;
+    --error-text: #d24b4e;
+    --link-color: #386fe5;
+    --mention-highlight-bg: #ffd470;
+    --mention-highlight-link: #1b1d22;
+    --new-message-separator: #cc8f00;
+    --online-indicator: #3db887;
+    --sidebar-bg: #1e325c;
+    --sidebar-header-bg: #192a4d;
+    --sidebar-header-text-color: #ffffff;
+    --sidebar-text: #ffffff;
+    --sidebar-text-active-border: #5d89ea;
+    --sidebar-text-active-color: #ffffff;
+    --sidebar-text-hover-bg: #28427b;
+    --sidebar-unread-text: #ffffff;
+    --away-indicator-rgb: 255, 188, 31;
+    --button-bg-rgb: 28, 88, 217;
+    --button-color-rgb: 255, 255, 255;
+    --center-channel-bg-rgb: 255, 255, 255;
+    --center-channel-color-rgb: 63, 67, 80;
+    --dnd-indicator-rgb: 210, 75, 78;
+    --error-text-color-rgb: 210, 75, 78;
+    --link-color-rgb: 56, 111, 229;
+    --mention-highlight-bg-rgb: 255, 212, 112;
+    --mention-highlight-link-rgb: 27, 29, 34;
+    --online-indicator-rgb: 61, 184, 135;
+    --sidebar-bg-rgb: 30, 50, 92;
+    --sidebar-text-rgb: 255, 255, 255;
+    --sidebar-text-active-border-rgb: 93, 137, 234;
+}
+
+body {
+    background: var(--center-channel-bg);
+    color: var(--center-channel-color);
+    font-family: "Open Sans", sans-serif;
+    font-size: 14px;
+}
