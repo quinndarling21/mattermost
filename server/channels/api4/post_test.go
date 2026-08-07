@@ -4762,6 +4762,12 @@ func TestSearchPosts(t *testing.T) {
 	require.Len(t, posts.Order, 1, "wrong number of posts")
 	require.Equal(t, post2.Id, posts.Order[0], "wrong search")
 
+	// MAT-6: leading/trailing whitespace should be trimmed before searching
+	posts, _, err = client.SearchPosts(context.Background(), th.BasicTeam.Id, "  post2  ", false)
+	require.NoError(t, err)
+	require.Len(t, posts.Order, 1, "search with leading/trailing spaces should still match")
+	require.Equal(t, post2.Id, posts.Order[0], "wrong search for trimmed terms")
+
 	posts, _, err = client.SearchPosts(context.Background(), th.BasicTeam.Id, "#hashtag", false)
 	require.NoError(t, err)
 	require.Len(t, posts.Order, 1, "wrong number of posts")
@@ -4800,6 +4806,10 @@ func TestSearchPosts(t *testing.T) {
 	CheckForbiddenStatus(t, resp)
 
 	_, resp, err = client.SearchPosts(context.Background(), th.BasicTeam.Id, "", false)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
+
+	_, resp, err = client.SearchPosts(context.Background(), th.BasicTeam.Id, "   ", false)
 	require.Error(t, err)
 	CheckBadRequestStatus(t, resp)
 

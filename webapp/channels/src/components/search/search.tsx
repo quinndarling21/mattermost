@@ -321,6 +321,10 @@ const Search = ({
             return;
         }
 
+        if (terms !== searchTerms) {
+            updateSearchTerms(terms);
+        }
+
         const {error} = await showSearchResults(Boolean(isMentionSearch)) as any;
 
         if (!error) {
