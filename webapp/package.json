@@ -10,6 +10,7 @@
     "build": "node scripts/build.mjs",
     "run": "node scripts/run.mjs",
     "dev-server": "node scripts/dev-server.mjs",
+    "storybook": "npm run storybook -w platform/shared",
     "test": "npm run test --workspaces --if-present",
     "test:updatesnapshot": "npm run test:updatesnapshot --workspaces --if-present",
     "test-ci": "npm run test-ci --workspaces --if-present",

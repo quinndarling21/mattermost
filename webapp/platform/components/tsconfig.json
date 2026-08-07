@@ -18,5 +18,11 @@
     },
     "include": [
         "./src/**/*"
+    ],
+    // Stories are typechecked and built by Storybook (in platform/shared),
+    // whose packages can't be resolved with this package's legacy
+    // "moduleResolution": "node" setting.
+    "exclude": [
+        "./src/**/*.stories.tsx"
     ]
 }
