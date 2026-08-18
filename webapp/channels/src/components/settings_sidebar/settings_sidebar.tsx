@@ -264,6 +264,7 @@ export class SettingsSidebar extends React.PureComponent<Props, State> {
                     aria-label={formatMessage({id: 'user.settings.search.label', defaultMessage: 'Search settings'})}
                     useLegend={false}
                     clearable={true}
+                    maxLength={128}
                     value={this.state.searchTerm}
                     onChange={this.handleSearchChange}
                     onClear={this.clearSearch}

@@ -352,9 +352,6 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                 {tab: 'profile', section: 'picture', category: categories.profile, title: formatMessage({id: 'user.settings.general.profilePicture', defaultMessage: 'Profile Picture'}), keywords: ['avatar', 'photo']},
                 {tab: 'security', section: 'password', category: categories.security, title: formatMessage({id: 'user.settings.security.password', defaultMessage: 'Password'})},
                 {tab: 'security', section: 'signin', category: categories.security, title: formatMessage({id: 'user.settings.security.signin', defaultMessage: 'Sign-in Method'}), keywords: ['login', 'sso']},
-                {tab: 'security', section: 'mfa', category: categories.security, title: formatMessage({id: 'user.settings.mfa.title', defaultMessage: 'Multi-factor Authentication'}), keywords: ['mfa', '2fa']},
-                {tab: 'security', section: 'tokens', category: categories.security, title: formatMessage({id: 'user.settings.tokens.title', defaultMessage: 'Personal Access Tokens'}), keywords: ['api token']},
-                {tab: 'security', section: 'apps', category: categories.security, title: formatMessage({id: 'user.settings.security.oauthApps', defaultMessage: 'OAuth 2.0 Applications'})},
             ];
         }
 
@@ -363,15 +360,10 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             {tab: 'notifications', section: 'desktopNotificationSound', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.desktopNotificationSound', defaultMessage: 'Notification sounds'}), keywords: ['audio']},
             {tab: 'notifications', section: 'email', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.emailNotifications', defaultMessage: 'Email notifications'})},
             {tab: 'notifications', section: 'keywordsAndMentions', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.keywordsWithNotification.title', defaultMessage: 'Keywords that trigger notifications'}), keywords: ['mentions']},
-            {tab: 'notifications', section: 'replyNotifications', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.comments', defaultMessage: 'Reply notifications'}), keywords: ['threads']},
-            {tab: 'notifications', section: 'autoResponder', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.autoResponder', defaultMessage: 'Automatic direct message replies'}), keywords: ['out of office']},
-            {tab: 'display', section: 'theme', category: categories.display, title: formatMessage({id: 'user.settings.display.theme', defaultMessage: 'Theme'}), keywords: ['colors', 'dark mode']},
             {tab: 'display', section: 'clock', category: categories.display, title: formatMessage({id: 'user.settings.display.clockDisplay', defaultMessage: 'Clock Display'}), keywords: ['time', '12 hour', '24 hour']},
             {tab: 'display', section: 'name_format', category: categories.display, title: formatMessage({id: 'user.settings.display.teammateNameDisplayTitle', defaultMessage: 'Teammate Name Display'})},
-            {tab: 'display', section: 'timezone', category: categories.display, title: formatMessage({id: 'user.settings.display.timezone', defaultMessage: 'Timezone'})},
             {tab: 'display', section: 'message_display', category: categories.display, title: formatMessage({id: 'user.settings.display.messageDisplayTitle', defaultMessage: 'Message Display'}), keywords: ['compact']},
             {tab: 'display', section: 'channel_display_mode', category: categories.display, title: formatMessage({id: 'user.settings.display.channelDisplayTitle', defaultMessage: 'Channel Display'}), keywords: ['width']},
-            {tab: 'display', section: 'languages', category: categories.display, title: formatMessage({id: 'user.settings.display.language', defaultMessage: 'Language'})},
             {tab: 'display', section: 'renderEmoticonsAsEmoji', category: categories.display, title: formatMessage({id: 'user.settings.display.renderEmoticonsAsEmojiTitle', defaultMessage: 'Render emoticons as emojis'}), keywords: ['emoji']},
             {tab: 'sidebar', section: 'showUnreadsCategory', category: categories.sidebar, title: formatMessage({id: 'user.settings.sidebar.showUnreadsCategoryTitle', defaultMessage: 'Group unread channels separately'})},
             {tab: 'sidebar', section: 'limitVisibleGMsDMs', category: categories.sidebar, title: formatMessage({id: 'user.settings.sidebar.limitVisibleGMsDMsTitle', defaultMessage: 'Number of direct messages to show'})},
@@ -381,8 +373,22 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             {tab: 'advanced', section: 'unread_scroll_position', category: categories.advanced, title: formatMessage({id: 'user.settings.advance.unreadScrollPositionTitle', defaultMessage: 'Scroll position when viewing an unread channel'})},
         ];
 
+        if (!this.props.adminMode) {
+            searchItems.push({
+                tab: 'display',
+                section: 'theme',
+                category: categories.display,
+                title: formatMessage({id: 'user.settings.display.theme', defaultMessage: 'Theme'}),
+                keywords: ['colors', 'dark mode'],
+            });
+        }
+
         Object.values(this.props.pluginSettings).forEach((plugin) => {
             plugin.sections.forEach((section) => {
+                if ('disabled' in section && section.disabled) {
+                    return;
+                }
+
                 searchItems.push({
                     tab: plugin.id,
                     section: section.title,
