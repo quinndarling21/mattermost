@@ -39,6 +39,18 @@ describe('components/sidebar/sidebar_channel/sidebar_base_channel/sidebar_base_c
         expect(screen.getByLabelText(':rocket:')).toBeInTheDocument();
     });
 
+    test('should render the channel emoji instead of the lock icon on private channels', () => {
+        const {container} = renderWithContext(
+            <SidebarBaseChannelIcon
+                channelType={'P' as ChannelType}
+                emoji='rocket'
+            />,
+        );
+
+        expect(container.querySelector('.icon-lock-outline')).not.toBeInTheDocument();
+        expect(screen.getByLabelText(':rocket:')).toBeInTheDocument();
+    });
+
     test('should strip surrounding colons from the stored emoji name', () => {
         renderWithContext(
             <SidebarBaseChannelIcon

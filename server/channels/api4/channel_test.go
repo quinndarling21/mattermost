@@ -1146,6 +1146,52 @@ func TestPatchChannel(t *testing.T) {
 		CheckBadRequestStatus(t, resp)
 	})
 
+	t.Run("Should be able to patch emoji on a private channel", func(t *testing.T) {
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		th.LoginBasic(t)
+
+		channel := &model.Channel{
+			DisplayName: GenerateTestChannelName(),
+			Name:        GenerateTestChannelName(),
+			Type:        model.ChannelTypePrivate,
+			TeamId:      team.Id,
+		}
+		channel, _, err = client.CreateChannel(context.Background(), channel)
+		require.NoError(t, err)
+
+		emoji := "rocket"
+		patch := &model.ChannelPatch{Emoji: &emoji}
+		patched, _, err := client.PatchChannel(context.Background(), channel.Id, patch)
+		require.NoError(t, err)
+		require.Equal(t, "rocket", patched.Emoji)
+
+		empty := ""
+		cleared, _, err := client.PatchChannel(context.Background(), channel.Id, &model.ChannelPatch{Emoji: &empty})
+		require.NoError(t, err)
+		require.Equal(t, "", cleared.Emoji)
+	})
+
+	t.Run("Should not be able to patch emoji on a group channel", func(t *testing.T) {
+		user1 := th.CreateUser(t)
+		user2 := th.CreateUser(t)
+		user3 := th.CreateUser(t)
+
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		_, _, err = client.Login(context.Background(), user1.Email, user1.Password)
+		require.NoError(t, err)
+
+		groupChannel, _, err := client.CreateGroupChannel(context.Background(), []string{user1.Id, user2.Id, user3.Id})
+		require.NoError(t, err)
+
+		emoji := "rocket"
+		patch := &model.ChannelPatch{Emoji: &emoji}
+		_, resp, err := client.PatchChannel(context.Background(), groupChannel.Id, patch)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+	})
+
 	t.Run("Should not be able to configure channel banner without a license", func(t *testing.T) {
 		_, err := client.Logout(context.Background())
 		require.NoError(t, err)

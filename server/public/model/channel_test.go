@@ -132,6 +132,35 @@ func TestChannelIsValidEmoji(t *testing.T) {
 		c.Type = ChannelTypeDirect
 		c.Emoji = "rocket"
 		require.NotNil(t, c.IsValid())
+		require.Equal(t, "model.channel.is_valid.emoji.channel_type.app_error", c.IsValid().Id)
+	})
+
+	t.Run("emoji is not allowed on group channels", func(t *testing.T) {
+		c := base
+		c.Type = ChannelTypeGroup
+		c.Emoji = "rocket"
+		require.NotNil(t, c.IsValid())
+		require.Equal(t, "model.channel.is_valid.emoji.channel_type.app_error", c.IsValid().Id)
+	})
+
+	t.Run("emoji is allowed on private channels", func(t *testing.T) {
+		c := base
+		c.Type = ChannelTypePrivate
+		c.Emoji = "rocket"
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("emoji names longer than the max length are rejected", func(t *testing.T) {
+		c := base
+		c.Emoji = strings.Repeat("a", EmojiNameMaxLength+1)
+		require.NotNil(t, c.IsValid())
+		require.Equal(t, "model.channel.is_valid.emoji.app_error", c.IsValid().Id)
+	})
+
+	t.Run("emoji names at the max length are valid", func(t *testing.T) {
+		c := base
+		c.Emoji = strings.Repeat("a", EmojiNameMaxLength)
+		require.Nil(t, c.IsValid())
 	})
 }
 

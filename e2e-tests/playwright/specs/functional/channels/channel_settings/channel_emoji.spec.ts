@@ -52,3 +52,81 @@ test(
         await expect(channelsPage.page.locator('#channelHeaderDropdownButton').getByLabel(':slightly_smiling_face:')).toBeVisible();
     },
 );
+
+/**
+ * @objective Clear a channel emoji and restore the type icon in the sidebar and header.
+ * @reference MAT-9
+ */
+test(
+    'MAT-9_2 should restore the type icon after the channel emoji is removed',
+    {tag: ['@channel_settings', '@emoji']},
+    async ({pw}) => {
+        const {team, user, userClient} = await pw.initSetup();
+        const channel = await userClient.createChannel(
+            pw.random.channel({
+                teamId: team.id,
+                type: 'O',
+                emoji: 'slightly_smiling_face',
+            }),
+        );
+
+        const {channelsPage} = await pw.testBrowser.login(user);
+        await channelsPage.goto(team.name, channel.name);
+        await channelsPage.toBeVisible();
+
+        const sidebarItem = channelsPage.sidebarLeft.getChannelItem(channel.name);
+        await expect(sidebarItem.getByLabel(':slightly_smiling_face:')).toBeVisible();
+
+        const channelSettingsModal = await channelsPage.openChannelSettings();
+        const infoSettings = await channelSettingsModal.openInfoTab();
+        await expect(infoSettings.removeEmojiButton).toBeVisible();
+        await infoSettings.removeEmojiButton.click();
+        await channelSettingsModal.save();
+        await channelSettingsModal.close();
+
+        await expect(sidebarItem.locator('.icon-globe')).toBeVisible();
+        await expect(sidebarItem.getByLabel(':slightly_smiling_face:')).toHaveCount(0);
+        await expect(channelsPage.page.locator('#channelHeaderDropdownButton').getByLabel(':slightly_smiling_face:')).toHaveCount(0);
+    },
+);
+
+/**
+ * @objective Assign a channel emoji on a private channel and replace the lock icon.
+ * @reference MAT-9
+ */
+test(
+    'MAT-9_3 should replace the private-channel lock with the chosen emoji',
+    {tag: ['@channel_settings', '@emoji']},
+    async ({pw}) => {
+        const {team, user, userClient} = await pw.initSetup();
+        const channel = await userClient.createChannel(
+            pw.random.channel({
+                teamId: team.id,
+                type: 'P',
+            }),
+        );
+
+        const {channelsPage} = await pw.testBrowser.login(user);
+        await channelsPage.goto(team.name, channel.name);
+        await channelsPage.toBeVisible();
+
+        const sidebarItem = channelsPage.sidebarLeft.getChannelItem(channel.name);
+        await expect(sidebarItem.locator('.icon-lock-outline')).toBeVisible();
+
+        const channelSettingsModal = await channelsPage.openChannelSettings();
+        const infoSettings = await channelSettingsModal.openInfoTab();
+        await infoSettings.emojiButton.click();
+
+        const emojiPicker = new EmojiGifPicker(channelsPage.page.locator('#emojiPicker'));
+        await emojiPicker.toBeVisible();
+        await emojiPicker.clickEmoji('slightly smiling face');
+        await emojiPicker.notToBeVisible();
+
+        await channelSettingsModal.save();
+        await channelSettingsModal.close();
+
+        await expect(sidebarItem.getByLabel(':slightly_smiling_face:')).toBeVisible();
+        await expect(sidebarItem.locator('.icon-lock-outline')).toHaveCount(0);
+        await expect(channelsPage.page.locator('#channelHeaderDropdownButton').getByLabel(':slightly_smiling_face:')).toBeVisible();
+    },
+);

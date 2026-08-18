@@ -25,7 +25,7 @@ const SidebarBaseChannelIcon = ({
             <span className='SidebarChannelEmoji'>
                 <RenderEmoji
                     emojiName={emojiName}
-                    size={16}
+                    size={18}
                 />
             </span>
         );

@@ -14,18 +14,27 @@ jest.mock('components/emoji_picker/use_emoji_picker', () => ({
         showEmojiPicker,
         setShowEmojiPicker,
     }: {
-        onEmojiClick: (emoji: {short_name: string}) => void;
+        onEmojiClick: (emoji: {short_name?: string; name?: string}) => void;
         showEmojiPicker: boolean;
         setShowEmojiPicker: (show: boolean) => void;
     }) => ({
         emojiPicker: showEmojiPicker ? (
-            <button
-                type='button'
-                data-testid='mock-emoji-option'
-                onClick={() => onEmojiClick({short_name: 'rocket'})}
-            >
-                {'rocket'}
-            </button>
+            <>
+                <button
+                    type='button'
+                    data-testid='mock-emoji-option'
+                    onClick={() => onEmojiClick({short_name: 'rocket'})}
+                >
+                    {'rocket'}
+                </button>
+                <button
+                    type='button'
+                    data-testid='mock-custom-emoji-option'
+                    onClick={() => onEmojiClick({name: 'party_parrot'})}
+                >
+                    {'party_parrot'}
+                </button>
+            </>
         ) : null,
         getReferenceProps: () => ({
             onClick: () => setShowEmojiPicker(true),
@@ -87,5 +96,20 @@ describe('components/channel_settings_modal/channel_emoji_input', () => {
         await userEvent.click(screen.getByTestId('channel-emoji-button'));
         await userEvent.click(screen.getByTestId('mock-emoji-option'));
         expect(onChange).toHaveBeenCalledWith('rocket');
+    });
+
+    test('should call onChange with a custom emoji name when short_name is absent', async () => {
+        const onChange = jest.fn();
+
+        renderWithContext(
+            <ChannelEmojiInput
+                emoji=''
+                onChange={onChange}
+            />,
+        );
+
+        await userEvent.click(screen.getByTestId('channel-emoji-button'));
+        await userEvent.click(screen.getByTestId('mock-custom-emoji-option'));
+        expect(onChange).toHaveBeenCalledWith('party_parrot');
     });
 });

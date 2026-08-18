@@ -26,7 +26,7 @@
         align-items: center;
         justify-content: center;
         padding: 0;
-        border: var(--border-light);
+        border: var(--border-dark);
         border-radius: var(--radius-s);
         background: var(--center-channel-bg);
         color: rgba(var(--center-channel-color-rgb), 0.64);
@@ -34,6 +34,13 @@
         &:hover:not(:disabled) {
             background: rgba(var(--center-channel-color-rgb), 0.08);
             color: rgba(var(--center-channel-color-rgb), 0.8);
+        }
+
+        &:active:not(:disabled),
+        &.active,
+        &.active:hover {
+            background: rgba(var(--button-bg-rgb), 0.08);
+            color: var(--button-bg);
         }
 
         &:focus-visible {

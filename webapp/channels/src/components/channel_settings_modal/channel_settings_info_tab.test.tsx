@@ -151,6 +151,16 @@ const mockDirectMessageChannel = TestHelper.getChannelMock({
     type: 'D',
 });
 
+const mockGroupMessageChannel = TestHelper.getChannelMock({
+    id: 'gm-channel1',
+    team_id: '',
+    display_name: 'user1, user2, user3',
+    name: 'gm-channel1',
+    purpose: '',
+    header: 'GM initial header',
+    type: 'G',
+});
+
 const baseProps = {
     channel: mockChannel,
     setAreThereUnsavedChanges: jest.fn(),
@@ -667,6 +677,36 @@ describe('ChannelSettingsInfoTab', () => {
         );
 
         expect(screen.queryByTestId('channel-emoji-input')).not.toBeInTheDocument();
+    });
+
+    it('should not show the channel emoji control for group messages', () => {
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                channel={mockGroupMessageChannel}
+                setAreThereUnsavedChanges={jest.fn()}
+            />,
+        );
+
+        expect(screen.queryByTestId('channel-emoji-input')).not.toBeInTheDocument();
+    });
+
+    it('should patch an empty emoji when the channel emoji is cleared', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: ''}});
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                channel={{...mockChannel, emoji: 'rocket'}}
+                setAreThereUnsavedChanges={jest.fn()}
+            />,
+        );
+
+        await userEvent.click(screen.getByTestId('channel-emoji-input'));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {
+            emoji: '',
+        });
     });
 
     it('should handle errors when converting channel privacy', async () => {

@@ -131,11 +131,12 @@ export default function ChannelHeaderMenu({dmUser, gmMembers, isMobile, archived
                     <>
                         {archivedIcon}
                         {channelEmojiName && (
-                            <RenderEmoji
-                                emojiName={channelEmojiName}
-                                size={16}
-                                emojiStyle={{marginRight: 6}}
-                            />
+                            <span className='channel-header__emoji'>
+                                <RenderEmoji
+                                    emojiName={channelEmojiName}
+                                    size={18}
+                                />
+                            </span>
                         )}
                         <strong
                             id='channelHeaderTitle'
