@@ -2,11 +2,15 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import {useSelector} from 'react-redux';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
+import {getEmojiImageUrl} from 'mattermost-redux/utils/emoji_utils';
+
 import RenderEmoji from 'components/emoji/render_emoji';
 
+import {getEmojiMap} from 'selectors/emojis';
 import Constants from 'utils/constants';
 
 import './sidebar_base_channel_icon.scss';
@@ -16,39 +20,45 @@ type Props = {
     emoji?: string;
 }
 
-const SidebarBaseChannelIcon = ({
-    channelType,
-    emoji,
-}: Props) => {
-    let channelTypeIcon = null;
+function getChannelTypeIcon(channelType: ChannelType) {
     if (channelType === Constants.OPEN_CHANNEL) {
-        channelTypeIcon = (
+        return (
             <i className='icon icon-globe'/>
         );
-    } else if (channelType === Constants.PRIVATE_CHANNEL) {
-        channelTypeIcon = (
+    }
+
+    if (channelType === Constants.PRIVATE_CHANNEL) {
+        return (
             <i className='icon icon-lock-outline'/>
         );
     }
 
-    if (!emoji) {
-        return channelTypeIcon;
+    return null;
+}
+
+const SidebarBaseChannelIcon = ({
+    channelType,
+    emoji,
+}: Props) => {
+    const emojiMap = useSelector(getEmojiMap);
+    const resolvedEmoji = emoji ? emojiMap.get(emoji) : undefined;
+    const canRenderEmoji = Boolean(resolvedEmoji && getEmojiImageUrl(resolvedEmoji));
+
+    if (canRenderEmoji && emoji) {
+        return (
+            <span
+                className='SidebarBaseChannelIcon'
+                aria-hidden='true'
+            >
+                <RenderEmoji
+                    emojiName={emoji}
+                    size={16}
+                />
+            </span>
+        );
     }
 
-    return (
-        <span
-            className='SidebarBaseChannelIcon'
-            aria-hidden='true'
-        >
-            <RenderEmoji
-                emojiName={emoji}
-                size={16}
-            />
-            <span className='SidebarBaseChannelIcon__fallback'>
-                {channelTypeIcon}
-            </span>
-        </span>
-    );
+    return getChannelTypeIcon(channelType);
 };
 
 export default SidebarBaseChannelIcon;

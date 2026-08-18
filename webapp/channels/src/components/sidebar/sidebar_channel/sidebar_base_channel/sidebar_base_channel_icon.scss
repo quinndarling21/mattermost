@@ -10,16 +10,6 @@
     align-items: center;
     justify-content: center;
     margin: 0 6px 0 -2px;
-
-    i {
-        font-size: 18px;
-    }
-}
-
-// Written at the root: nesting `> .emoticon + &__fallback` compiles to an
-// invalid leading-combinator selector and is dropped by Sass.
-.SidebarBaseChannelIcon > .emoticon + .SidebarBaseChannelIcon__fallback {
-    display: none;
 }
 
 .SidebarLink.muted .SidebarBaseChannelIcon {
