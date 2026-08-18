@@ -196,6 +196,8 @@ docker-compose.override.yaml
 !.cursor/hooks/
 !.cursor/hooks/**
 !.cursor/mcp.json
+!.cursor/approval-policies/
+!.cursor/approval-policies/**
 server/prev-report.xml
 server/prev-gotestsum.json
 server/shard-*.txt
