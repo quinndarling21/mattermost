@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 .ChannelEmojiPicker {
-    margin: 20px 0;
+    margin-top: 20px;
 
     &__label {
         display: block;
@@ -24,12 +24,18 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+        border: var(--border-dark);
         background: var(--center-channel-bg);
         color: rgba(var(--center-channel-color-rgb), 0.64);
 
         &:hover:not(:disabled) {
             background: rgba(var(--center-channel-color-rgb), 0.08);
+        }
+
+        &:active:not(:disabled),
+        &[aria-expanded='true'] {
+            background: rgba(var(--button-bg-rgb), 0.08);
+            color: var(--button-bg);
         }
 
         &:focus-visible {

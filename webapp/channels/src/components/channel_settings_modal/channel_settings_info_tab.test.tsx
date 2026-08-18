@@ -240,6 +240,24 @@ describe('ChannelSettingsInfoTab', () => {
         expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: 'tada'});
     });
 
+    it('should clear the selected channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: ''}});
+        const channelWithEmoji = TestHelper.getChannelMock({...mockChannel, emoji: 'tada'});
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                {...baseProps}
+                channel={channelWithEmoji}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: 'Set channel emoji'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: ''});
+    });
+
     it('should save DM header from channel settings without requiring channel name', async () => {
         const {patchChannel} = require('mattermost-redux/actions/channels');
         patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});

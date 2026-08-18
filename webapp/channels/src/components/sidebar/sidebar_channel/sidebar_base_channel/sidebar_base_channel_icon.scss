@@ -1,0 +1,24 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+.SidebarBaseChannelIcon {
+    display: flex;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    align-items: center;
+    justify-content: center;
+    margin: 0 6px 0 -2px;
+
+    i {
+        font-size: 18px;
+    }
+
+    > .emoticon + &__fallback {
+        display: none;
+    }
+}
+
+.SidebarLink.muted .SidebarBaseChannelIcon {
+    opacity: 0.4;
+}
