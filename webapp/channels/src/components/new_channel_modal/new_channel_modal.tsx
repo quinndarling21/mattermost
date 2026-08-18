@@ -38,6 +38,7 @@ import {
     CHANNEL_BANNER_MAX_CHARACTER_LIMIT,
     CHANNEL_BANNER_MIN_CHARACTER_LIMIT,
 } from 'components/channel_settings_modal/channel_settings_configuration_tab';
+import ChannelEmojiPicker from 'components/channel_emoji_picker/channel_emoji_picker';
 import useClassificationMarkings from 'components/common/hooks/useClassificationMarkings';
 import DropdownInput from 'components/dropdown_input';
 import type {ValueType} from 'components/dropdown_input';
@@ -93,6 +94,7 @@ const NewChannelModal = () => {
     const [displayName, setDisplayName] = useState('');
     const [url, setURL] = useState('');
     const [purpose, setPurpose] = useState('');
+    const [emoji, setEmoji] = useState('');
     const [urlError, setURLError] = useState('');
     const [purposeError, setPurposeError] = useState('');
     const [serverError, setServerError] = useState('');
@@ -162,6 +164,7 @@ const NewChannelModal = () => {
             name: url,
             display_name: displayName,
             purpose,
+            emoji,
             header: '',
             type,
             create_at: 0,
@@ -358,6 +361,10 @@ const NewChannelModal = () => {
                     onURLChange={handleURLChange}
                     onErrorStateChange={setChannelInputError}
                     urlError={urlError}
+                />
+                <ChannelEmojiPicker
+                    value={emoji}
+                    onChange={setEmoji}
                 />
                 <PublicPrivateSelector
                     className='new-channel-modal-type-selector'

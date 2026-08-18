@@ -57,6 +57,7 @@ export type Channel = {
     name: string;
     header: string;
     purpose: string;
+    emoji?: string;
     last_post_at: number;
     last_root_post_at: number;
     creator_id: string;

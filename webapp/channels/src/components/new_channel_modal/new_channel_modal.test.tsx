@@ -25,6 +25,14 @@ import NewChannelModal from './new_channel_modal';
 
 jest.mock('mattermost-redux/actions/channels');
 
+jest.mock('components/channel_emoji_picker/channel_emoji_picker', () => {
+    return ({onChange}: {onChange: (emoji: string) => void}) => (
+        <button onClick={() => onChange('tada')}>
+            {'Set channel emoji'}
+        </button>
+    );
+});
+
 describe('components/new_channel_modal', () => {
     const initialState: DeepPartial<GlobalState> = {
         entities: {
@@ -431,6 +439,7 @@ describe('components/new_channel_modal', () => {
         expect(channelNameInput).toHaveAttribute('value', '');
 
         await userEvent.type(channelNameInput, name);
+        await userEvent.click(screen.getByRole('button', {name: 'Set channel emoji'}));
 
         // Display name should be updated
         expect(channelNameInput).toHaveValue(name);
@@ -447,6 +456,7 @@ describe('components/new_channel_modal', () => {
             creator_id: '',
             delete_at: 0,
             display_name: name,
+            emoji: 'tada',
             group_constrained: false,
             header: '',
             id: '',

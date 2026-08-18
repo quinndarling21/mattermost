@@ -261,6 +261,7 @@ func updateChannel(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	oldChannel.Header = channel.Header
 	oldChannel.Purpose = channel.Purpose
+	oldChannel.Emoji = channel.Emoji
 
 	oldChannelDisplayName := oldChannel.DisplayName
 
@@ -394,7 +395,7 @@ func patchChannel(c *Context, w http.ResponseWriter, r *http.Request) {
 	model.AddEventParameterAuditableToAuditRec(auditRec, "channel", patch)
 	auditRec.AddEventPriorState(oldChannel)
 
-	updatingProperties := patch.DisplayName != nil || patch.Name != nil || patch.Header != nil || patch.Purpose != nil || patch.GroupConstrained != nil || patch.DefaultCategoryName != nil
+	updatingProperties := patch.DisplayName != nil || patch.Name != nil || patch.Header != nil || patch.Purpose != nil || patch.Emoji != nil || patch.GroupConstrained != nil || patch.DefaultCategoryName != nil
 	updatingAutoTranslation := patch.AutoTranslation != nil
 	updatingManagedCategory := patch.ManagedCategoryName != nil
 	updatingDiscoverable := patch.Discoverable != nil

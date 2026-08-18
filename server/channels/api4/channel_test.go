@@ -431,6 +431,7 @@ func TestUpdateChannel(t *testing.T) {
 	channel.DisplayName = "My new display name"
 	channel.Header = "My fancy header"
 	channel.Purpose = "Mattermost ftw!"
+	channel.Emoji = "rocket"
 
 	newChannel, _, err := client.UpdateChannel(context.Background(), channel)
 	require.NoError(t, err)
@@ -438,6 +439,7 @@ func TestUpdateChannel(t *testing.T) {
 	require.Equal(t, channel.DisplayName, newChannel.DisplayName, "Update failed for DisplayName")
 	require.Equal(t, channel.Header, newChannel.Header, "Update failed for Header")
 	require.Equal(t, channel.Purpose, newChannel.Purpose, "Update failed for Purpose")
+	require.Equal(t, channel.Emoji, newChannel.Emoji, "Update failed for Emoji")
 
 	// Test GroupConstrained flag
 	channel.GroupConstrained = new(true)
@@ -833,11 +835,13 @@ func TestPatchChannel(t *testing.T) {
 			DisplayName: new(string),
 			Header:      new(string),
 			Purpose:     new(string),
+			Emoji:       new(string),
 		}
 		*patch.Name = model.NewId()
 		*patch.DisplayName = model.NewId()
 		*patch.Header = model.NewId()
 		*patch.Purpose = model.NewId()
+		*patch.Emoji = "tada"
 
 		channel, _, err := client.PatchChannel(context.Background(), th.BasicChannel.Id, patch)
 		require.NoError(t, err)
@@ -846,6 +850,7 @@ func TestPatchChannel(t *testing.T) {
 		require.Equal(t, *patch.DisplayName, channel.DisplayName, "do not match")
 		require.Equal(t, *patch.Header, channel.Header, "do not match")
 		require.Equal(t, *patch.Purpose, channel.Purpose, "do not match")
+		require.Equal(t, *patch.Emoji, channel.Emoji, "do not match")
 	})
 
 	t.Run("should be able to patch with no name", func(t *testing.T) {
