@@ -179,9 +179,10 @@ export class SettingsSidebar extends React.PureComponent<Props, State> {
         this.setState({searchTerm: ''});
     };
 
-    private handleSearchItemClick = (item: SearchItem) => {
+    private handleSearchItemClick = (item: SearchItem, event: React.MouseEvent<HTMLButtonElement>) => {
         this.clearSearch();
         this.props.onSearchItemSelect?.(item);
+        event.currentTarget.closest('.settings-modal')?.classList.add('display--content');
     };
 
     private renderSearch() {
@@ -242,7 +243,7 @@ export class SettingsSidebar extends React.PureComponent<Props, State> {
                             key={`${item.tab}-${item.section}`}
                             className='SettingsSidebar__result style--none'
                             type='button'
-                            onClick={() => this.handleSearchItemClick(item)}
+                            onClick={(event) => this.handleSearchItemClick(item, event)}
                         >
                             <span className='SettingsSidebar__resultTitle'>{item.title}</span>
                             <span className='SettingsSidebar__resultCategory'>{item.category}</span>
@@ -315,17 +316,18 @@ export class SettingsSidebar extends React.PureComponent<Props, State> {
             <div
                 id='tabList'
                 className='nav nav-pills nav-stacked'
-                role='tablist'
-                aria-orientation='vertical'
             >
                 {this.renderSearch()}
                 {!this.state.searchTerm.trim() && (
-                    <>
+                    <div
+                        role='tablist'
+                        aria-orientation='vertical'
+                    >
                         <div role='group'>
                             {tabList}
                         </div>
                         {pluginTabList}
-                    </>
+                    </div>
                 )}
             </div>
         );

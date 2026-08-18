@@ -166,17 +166,19 @@ describe('settings search', () => {
         const user = userEvent.setup();
         const onSearchItemSelect = jest.fn();
         renderWithContext(
-            <SettingsSidebar
-                {...baseProps}
-                tabs={[{
-                    icon: 'icon',
-                    iconTitle: 'Notifications icon',
-                    name: 'notifications',
-                    uiName: 'Notifications',
-                }]}
-                searchItems={searchItems}
-                onSearchItemSelect={onSearchItemSelect}
-            />,
+            <div className='settings-modal'>
+                <SettingsSidebar
+                    {...baseProps}
+                    tabs={[{
+                        icon: 'icon',
+                        iconTitle: 'Notifications icon',
+                        name: 'notifications',
+                        uiName: 'Notifications',
+                    }]}
+                    searchItems={searchItems}
+                    onSearchItemSelect={onSearchItemSelect}
+                />
+            </div>,
         );
 
         await user.type(screen.getByRole('searchbox', {name: 'Search settings'}), 'email');
@@ -184,6 +186,7 @@ describe('settings search', () => {
 
         expect(onSearchItemSelect).toHaveBeenCalledWith(searchItems[0]);
         expect(screen.getByRole('tab', {name: 'notifications'})).toBeInTheDocument();
+        expect(screen.getByRole('tab', {name: 'notifications'}).closest('.settings-modal')).toHaveClass('display--content');
     });
 
     it('shows guidance when there are no matches', async () => {
