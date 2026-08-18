@@ -8,9 +8,10 @@ import type {ChannelType} from '@mattermost/types/channels';
 
 import {getEmojiImageUrl} from 'mattermost-redux/utils/emoji_utils';
 
+import {getEmojiMap} from 'selectors/emojis';
+
 import RenderEmoji from 'components/emoji/render_emoji';
 
-import {getEmojiMap} from 'selectors/emojis';
 import Constants from 'utils/constants';
 
 import './sidebar_base_channel_icon.scss';
