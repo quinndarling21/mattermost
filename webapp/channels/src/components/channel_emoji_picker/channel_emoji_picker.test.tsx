@@ -60,6 +60,9 @@ describe('ChannelEmojiPicker', () => {
         expect(onChange).toHaveBeenCalledWith('tada');
 
         await userEvent.click(
+            screen.getByRole('button', {name: 'Select channel emoji'}),
+        );
+        await userEvent.click(
             screen.getByRole('button', {name: 'Choose custom emoji'}),
         );
         expect(onChange).toHaveBeenLastCalledWith('custom_emoji');
