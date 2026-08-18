@@ -14,6 +14,7 @@ import type {ActionResult} from 'mattermost-redux/types/actions';
 
 import ConfirmModal from 'components/confirm_modal';
 import SettingsSidebar from 'components/settings_sidebar';
+import type {SearchItem} from 'components/settings_sidebar/settings_sidebar';
 import UserSettings from 'components/user_settings';
 import LoadingSpinner from 'components/widgets/loading/loading_spinner';
 import SmartLoader from 'components/widgets/smart_loader';
@@ -257,6 +258,18 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         }
     };
 
+    navigateToSetting = (item: SearchItem, skipConfirm?: boolean) => {
+        if (!skipConfirm && this.requireConfirm) {
+            this.showConfirmModal(() => this.navigateToSetting(item, true));
+            return;
+        }
+
+        this.setState({
+            active_tab: item.tab,
+            active_section: item.section,
+        });
+    };
+
     getUserSettingsTabs = () => {
         const {formatMessage} = this.props.intl;
         return [
@@ -316,6 +329,70 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                 iconTitle: v.uiName,
             };
         });
+    };
+
+    getSearchItems = (): SearchItem[] => {
+        const {formatMessage} = this.props.intl;
+        const categories = {
+            profile: formatMessage({id: 'user.settings.modal.profile', defaultMessage: 'Profile Settings'}),
+            security: formatMessage({id: 'user.settings.modal.security', defaultMessage: 'Security'}),
+            notifications: formatMessage({id: 'user.settings.modal.notifications', defaultMessage: 'Notifications'}),
+            display: formatMessage({id: 'user.settings.modal.display', defaultMessage: 'Display'}),
+            sidebar: formatMessage({id: 'user.settings.modal.sidebar', defaultMessage: 'Sidebar'}),
+            advanced: formatMessage({id: 'user.settings.modal.advanced', defaultMessage: 'Advanced'}),
+        };
+
+        if (!this.props.isContentProductSettings) {
+            return [
+                {tab: 'profile', section: 'email', category: categories.profile, title: formatMessage({id: 'user.settings.general.email', defaultMessage: 'Email'})},
+                {tab: 'profile', section: 'name', category: categories.profile, title: formatMessage({id: 'user.settings.general.fullName', defaultMessage: 'Full Name'}), keywords: ['first name', 'last name']},
+                {tab: 'profile', section: 'nickname', category: categories.profile, title: formatMessage({id: 'user.settings.general.nickname', defaultMessage: 'Nickname'})},
+                {tab: 'profile', section: 'username', category: categories.profile, title: formatMessage({id: 'user.settings.general.username', defaultMessage: 'Username'})},
+                {tab: 'profile', section: 'position', category: categories.profile, title: formatMessage({id: 'user.settings.general.position', defaultMessage: 'Position'}), keywords: ['job title']},
+                {tab: 'profile', section: 'picture', category: categories.profile, title: formatMessage({id: 'user.settings.general.profilePicture', defaultMessage: 'Profile Picture'}), keywords: ['avatar', 'photo']},
+                {tab: 'security', section: 'password', category: categories.security, title: formatMessage({id: 'user.settings.security.password', defaultMessage: 'Password'})},
+                {tab: 'security', section: 'signin', category: categories.security, title: formatMessage({id: 'user.settings.security.signin', defaultMessage: 'Sign-in Method'}), keywords: ['login', 'sso']},
+                {tab: 'security', section: 'mfa', category: categories.security, title: formatMessage({id: 'user.settings.mfa.title', defaultMessage: 'Multi-factor Authentication'}), keywords: ['mfa', '2fa']},
+                {tab: 'security', section: 'tokens', category: categories.security, title: formatMessage({id: 'user.settings.tokens.title', defaultMessage: 'Personal Access Tokens'}), keywords: ['api token']},
+                {tab: 'security', section: 'apps', category: categories.security, title: formatMessage({id: 'user.settings.security.oauthApps', defaultMessage: 'OAuth 2.0 Applications'})},
+            ];
+        }
+
+        const searchItems: SearchItem[] = [
+            {tab: 'notifications', section: 'desktopAndMobile', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.desktopAndMobile', defaultMessage: 'Desktop and mobile notifications'}), keywords: ['push notifications']},
+            {tab: 'notifications', section: 'desktopNotificationSound', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.desktopNotificationSound', defaultMessage: 'Notification sounds'}), keywords: ['audio']},
+            {tab: 'notifications', section: 'email', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.emailNotifications', defaultMessage: 'Email notifications'})},
+            {tab: 'notifications', section: 'keywordsAndMentions', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.keywordsWithNotification.title', defaultMessage: 'Keywords that trigger notifications'}), keywords: ['mentions']},
+            {tab: 'notifications', section: 'replyNotifications', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.comments', defaultMessage: 'Reply notifications'}), keywords: ['threads']},
+            {tab: 'notifications', section: 'autoResponder', category: categories.notifications, title: formatMessage({id: 'user.settings.notifications.autoResponder', defaultMessage: 'Automatic direct message replies'}), keywords: ['out of office']},
+            {tab: 'display', section: 'theme', category: categories.display, title: formatMessage({id: 'user.settings.display.theme', defaultMessage: 'Theme'}), keywords: ['colors', 'dark mode']},
+            {tab: 'display', section: 'clock', category: categories.display, title: formatMessage({id: 'user.settings.display.clockDisplay', defaultMessage: 'Clock Display'}), keywords: ['time', '12 hour', '24 hour']},
+            {tab: 'display', section: 'name_format', category: categories.display, title: formatMessage({id: 'user.settings.display.teammateNameDisplayTitle', defaultMessage: 'Teammate Name Display'})},
+            {tab: 'display', section: 'timezone', category: categories.display, title: formatMessage({id: 'user.settings.display.timezone', defaultMessage: 'Timezone'})},
+            {tab: 'display', section: 'message_display', category: categories.display, title: formatMessage({id: 'user.settings.display.messageDisplayTitle', defaultMessage: 'Message Display'}), keywords: ['compact']},
+            {tab: 'display', section: 'channel_display_mode', category: categories.display, title: formatMessage({id: 'user.settings.display.channelDisplayTitle', defaultMessage: 'Channel Display'}), keywords: ['width']},
+            {tab: 'display', section: 'languages', category: categories.display, title: formatMessage({id: 'user.settings.display.language', defaultMessage: 'Language'})},
+            {tab: 'display', section: 'renderEmoticonsAsEmoji', category: categories.display, title: formatMessage({id: 'user.settings.display.renderEmoticonsAsEmojiTitle', defaultMessage: 'Render emoticons as emojis'}), keywords: ['emoji']},
+            {tab: 'sidebar', section: 'showUnreadsCategory', category: categories.sidebar, title: formatMessage({id: 'user.settings.sidebar.showUnreadsCategoryTitle', defaultMessage: 'Group unread channels separately'})},
+            {tab: 'sidebar', section: 'limitVisibleGMsDMs', category: categories.sidebar, title: formatMessage({id: 'user.settings.sidebar.limitVisibleGMsDMsTitle', defaultMessage: 'Number of direct messages to show'})},
+            {tab: 'advanced', section: 'advancedCtrlSend', category: categories.advanced, title: formatMessage({id: 'user.settings.advance.sendOnCtrlEnterTitle', defaultMessage: 'Send messages on CTRL+ENTER'}), keywords: ['keyboard']},
+            {tab: 'advanced', section: 'formatting', category: categories.advanced, title: formatMessage({id: 'user.settings.advance.formattingTitle', defaultMessage: 'Enable Post Formatting'}), keywords: ['markdown']},
+            {tab: 'advanced', section: 'joinLeave', category: categories.advanced, title: formatMessage({id: 'user.settings.advance.joinLeaveTitle', defaultMessage: 'Show join and leave messages'})},
+            {tab: 'advanced', section: 'unread_scroll_position', category: categories.advanced, title: formatMessage({id: 'user.settings.advance.unreadScrollPositionTitle', defaultMessage: 'Scroll position when viewing an unread channel'})},
+        ];
+
+        Object.values(this.props.pluginSettings).forEach((plugin) => {
+            plugin.sections.forEach((section) => {
+                searchItems.push({
+                    tab: plugin.id,
+                    section: section.title,
+                    category: plugin.uiName,
+                    title: section.title,
+                });
+            });
+        });
+
+        return searchItems;
     };
 
     render() {
@@ -392,6 +469,8 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                     <SettingsSidebar
                                         tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
                                         pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
+                                        searchItems={this.getSearchItems()}
+                                        onSearchItemSelect={this.navigateToSetting}
                                         activeTab={this.state.active_tab}
                                         updateTab={this.updateTab}
                                     />

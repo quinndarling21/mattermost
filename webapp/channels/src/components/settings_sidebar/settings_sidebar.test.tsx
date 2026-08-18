@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -118,5 +119,85 @@ describe('tabs are properly rendered', () => {
 
         expect(screen.queryByText(uiName1)).toBeInTheDocument();
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
+    });
+});
+
+describe('settings search', () => {
+    const searchItems = [
+        {
+            tab: 'notifications',
+            section: 'email',
+            category: 'Notifications',
+            title: 'Email notifications',
+        },
+        {
+            tab: 'display',
+            section: 'theme',
+            category: 'Display',
+            title: 'Theme',
+            keywords: ['dark mode'],
+        },
+    ];
+
+    it('filters individual settings by title, category, and keyword', async () => {
+        const user = userEvent.setup();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        const searchInput = screen.getByRole('searchbox', {name: 'Search settings'});
+        await user.type(searchInput, 'email');
+        expect(screen.getByText('Email notifications')).toBeInTheDocument();
+        expect(screen.queryByText('Theme')).not.toBeInTheDocument();
+
+        await user.clear(searchInput);
+        await user.type(searchInput, 'display');
+        expect(screen.getByText('Theme')).toBeInTheDocument();
+
+        await user.clear(searchInput);
+        await user.type(searchInput, 'dark mode');
+        expect(screen.getByText('Theme')).toBeInTheDocument();
+    });
+
+    it('selects a result and restores category navigation', async () => {
+        const user = userEvent.setup();
+        const onSearchItemSelect = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'Notifications icon',
+                    name: 'notifications',
+                    uiName: 'Notifications',
+                }]}
+                searchItems={searchItems}
+                onSearchItemSelect={onSearchItemSelect}
+            />,
+        );
+
+        await user.type(screen.getByRole('searchbox', {name: 'Search settings'}), 'email');
+        await user.click(screen.getByRole('button', {name: /Email notifications/}));
+
+        expect(onSearchItemSelect).toHaveBeenCalledWith(searchItems[0]);
+        expect(screen.getByRole('tab', {name: 'notifications'})).toBeInTheDocument();
+    });
+
+    it('shows guidance when there are no matches', async () => {
+        const user = userEvent.setup();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        await user.type(screen.getByRole('searchbox', {name: 'Search settings'}), 'billing');
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+        expect(screen.getByText('Try searching for another setting.')).toBeInTheDocument();
     });
 });
