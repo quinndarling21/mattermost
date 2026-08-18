@@ -25,6 +25,7 @@ import {
 
 import ConvertConfirmModal from 'components/admin_console/team_channel_settings/convert_confirm_modal';
 import CategorySelector from 'components/category_selector/category_selector';
+import ChannelEmojiPicker from 'components/channel_emoji_picker/channel_emoji_picker';
 import ChannelNameFormField from 'components/channel_name_form_field/channel_name_form_field';
 import type {TextboxElement} from 'components/textbox';
 import AdvancedTextbox from 'components/widgets/advanced_textbox/advanced_textbox';
@@ -112,6 +113,8 @@ function ChannelSettingsInfoTab({
 
     const [defaultCategoryName, setDefaultCategoryName] = useState<string | undefined>(channel.default_category_name);
     const [serverDefaultCategoryName, setServerDefaultCategoryName] = useState<string | undefined>(channel.default_category_name);
+    const [channelEmoji, setChannelEmoji] = useState(channel.emoji ?? '');
+    const [serverChannelEmoji, setServerChannelEmoji] = useState(channel.emoji ?? '');
 
     const [managedCategoryName, setManagedCategoryName] = useState(currentManagedCategoryName);
     const [serverManagedCategoryName, setServerManagedCategoryName] = useState(currentManagedCategoryName);
@@ -120,6 +123,11 @@ function ChannelSettingsInfoTab({
         setDefaultCategoryName(channel.default_category_name);
         setServerDefaultCategoryName(channel.default_category_name);
     }, [channel.id, channel.default_category_name]);
+
+    useEffect(() => {
+        setChannelEmoji(channel.emoji ?? '');
+        setServerChannelEmoji(channel.emoji ?? '');
+    }, [channel.id, channel.emoji]);
 
     useEffect(() => {
         setManagedCategoryName(currentManagedCategoryName);
@@ -172,12 +180,13 @@ function ChannelSettingsInfoTab({
             channelPurpose.trim() !== channel.purpose ||
             channelHeader.trim() !== channel.header ||
             channelType !== channel.type ||
+            channelEmoji !== serverChannelEmoji ||
             (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '') ||
             managedCategoryName !== serverManagedCategoryName
         ) : false;
 
         setAreThereUnsavedChanges?.(unsavedChanges);
-    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, setAreThereUnsavedChanges]);
+    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, channelEmoji, serverChannelEmoji, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, setAreThereUnsavedChanges]);
 
     const handleURLChange = useCallback((newURL: string) => {
         if (internalUrlError) {
@@ -308,6 +317,9 @@ function ChannelSettingsInfoTab({
         if (channelHeader.trim() !== channel.header) {
             updated.header = channelHeader.trim();
         }
+        if (!isDMorGroupChannel && channelEmoji !== serverChannelEmoji) {
+            updated.emoji = channelEmoji;
+        }
         if ((defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '')) {
             updated.default_category_name = defaultCategoryName ?? '';
         }
@@ -334,11 +346,13 @@ function ChannelSettingsInfoTab({
             setChannelPurpose(data?.purpose ?? updated.purpose ?? channel.purpose);
         }
         setChannelHeader(data?.header ?? updated.header ?? channel.header);
+        setChannelEmoji(data?.emoji ?? updated.emoji ?? serverChannelEmoji);
+        setServerChannelEmoji(data?.emoji ?? updated.emoji ?? serverChannelEmoji);
         setServerDefaultCategoryName(defaultCategoryName);
         setServerManagedCategoryName(managedCategoryName);
 
         return true;
-    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, channelEmoji, serverChannelEmoji, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
 
     // Handle save changes panel actions
     const handleSaveChanges = useCallback(async () => {
@@ -378,6 +392,7 @@ function ChannelSettingsInfoTab({
         setChannelURL(channel?.name ?? '');
         setChannelPurpose(channel?.purpose ?? '');
         setChannelHeader(channel?.header ?? '');
+        setChannelEmoji(serverChannelEmoji);
         setChannelType(channel?.type as ChannelType ?? Constants.OPEN_CHANNEL as ChannelType);
         setDefaultCategoryName(serverDefaultCategoryName);
         setManagedCategoryName(serverManagedCategoryName);
@@ -392,7 +407,7 @@ function ChannelSettingsInfoTab({
         if (onCancel) {
             onCancel();
         }
-    }, [channel, onCancel, serverDefaultCategoryName, serverManagedCategoryName, setFormError]);
+    }, [channel, onCancel, serverChannelEmoji, serverDefaultCategoryName, serverManagedCategoryName, setFormError]);
 
     // Calculate if there are errors
     const hasErrors = Boolean(formError) ||
@@ -411,13 +426,14 @@ function ChannelSettingsInfoTab({
                 unsavedChanges = unsavedChanges || channelUrl.trim() !== channel.name;
                 unsavedChanges = unsavedChanges || channelPurpose.trim() !== channel.purpose;
                 unsavedChanges = unsavedChanges || channelType !== channel.type;
+                unsavedChanges = unsavedChanges || channelEmoji !== serverChannelEmoji;
                 unsavedChanges = unsavedChanges || (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '');
                 unsavedChanges = unsavedChanges || managedCategoryName !== serverManagedCategoryName;
             }
         }
 
         return unsavedChanges || saveChangesPanelState === 'saved';
-    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, channelEmoji, serverChannelEmoji, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
 
     return (
         <div className='ChannelSettingsModal__infoTab'>
@@ -461,6 +477,13 @@ function ChannelSettingsInfoTab({
                     currentUrl={channelUrl}
                     readOnly={!canManageChannelProperties}
                     isEditingExistingChannel={true}
+                />
+            )}
+            {!isDMorGroupChannel && (
+                <ChannelEmojiPicker
+                    value={channelEmoji}
+                    onChange={setChannelEmoji}
+                    disabled={!canManageChannelProperties}
                 />
             )}
             {/* Channel Type Section*/}
