@@ -104,8 +104,11 @@ verify_enterprise_checkout() {
 
   local target
   if ! target="$(find_enterprise_checkout)"; then
-    log "Enterprise checkout not found. Ensure the Cursor multi-repo environment includes github.com/mattermost/enterprise."
-    return 1
+    # The enterprise repo is private and often not accessible to forks;
+    # server/Makefile already falls back to a Team Edition build when
+    # BUILD_ENTERPRISE_DIR is absent, so a missing checkout is not fatal.
+    log "Enterprise checkout not found; continuing with a Team Edition setup. Include github.com/mattermost/enterprise in the multi-repo environment for an enterprise build."
+    return 0
   fi
 
   log "Enterprise checkout ready at $target."

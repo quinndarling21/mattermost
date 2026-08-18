@@ -8,3 +8,4 @@ alwaysApply: true
 - This repository has a checked-in Cloud Agent environment under `.cursor/`.
 - Docker is started by `.cursor/scripts/cloud-agent-start.sh`; if Docker is unavailable in Cloud, treat that as an environment failure rather than falling back to snapshot assumptions.
 - The environment declares `mattermost/enterprise` as a Cursor multi-repo dependency. Cursor clones repositories as siblings, so `server/Makefile` can use its default `../../enterprise` path; the install hook does not clone or symlink enterprise.
+- `mattermost/enterprise` is private and not accessible from this fork's credentials, so the enterprise checkout is usually absent. The install hook and `server/Makefile` both fall back to a Team Edition setup in that case; do not treat a missing enterprise checkout as a setup failure.
