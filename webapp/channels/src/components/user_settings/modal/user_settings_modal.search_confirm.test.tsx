@@ -74,6 +74,26 @@ describe('settings search unsaved-change confirmation', () => {
         expect(screen.getByRole('option', {name: 'Theme', hidden: true})).toBeInTheDocument();
     });
 
+    it('asks again when a result is clicked after discard is cancelled', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        await userEvent.click(await screen.findByTestId('mark-dirty'));
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'dark mode'}});
+
+        expect(await screen.findByText('Discard Changes?')).toBeInTheDocument();
+        fireEvent.click(screen.getByTestId('cancel-button'));
+        expect(document.getElementById('confirmModal')).not.toHaveClass('in');
+
+        fireEvent.click(screen.getByRole('option', {name: 'Theme', hidden: true}));
+
+        expect(await screen.findByText('Discard Changes?')).toBeInTheDocument();
+        expect(screen.getByTestId('active-tab')).toHaveTextContent('notifications');
+
+        fireEvent.click(screen.getByRole('button', {name: 'Yes, Discard'}));
+        expect(screen.getByTestId('active-tab')).toHaveTextContent('display');
+        expect(screen.getByTestId('active-section')).toHaveTextContent('theme');
+    });
+
     it('routes to the matching setting after discard is confirmed', async () => {
         renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
 

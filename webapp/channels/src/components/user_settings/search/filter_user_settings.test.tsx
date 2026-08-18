@@ -81,10 +81,26 @@ describe('filterUserSettings', () => {
         expect(matches[0]?.tab).toBe('display');
     });
 
-    it('matches aliases such as dark mode', () => {
-        const matches = filterUserSettings(items, 'dark mode');
-        expect(matches[0]?.section).toBe('theme');
-        expect(matches[0]?.tab).toBe('display');
+    it.each([
+        ['dark mode', 'theme', 'display'],
+        ['language', 'languages', 'display'],
+        ['time format', 'clock', 'display'],
+        ['automatic replies', 'autoResponder', 'notifications'],
+        ['channel switcher', 'limitVisibleGMsDMs', 'sidebar'],
+        ['join/leave messages', 'joinLeave', 'advanced'],
+    ])('matches required product alias %s', (query, section, tab) => {
+        const matches = filterUserSettings(items, query);
+        expect(matches.some((match) => match.section === section && match.tab === tab)).toBe(true);
+    });
+
+    it.each([
+        ['MFA', 'mfa'],
+        ['access tokens', 'tokens'],
+        ['active sessions', ''],
+    ])('matches required profile alias %s', (query, section) => {
+        const profileItems = buildUserSettingsSearchItems(intl, false, {});
+        const matches = filterUserSettings(profileItems, query);
+        expect(matches.some((match) => match.section === section && match.tab === 'security')).toBe(true);
     });
 
     it('matches prefix tokens like appear -> Appearance/theme aliases', () => {

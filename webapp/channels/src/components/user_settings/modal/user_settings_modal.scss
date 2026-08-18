@@ -7,6 +7,13 @@
         overflow: hidden;
     }
 
+    .settings-content mark {
+        border-radius: var(--radius-xs);
+        background: rgba(var(--button-bg-rgb), 0.24);
+        color: inherit;
+        padding-inline: 2px;
+    }
+
     .GenericModal__wrapper {
         display: flex;
         overflow: hidden;

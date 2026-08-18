@@ -7272,6 +7272,7 @@
   "user.settings.modal.display": "Display",
   "user.settings.modal.findSettings": "Find settings",
   "user.settings.modal.noSettingsFound": "No settings found",
+  "user.settings.modal.noSettingsFoundHint": "Try a different name or keyword.",
   "user.settings.modal.notifications": "Notifications",
   "user.settings.modal.profile": "Profile Settings",
   "user.settings.modal.searchResults": "Settings search results",

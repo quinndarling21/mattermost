@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen, waitFor} from '@testing-library/react';
+import {fireEvent, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
@@ -138,6 +138,14 @@ const searchItems: UserSettingsSearchItem[] = [
         aliases: ['dark mode', 'appearance'],
     },
     {
+        id: 'display:clock:Clock Display',
+        tab: 'display',
+        tabLabel: 'Display',
+        section: 'clock',
+        label: 'Clock Display',
+        aliases: ['clock', 'time format'],
+    },
+    {
         id: 'notifications:desktopAndMobile:Desktop and mobile notifications',
         tab: 'notifications',
         tabLabel: 'Notifications',
@@ -263,6 +271,86 @@ describe('settings search', () => {
 
         await userEvent.clear(input);
         expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
+    });
+
+    it('clears search from the clear control without changing the current setting', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+                activeTab='display'
+                activeSection='theme'
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'theme');
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+        navigateToSetting.mockClear();
+
+        await userEvent.click(screen.getByRole('button', {name: 'Clear'}));
+
+        expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Find settings')).toHaveValue('');
+        await waitFor(() => {
+            expect(screen.getByPlaceholderText('Find settings')).toHaveFocus();
+        });
+        expect(navigateToSetting).not.toHaveBeenCalled();
+    });
+
+    it('keeps the current match selected while it still matches', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                activeTab='display'
+                activeSection='theme'
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'theme'}});
+
+        expect(navigateToSetting).not.toHaveBeenCalled();
+        expect(screen.getByRole('option', {name: 'Theme'})).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('routes to the first match when the current selection no longer matches', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                activeTab='display'
+                activeSection='theme'
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'clock'}});
+
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'clock');
+    });
+
+    it('highlights matching text in result labels', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'heme'}});
+
+        expect(screen.getByText('heme')).toHaveClass('SettingsSidebar__searchHighlight');
     });
 
     it('moves keyboard focus through results with arrow keys', async () => {

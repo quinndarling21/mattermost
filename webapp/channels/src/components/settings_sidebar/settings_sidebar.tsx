@@ -81,7 +81,7 @@ function SettingsSearchInput({
             />
             <input
                 id='userSettingsFilter'
-                className={classNames('SettingsSidebar__filter', {active: Boolean(value)})}
+                className='SettingsSidebar__filter'
                 type='search'
                 value={value}
                 onChange={onChange}
@@ -434,6 +434,12 @@ export default class SettingsSidebar extends React.PureComponent<Props, State> {
                         id='user.settings.modal.noSettingsFound'
                         defaultMessage='No settings found'
                     />
+                    <p className='SettingsSidebar__noResultsHint'>
+                        <FormattedMessage
+                            id='user.settings.modal.noSettingsFoundHint'
+                            defaultMessage='Try a different name or keyword.'
+                        />
+                    </p>
                 </div>
             );
         }
