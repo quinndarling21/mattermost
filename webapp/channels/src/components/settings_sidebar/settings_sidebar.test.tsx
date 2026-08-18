@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
@@ -280,5 +280,56 @@ describe('settings search', () => {
         await userEvent.keyboard('{ArrowDown}');
 
         expect(screen.getByRole('option', {name: /Desktop and mobile notifications/i})).toHaveFocus();
+    });
+
+    it('moves focus into the setting when a result is clicked', async () => {
+        const edit = document.createElement('button');
+        edit.id = 'themeEdit';
+        edit.scrollIntoView = jest.fn();
+        document.body.appendChild(edit);
+
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'theme');
+        await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
+
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme');
+        await waitFor(() => {
+            expect(edit).toHaveFocus();
+        });
+
+        edit.remove();
+    });
+
+    it('moves focus into the setting when Enter confirms the first result', async () => {
+        const edit = document.createElement('button');
+        edit.id = 'themeEdit';
+        edit.scrollIntoView = jest.fn();
+        document.body.appendChild(edit);
+
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={jest.fn()}
+            />,
+        );
+
+        const input = screen.getByPlaceholderText('Find settings');
+        await userEvent.type(input, 'theme');
+        await userEvent.keyboard('{Enter}');
+
+        await waitFor(() => {
+            expect(edit).toHaveFocus();
+        });
+
+        edit.remove();
     });
 });

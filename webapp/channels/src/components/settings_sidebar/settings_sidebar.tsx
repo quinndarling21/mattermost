@@ -189,7 +189,7 @@ export default class SettingsSidebar extends React.PureComponent<Props, State> {
                 const title = result.section ? document.getElementById(`${result.section}Title`) : null;
                 const target = editButton || title;
                 if (target) {
-                    target.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+                    target.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
                     if (editButton) {
                         editButton.focus();
                     }
