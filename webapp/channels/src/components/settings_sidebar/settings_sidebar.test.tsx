@@ -2,8 +2,11 @@
 // See LICENSE.txt for license information.
 
 import {screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
+
+import type {UserSettingsSearchItem} from 'components/user_settings/search';
 
 import {renderWithContext} from 'tests/react_testing_utils';
 
@@ -118,5 +121,160 @@ describe('tabs are properly rendered', () => {
 
         expect(screen.queryByText(uiName1)).toBeInTheDocument();
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
+    });
+});
+
+const searchItems: UserSettingsSearchItem[] = [
+    {
+        id: 'display:theme:Theme',
+        tab: 'display',
+        tabLabel: 'Display',
+        section: 'theme',
+        label: 'Theme',
+        aliases: ['dark mode', 'appearance'],
+    },
+    {
+        id: 'notifications:desktopAndMobile:Desktop and mobile notifications',
+        tab: 'notifications',
+        tabLabel: 'Notifications',
+        section: 'desktopAndMobile',
+        label: 'Desktop and mobile notifications',
+        aliases: ['desktop', 'mobile'],
+    },
+    {
+        id: 'demo:Demo Section:Demo Setting',
+        tab: 'demo',
+        tabLabel: 'Demo Plugin',
+        section: 'Demo Section',
+        label: 'Demo Setting',
+        aliases: ['plugin'],
+        isPlugin: true,
+    },
+];
+
+describe('settings search', () => {
+    it('shows Find settings input when search items are provided', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+            />,
+        );
+
+        expect(screen.getByPlaceholderText('Find settings')).toBeInTheDocument();
+        expect(screen.getByLabelText('Find settings')).toBeInTheDocument();
+    });
+
+    it('does not show search input when search items are omitted', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+            />,
+        );
+
+        expect(screen.queryByPlaceholderText('Find settings')).not.toBeInTheDocument();
+    });
+
+    it('replaces tabs with grouped results and auto-routes while searching', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'dark mode');
+
+        expect(screen.getByText('Theme')).toBeInTheDocument();
+        expect(screen.getByText('Display')).toBeInTheDocument();
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme');
+        expect(screen.getByPlaceholderText('Find settings')).toHaveFocus();
+    });
+
+    it('shows plugin results under PLUGIN PREFERENCES', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'Demo Setting');
+
+        expect(screen.getByText('PLUGIN PREFERENCES')).toBeInTheDocument();
+        expect(screen.getByText('Demo Setting')).toBeInTheDocument();
+    });
+
+    it('shows empty state when nothing matches', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'zzzz-not-a-setting');
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+    });
+
+    it('clears search and restores tabs', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+            />,
+        );
+
+        const input = screen.getByPlaceholderText('Find settings');
+        await userEvent.type(input, 'theme');
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+
+        await userEvent.clear(input);
+        expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
+    });
+
+    it('moves keyboard focus through results with arrow keys', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        const input = screen.getByPlaceholderText('Find settings');
+        await userEvent.type(input, 'desktop');
+        await userEvent.keyboard('{ArrowDown}');
+
+        expect(screen.getByRole('option', {name: /Desktop and mobile notifications/i})).toHaveFocus();
     });
 });

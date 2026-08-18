@@ -8,7 +8,7 @@ import type {Dispatch} from 'redux';
 
 import {getUserPreferences} from 'mattermost-redux/actions/preferences';
 import {getUser, sendVerificationEmail} from 'mattermost-redux/actions/users';
-import {getConfig} from 'mattermost-redux/selectors/entities/general';
+import {getConfig, getCustomProfileAttributes} from 'mattermost-redux/selectors/entities/general';
 import {getUserPreferences as getUserPreferencesSelector} from 'mattermost-redux/selectors/entities/preferences';
 import {getCurrentUser, getUser as getUserSelector} from 'mattermost-redux/selectors/entities/users';
 
@@ -36,6 +36,7 @@ function mapStateToProps(state: GlobalState, ownProps: OwnProps) {
         sendEmailNotifications,
         requireEmailVerification,
         pluginSettings: getPluginUserSettings(state),
+        customProfileAttributeFields: getCustomProfileAttributes(state),
     };
 }
 

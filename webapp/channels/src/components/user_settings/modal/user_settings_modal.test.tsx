@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -252,5 +253,45 @@ describe('plugin tabs use the correct icon', () => {
         expect(element).toBeInTheDocument();
         expect(element!.nodeName).toBe('I');
         expect(element?.className).toBe('icon icon-phone-in-talk');
+    });
+});
+
+describe('settings search', () => {
+    it('shows Find settings and routes dark mode to Display theme', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        const search = await screen.findByPlaceholderText('Find settings');
+        await userEvent.type(search, 'dark mode');
+
+        expect(await screen.findByText('Theme')).toBeInTheDocument();
+        expect(screen.getByRole('heading', {name: 'Display'})).toBeInTheDocument();
+        expect(search).toHaveFocus();
+    });
+
+    it('shows no results for an unmatched query without leaving the current tab', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        expect(await screen.findByTestId('notifications-tab-button')).toBeInTheDocument();
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'zzzz-not-a-setting');
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+        expect(screen.getByRole('heading', {name: 'Notifications'})).toBeInTheDocument();
+    });
+
+    it('does not include product settings when the Profile modal is open', async () => {
+        renderWithContext(
+            <UserSettingsModal
+                {...baseProps}
+                isContentProductSettings={false}
+            />,
+            baseState,
+        );
+
+        const search = await screen.findByPlaceholderText('Find settings');
+        await userEvent.type(search, 'dark mode');
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+        expect(screen.queryByText('Theme')).not.toBeInTheDocument();
     });
 });

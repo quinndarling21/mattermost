@@ -2,6 +2,10 @@
 // See LICENSE.txt for license information.
 
 .UserSettingsModal {
+    .settings-links {
+        display: flex;
+        overflow: hidden;
+    }
 
     .GenericModal__wrapper {
         display: flex;
