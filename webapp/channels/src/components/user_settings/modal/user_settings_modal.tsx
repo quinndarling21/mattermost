@@ -15,6 +15,9 @@ import type {ActionResult} from 'mattermost-redux/types/actions';
 import ConfirmModal from 'components/confirm_modal';
 import SettingsSidebar from 'components/settings_sidebar';
 import UserSettings from 'components/user_settings';
+import SettingsSearch from 'components/user_settings/search/settings_search';
+import SettingsSearchResults from 'components/user_settings/search/settings_search_results';
+import type {SettingsSearchResultsHandle} from 'components/user_settings/search/settings_search_results';
 import LoadingSpinner from 'components/widgets/loading/loading_spinner';
 import SmartLoader from 'components/widgets/smart_loader';
 
@@ -53,6 +56,7 @@ export type Props = OwnProps & {
 type State = {
     active_tab?: string;
     active_section: string;
+    search_query: string;
     showConfirmModal: boolean;
     enforceFocus?: boolean;
     show: boolean;
@@ -65,6 +69,8 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
     private customConfirmAction: ((handleConfirm: () => void) => void) | null;
     private afterConfirm: (() => void) | null;
     private modalBodyRef: React.RefObject<HTMLDivElement>;
+    private searchInputRef: React.RefObject<HTMLInputElement>;
+    private searchResultsRef: React.RefObject<SettingsSearchResultsHandle>;
 
     constructor(props: Props) {
         super(props);
@@ -72,6 +78,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.state = {
             active_tab: props.activeTab ?? (props.isContentProductSettings ? 'notifications' : 'profile'),
             active_section: '',
+            search_query: '',
             showConfirmModal: false,
             enforceFocus: true,
             show: true,
@@ -88,6 +95,8 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.afterConfirm = null;
 
         this.modalBodyRef = React.createRef();
+        this.searchInputRef = React.createRef();
+        this.searchResultsRef = React.createRef();
     }
 
     handleResend = (email: string) => {
@@ -164,6 +173,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: this.props.isContentProductSettings ? 'notifications' : 'profile',
             active_section: '',
+            search_query: '',
         });
         if (this.props.focusOriginElement) {
             focusElement(this.props.focusOriginElement, true);
@@ -179,6 +189,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: '',
             active_section: '',
+            search_query: '',
         });
     };
 
@@ -245,8 +256,42 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             this.setState({
                 active_tab: tab,
                 active_section: '',
+                search_query: '',
             });
         }
+    };
+
+    handleSearchChange = (query: string) => {
+        this.setState({search_query: query});
+    };
+
+    focusSearchResults = () => {
+        this.searchResultsRef.current?.focusFirst();
+    };
+
+    focusSearchInput = () => {
+        this.searchInputRef.current?.focus();
+    };
+
+    // Deep-link from a search result straight to the relevant tab + section,
+    // honoring the unsaved-changes confirmation flow.
+    handleSearchSelect = (tab: string, section: string, skipConfirm?: boolean) => {
+        if (!skipConfirm && this.requireConfirm) {
+            this.showConfirmModal(() => this.handleSearchSelect(tab, section, true));
+            return;
+        }
+
+        this.setState({
+            active_tab: tab,
+            active_section: section,
+            search_query: '',
+        });
+    };
+
+    getAvailableTabNames = (): string[] => {
+        const tabs = this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab();
+        const pluginTabs = this.props.isContentProductSettings ? this.getPluginsSettingsTab() : [];
+        return [...tabs, ...pluginTabs].map((tab) => tab.name);
     };
 
     updateSection = (section?: string, skipConfirm?: boolean) => {
@@ -389,6 +434,12 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                         <>
                             <div className='settings-table'>
                                 <div className='settings-links'>
+                                    <SettingsSearch
+                                        ref={this.searchInputRef}
+                                        value={this.state.search_query}
+                                        onChange={this.handleSearchChange}
+                                        onEnterResults={this.focusSearchResults}
+                                    />
                                     <SettingsSidebar
                                         tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
                                         pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
@@ -397,22 +448,32 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                     />
                                 </div>
                                 <div className='settings-content minimize-settings'>
-                                    <UserSettings
-                                        activeTab={this.state.active_tab}
-                                        activeSection={this.state.active_section}
-                                        updateSection={this.updateSection}
-                                        updateTab={this.updateTab}
-                                        closeModal={this.closeModal}
-                                        collapseModal={this.collapseModal}
-                                        setRequireConfirm={(requireConfirm?: boolean, customConfirmAction?: () => () => void) => {
-                                            this.requireConfirm = requireConfirm || false;
-                                            this.customConfirmAction = customConfirmAction || null;
-                                        }}
-                                        pluginSettings={this.props.pluginSettings}
-                                        user={this.props.user}
-                                        adminMode={this.props.adminMode}
-                                        userPreferences={this.props.userPreferences}
-                                    />
+                                    {this.state.search_query.trim() ? (
+                                        <SettingsSearchResults
+                                            ref={this.searchResultsRef}
+                                            query={this.state.search_query}
+                                            availableTabs={this.getAvailableTabNames()}
+                                            onSelect={this.handleSearchSelect}
+                                            onFocusSearch={this.focusSearchInput}
+                                        />
+                                    ) : (
+                                        <UserSettings
+                                            activeTab={this.state.active_tab}
+                                            activeSection={this.state.active_section}
+                                            updateSection={this.updateSection}
+                                            updateTab={this.updateTab}
+                                            closeModal={this.closeModal}
+                                            collapseModal={this.collapseModal}
+                                            setRequireConfirm={(requireConfirm?: boolean, customConfirmAction?: () => () => void) => {
+                                                this.requireConfirm = requireConfirm || false;
+                                                this.customConfirmAction = customConfirmAction || null;
+                                            }}
+                                            pluginSettings={this.props.pluginSettings}
+                                            user={this.props.user}
+                                            adminMode={this.props.adminMode}
+                                            userPreferences={this.props.userPreferences}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </>
