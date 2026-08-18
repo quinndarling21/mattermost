@@ -5,9 +5,9 @@ import type {IntlShape} from 'react-intl';
 
 import type {UserPropertyField} from '@mattermost/types/properties';
 
-import type {PluginConfiguration} from 'types/plugins/user_settings';
-
 import Constants, {AdvancedSections, UserSettingsNotificationSections} from 'utils/constants';
+
+import type {PluginConfiguration} from 'types/plugins/user_settings';
 
 import type {UserSettingsSearchItem} from './types';
 

@@ -1,10 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
+
+jest.mock('@mattermost/shared/context', () => ({
+    SharedProvider: ({children}: {children: React.ReactNode}) => children,
+}));
 
 import type {DeepPartial} from '@mattermost/types/utilities';
 
@@ -28,7 +32,7 @@ const baseState: DeepPartial<GlobalState> = {
         users: {
             currentUserId: 'id',
             profiles: {
-                id: TestHelper.getUserMock({id: 'id'}),
+                id: TestHelper.getUserMock({id: 'id', locale: 'en'}),
             },
         },
     },
@@ -261,10 +265,11 @@ describe('settings search', () => {
         renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
 
         const search = await screen.findByPlaceholderText('Find settings');
-        await userEvent.type(search, 'dark mode');
+        fireEvent.change(search, {target: {value: 'dark mode'}});
 
-        expect(await screen.findByText('Theme')).toBeInTheDocument();
+        expect(await screen.findByRole('option', {name: 'Theme'})).toHaveAttribute('aria-selected', 'true');
         expect(screen.getByRole('heading', {name: 'Display'})).toBeInTheDocument();
+        expect(screen.getByRole('heading', {name: 'Display Settings'})).toBeInTheDocument();
         expect(search).toHaveFocus();
     });
 
@@ -273,7 +278,7 @@ describe('settings search', () => {
 
         expect(await screen.findByTestId('notifications-tab-button')).toBeInTheDocument();
 
-        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'zzzz-not-a-setting');
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'xyzzy-not-a-setting'}});
 
         expect(screen.getByText('No settings found')).toBeInTheDocument();
         expect(screen.getByRole('heading', {name: 'Notifications'})).toBeInTheDocument();

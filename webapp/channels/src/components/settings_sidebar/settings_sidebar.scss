@@ -30,14 +30,33 @@
             pointer-events: none;
         }
 
-        .input-clear {
-            .input-clear-x {
-                position: absolute;
-                top: 50%;
-                right: 10px;
-                transform: translateY(-50%);
-                color: rgba(var(--center-channel-color-rgb), 0.64);
-            }
+        input[type='search']::-webkit-search-decoration,
+        input[type='search']::-webkit-search-cancel-button,
+        input[type='search']::-webkit-search-results-button,
+        input[type='search']::-webkit-search-results-decoration {
+            display: none;
+        }
+    }
+
+    &__clear {
+        position: absolute;
+        top: 50%;
+        right: 8px;
+        display: flex;
+        width: 20px;
+        height: 20px;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: rgba(var(--center-channel-color-rgb), 0.64);
+        cursor: pointer;
+        transform: translateY(-50%);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--center-channel-color);
         }
     }
 

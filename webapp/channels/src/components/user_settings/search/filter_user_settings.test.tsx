@@ -11,6 +11,7 @@ import {
     getFirstPartyProductSettingSectionIds,
     getFirstPartyProfileSettingSectionIds,
 } from 'components/user_settings/search';
+
 import type {PluginConfiguration} from 'types/plugins/user_settings';
 
 const intl = {

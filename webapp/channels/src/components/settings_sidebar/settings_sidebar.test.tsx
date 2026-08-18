@@ -12,6 +12,10 @@ import {renderWithContext} from 'tests/react_testing_utils';
 
 import SettingsSidebar from './settings_sidebar';
 
+jest.mock('@mattermost/shared/context', () => ({
+    SharedProvider: ({children}: {children: React.ReactNode}) => children,
+}));
+
 type Props = ComponentProps<typeof SettingsSidebar>;
 
 const baseProps: Props = {

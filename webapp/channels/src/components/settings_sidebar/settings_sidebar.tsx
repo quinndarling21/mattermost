@@ -5,7 +5,6 @@ import classNames from 'classnames';
 import React from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
 
-import QuickInput from 'components/quick_input';
 import {
     filterUserSettings,
     groupSearchMatchesByTab,
@@ -80,18 +79,30 @@ function SettingsSearchInput({
                 className='search__icon'
                 aria-hidden='true'
             />
-            <QuickInput
+            <input
                 id='userSettingsFilter'
                 className={classNames('SettingsSidebar__filter', {active: Boolean(value)})}
                 type='search'
                 value={value}
                 onChange={onChange}
                 onKeyDown={onKeyDown}
-                clearable={true}
-                onClear={onClear}
                 placeholder={placeholder}
-                ref={inputRef}
+                ref={inputRef as React.RefObject<HTMLInputElement>}
+                autoComplete='off'
             />
+            {value && (
+                <button
+                    type='button'
+                    className='SettingsSidebar__clear'
+                    onClick={onClear}
+                    aria-label={formatMessage({id: 'input.clear', defaultMessage: 'Clear'})}
+                >
+                    <i
+                        className='icon icon-close-circle'
+                        aria-hidden='true'
+                    />
+                </button>
+            )}
         </div>
     );
 }

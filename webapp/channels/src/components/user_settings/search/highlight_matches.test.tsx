@@ -8,13 +8,23 @@ import HighlightMatches from './highlight_matches';
 
 describe('HighlightMatches', () => {
     it('renders plain text when the query does not match', () => {
-        render(<HighlightMatches text='Theme' query='dark'/>);
+        render(
+            <HighlightMatches
+                text='Theme'
+                query='dark'
+            />,
+        );
         expect(screen.getByText('Theme')).toBeInTheDocument();
         expect(screen.queryByRole('mark')).not.toBeInTheDocument();
     });
 
     it('highlights case-insensitive matches', () => {
-        render(<HighlightMatches text='Desktop notifications' query='notif'/>);
+        render(
+            <HighlightMatches
+                text='Desktop notifications'
+                query='notif'
+            />,
+        );
         expect(screen.getByText('notif')).toHaveClass('SettingsSidebar__searchHighlight');
     });
 
