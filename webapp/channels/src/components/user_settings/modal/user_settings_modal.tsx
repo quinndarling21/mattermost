@@ -12,9 +12,11 @@ import type {UserProfile} from '@mattermost/types/users';
 
 import type {ActionResult} from 'mattermost-redux/types/actions';
 
+import SearchKeywordMarking from 'components/admin_console/search_keyword_marking';
 import ConfirmModal from 'components/confirm_modal';
 import SettingsSidebar from 'components/settings_sidebar';
 import UserSettings from 'components/user_settings';
+import {buildUserSettingsSearchItems} from 'components/user_settings/search';
 import LoadingSpinner from 'components/widgets/loading/loading_spinner';
 import SmartLoader from 'components/widgets/smart_loader';
 
@@ -58,6 +60,7 @@ type State = {
     show: boolean;
     resendStatus: string;
     loading: boolean;
+    searchQuery: string;
 };
 
 class UserSettingsModal extends React.PureComponent<Props, State> {
@@ -77,6 +80,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             show: true,
             resendStatus: '',
             loading: false,
+            searchQuery: '',
         };
 
         this.requireConfirm = false;
@@ -257,6 +261,22 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         }
     };
 
+    navigateToSetting = (tab: string, section: string, skipConfirm?: boolean) => {
+        if (!skipConfirm && this.requireConfirm) {
+            this.showConfirmModal(() => this.navigateToSetting(tab, section, true));
+            return;
+        }
+
+        this.setState({
+            active_tab: tab,
+            active_section: section,
+        });
+    };
+
+    handleSearchChange = (searchQuery: string) => {
+        this.setState({searchQuery});
+    };
+
     getUserSettingsTabs = () => {
         const {formatMessage} = this.props.intl;
         return [
@@ -393,26 +413,37 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                         tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
                                         pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
                                         activeTab={this.state.active_tab}
+                                        activeSection={this.state.active_section}
                                         updateTab={this.updateTab}
+                                        updateSection={this.updateSection}
+                                        navigateToSetting={this.navigateToSetting}
+                                        searchItems={buildUserSettingsSearchItems(
+                                            this.props.intl,
+                                            this.props.isContentProductSettings,
+                                            this.props.isContentProductSettings ? this.props.pluginSettings : {},
+                                        )}
+                                        onSearchChange={this.handleSearchChange}
                                     />
                                 </div>
                                 <div className='settings-content minimize-settings'>
-                                    <UserSettings
-                                        activeTab={this.state.active_tab}
-                                        activeSection={this.state.active_section}
-                                        updateSection={this.updateSection}
-                                        updateTab={this.updateTab}
-                                        closeModal={this.closeModal}
-                                        collapseModal={this.collapseModal}
-                                        setRequireConfirm={(requireConfirm?: boolean, customConfirmAction?: () => () => void) => {
-                                            this.requireConfirm = requireConfirm || false;
-                                            this.customConfirmAction = customConfirmAction || null;
-                                        }}
-                                        pluginSettings={this.props.pluginSettings}
-                                        user={this.props.user}
-                                        adminMode={this.props.adminMode}
-                                        userPreferences={this.props.userPreferences}
-                                    />
+                                    <SearchKeywordMarking keyword={this.state.searchQuery}>
+                                        <UserSettings
+                                            activeTab={this.state.active_tab}
+                                            activeSection={this.state.active_section}
+                                            updateSection={this.updateSection}
+                                            updateTab={this.updateTab}
+                                            closeModal={this.closeModal}
+                                            collapseModal={this.collapseModal}
+                                            setRequireConfirm={(requireConfirm?: boolean, customConfirmAction?: () => () => void) => {
+                                                this.requireConfirm = requireConfirm || false;
+                                                this.customConfirmAction = customConfirmAction || null;
+                                            }}
+                                            pluginSettings={this.props.pluginSettings}
+                                            user={this.props.user}
+                                            adminMode={this.props.adminMode}
+                                            userPreferences={this.props.userPreferences}
+                                        />
+                                    </SearchKeywordMarking>
                                 </div>
                             </div>
                         </>

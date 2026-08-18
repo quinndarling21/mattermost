@@ -1,10 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
+import type {UserSettingsSearchItem} from 'components/user_settings/search';
 import {renderWithContext} from 'tests/react_testing_utils';
 
 import SettingsSidebar from './settings_sidebar';
@@ -17,6 +18,25 @@ const baseProps: Props = {
     updateTab: jest.fn(),
     pluginTabs: [],
 };
+
+const searchItems: UserSettingsSearchItem[] = [
+    {
+        id: 'display:theme:Theme',
+        tab: 'display',
+        tabLabel: 'Display',
+        section: 'theme',
+        label: 'Theme',
+        aliases: ['dark mode', 'appearance'],
+    },
+    {
+        id: 'notifications:desktopAndMobile:Desktop and mobile notifications',
+        tab: 'notifications',
+        tabLabel: 'Notifications',
+        section: 'desktopAndMobile',
+        label: 'Desktop and mobile notifications',
+        aliases: ['desktop', 'mobile'],
+    },
+];
 
 describe('properly use the correct icon', () => {
     it('icon as a string', () => {
@@ -118,5 +138,99 @@ describe('tabs are properly rendered', () => {
 
         expect(screen.queryByText(uiName1)).toBeInTheDocument();
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
+    });
+});
+
+describe('settings search', () => {
+    it('shows Find settings input when search items are provided', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+            />,
+        );
+
+        expect(screen.getByPlaceholderText('Find settings')).toBeInTheDocument();
+    });
+
+    it('does not show search input when search items are omitted', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+            />,
+        );
+
+        expect(screen.queryByPlaceholderText('Find settings')).not.toBeInTheDocument();
+    });
+
+    it('replaces tabs with grouped results while searching', () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'dark mode'}});
+
+        expect(screen.queryByText('Display')).toBeInTheDocument();
+        expect(screen.getByText('Theme')).toBeInTheDocument();
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme');
+    });
+
+    it('shows empty state when nothing matches', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'zzzz-not-a-setting'}});
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+    });
+
+    it('clears search and restores tabs', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+            />,
+        );
+
+        const input = screen.getByPlaceholderText('Find settings');
+        fireEvent.change(input, {target: {value: 'theme'}});
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('input-clear'));
+        expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
     });
 });
