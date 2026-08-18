@@ -18,6 +18,7 @@ import ConfirmModal from 'components/confirm_modal';
 import SettingsSidebar from 'components/settings_sidebar';
 import UserSettings from 'components/user_settings';
 import {buildUserSettingsSearchItems} from 'components/user_settings/search';
+import type {UserSettingsSearchAvailability} from 'components/user_settings/search';
 import LoadingSpinner from 'components/widgets/loading/loading_spinner';
 import SmartLoader from 'components/widgets/smart_loader';
 
@@ -44,6 +45,7 @@ export type Props = OwnProps & {
     intl: IntlShape;
     pluginSettings: {[pluginId: string]: PluginConfiguration};
     customProfileAttributeFields?: UserPropertyField[];
+    searchAvailability?: UserSettingsSearchAvailability;
     user?: UserProfile;
     onExited: () => void;
     focusOriginElement?: string;
@@ -263,9 +265,13 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         }
     };
 
-    navigateToSetting = (tab: string, section: string, skipConfirm?: boolean) => {
-        if (!skipConfirm && this.requireConfirm) {
-            this.showConfirmModal(() => this.navigateToSetting(tab, section, true));
+    navigateToSetting = (tab: string, section: string, options?: {preview?: boolean; skipConfirm?: boolean}) => {
+        if (options?.preview && this.requireConfirm) {
+            return;
+        }
+
+        if (!options?.skipConfirm && this.requireConfirm) {
+            this.showConfirmModal(() => this.navigateToSetting(tab, section, {skipConfirm: true}));
             return;
         }
 
@@ -425,6 +431,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                             this.props.isContentProductSettings ? this.props.pluginSettings : {},
                                             {
                                                 customProfileAttributeFields: this.props.isContentProductSettings ? [] : this.props.customProfileAttributeFields || [],
+                                                availability: this.props.searchAvailability,
                                             },
                                         )}
                                         onSearchChange={this.handleSearchChange}

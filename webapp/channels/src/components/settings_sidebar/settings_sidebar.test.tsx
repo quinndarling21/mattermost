@@ -220,8 +220,63 @@ describe('settings search', () => {
         expect(screen.getByText('Theme')).toBeInTheDocument();
         expect(screen.getByText('Display')).toBeInTheDocument();
         expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
-        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme');
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme', {preview: true});
         expect(screen.getByPlaceholderText('Find settings')).toHaveFocus();
+    });
+
+    it('marks only one empty-section plugin result as selected', async () => {
+        const pluginSearchItems: UserSettingsSearchItem[] = [
+            {
+                id: 'demo:root:Demo Plugin',
+                tab: 'demo',
+                tabLabel: 'Demo Plugin',
+                section: '',
+                label: 'Demo Plugin',
+                aliases: ['plugin'],
+                isPlugin: true,
+            },
+            {
+                id: 'demo:root:Open Demo',
+                tab: 'demo',
+                tabLabel: 'Demo Plugin',
+                section: '',
+                label: 'Open Demo',
+                aliases: ['plugin'],
+                isPlugin: true,
+            },
+        ];
+
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                activeTab='demo'
+                activeSection=''
+                searchItems={pluginSearchItems}
+                navigateToSetting={jest.fn()}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'plugin');
+
+        const selected = screen.getAllByRole('option').filter((option) => option.getAttribute('aria-selected') === 'true');
+        expect(selected).toHaveLength(1);
+    });
+
+    it('auto-routes as a preview and confirms only on explicit selection', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'dark mode');
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme', {preview: true});
+
+        await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
+        expect(navigateToSetting).toHaveBeenLastCalledWith('display', 'theme', undefined);
     });
 
     it('shows plugin results under PLUGIN PREFERENCES', async () => {
@@ -337,7 +392,7 @@ describe('settings search', () => {
 
         fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'clock'}});
 
-        expect(navigateToSetting).toHaveBeenCalledWith('display', 'clock');
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'clock', {preview: true});
     });
 
     it('highlights matching text in result labels', async () => {
@@ -388,7 +443,7 @@ describe('settings search', () => {
         await userEvent.type(screen.getByPlaceholderText('Find settings'), 'theme');
         await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
 
-        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme');
+        expect(navigateToSetting).toHaveBeenLastCalledWith('display', 'theme', undefined);
         await waitFor(() => {
             expect(edit).toHaveFocus();
         });

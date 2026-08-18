@@ -38,12 +38,13 @@ export type Props = {
     searchItems?: UserSettingsSearchItem[];
     activeSection?: string;
     updateSection?: (section: string) => void;
-    navigateToSetting?: (tab: string, section: string) => void;
+    navigateToSetting?: (tab: string, section: string, options?: {preview?: boolean}) => void;
     onSearchChange?: (query: string) => void;
 };
 
 type State = {
     filter: string;
+    selectedResultId: string | null;
 };
 
 type SettingsSearchInputProps = {
@@ -110,18 +111,17 @@ function SettingsSearchInput({
 export default class SettingsSidebar extends React.PureComponent<Props, State> {
     buttonRefs: Map<string, HTMLButtonElement>;
     searchInputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement>;
-    private lastAutoRoutedId: string | null;
 
     constructor(props: Props) {
         super(props);
 
         this.state = {
             filter: '',
+            selectedResultId: null,
         };
 
         this.buttonRefs = new Map();
         this.searchInputRef = React.createRef();
-        this.lastAutoRoutedId = null;
     }
 
     componentDidUpdate(_prevProps: Props, prevState: State) {
@@ -135,20 +135,20 @@ export default class SettingsSidebar extends React.PureComponent<Props, State> {
 
         const matches = this.getMatches();
         if (matches.length === 0) {
-            this.lastAutoRoutedId = null;
+            if (this.state.selectedResultId) {
+                this.setState({selectedResultId: null});
+            }
             return;
         }
 
-        const currentMatch = matches.find((match) => this.isResultActive(match));
+        const currentMatch = matches.find((match) => match.id === this.state.selectedResultId) ||
+            matches.find((match) => this.matchesActiveSection(match));
         const target = currentMatch || matches[0];
 
-        if (this.lastAutoRoutedId === target.id) {
-            return;
-        }
-
-        this.lastAutoRoutedId = target.id;
-
         if (currentMatch) {
+            if (this.state.selectedResultId !== currentMatch.id) {
+                this.setState({selectedResultId: currentMatch.id});
+            }
             return;
         }
 
@@ -174,8 +174,12 @@ export default class SettingsSidebar extends React.PureComponent<Props, State> {
     }
 
     private routeToResult = (result: UserSettingsSearchMatch, moveFocus: boolean) => {
+        if (this.state.selectedResultId !== result.id) {
+            this.setState({selectedResultId: result.id});
+        }
+
         if (this.props.navigateToSetting) {
-            this.props.navigateToSetting(result.tab, result.section);
+            this.props.navigateToSetting(result.tab, result.section, moveFocus ? undefined : {preview: true});
         } else {
             this.props.updateTab(result.tab);
             if (result.section && this.props.updateSection) {
@@ -296,8 +300,7 @@ export default class SettingsSidebar extends React.PureComponent<Props, State> {
     };
 
     private handleClearFilter = () => {
-        this.setState({filter: ''});
-        this.lastAutoRoutedId = null;
+        this.setState({filter: '', selectedResultId: null});
         this.props.onSearchChange?.('');
         requestAnimationFrame(() => {
             this.searchInputRef.current?.focus();
@@ -325,7 +328,7 @@ export default class SettingsSidebar extends React.PureComponent<Props, State> {
         firstButton?.focus();
     };
 
-    private isResultActive(result: UserSettingsSearchMatch): boolean {
+    private matchesActiveSection(result: UserSettingsSearchMatch): boolean {
         if (this.props.activeTab !== result.tab) {
             return false;
         }
@@ -333,6 +336,13 @@ export default class SettingsSidebar extends React.PureComponent<Props, State> {
             return !this.props.activeSection;
         }
         return this.props.activeSection === result.section;
+    }
+
+    private isResultActive(result: UserSettingsSearchMatch): boolean {
+        if (this.state.selectedResultId) {
+            return result.id === this.state.selectedResultId;
+        }
+        return this.matchesActiveSection(result);
     }
 
     private renderTab(tab: Tab) {

@@ -219,4 +219,74 @@ describe('buildUserSettingsSearchItems coverage', () => {
         const items = buildUserSettingsSearchItems(intl, false, {}, {customProfileAttributeFields});
         expect(filterUserSettings(items, 'Hidden Field')).toHaveLength(0);
     });
+
+    it('omits settings that are not available in the current config', () => {
+        const unavailable = buildUserSettingsSearchItems(intl, true, {}, {
+            availability: {
+                enableThemeSelection: false,
+                enableLinkPreviews: false,
+                lastActiveTimeEnabled: false,
+                enableAutoResponder: false,
+                enableUserDeactivation: false,
+            },
+        });
+        const available = buildUserSettingsSearchItems(intl, true, {}, {
+            availability: {
+                enableThemeSelection: true,
+                enableLinkPreviews: true,
+                lastActiveTimeEnabled: true,
+                enableAutoResponder: true,
+                enableUserDeactivation: true,
+                userAuthService: '',
+            },
+        });
+
+        expect(unavailable.some((item) => item.section === 'theme')).toBe(false);
+        expect(unavailable.some((item) => item.section === 'linkpreview')).toBe(false);
+        expect(unavailable.some((item) => item.section === 'lastactive')).toBe(false);
+        expect(unavailable.some((item) => item.section === 'autoResponder')).toBe(false);
+        expect(unavailable.some((item) => item.section === 'deactivateAccount')).toBe(false);
+
+        expect(available.some((item) => item.section === 'theme')).toBe(true);
+        expect(available.some((item) => item.section === 'linkpreview')).toBe(true);
+        expect(available.some((item) => item.section === 'lastactive')).toBe(true);
+        expect(available.some((item) => item.section === 'autoResponder')).toBe(true);
+        expect(available.some((item) => item.section === 'deactivateAccount')).toBe(true);
+    });
+
+    it('omits security settings that are not available for the current user', () => {
+        const unavailable = buildUserSettingsSearchItems(intl, false, {}, {
+            availability: {
+                mfaAvailable: false,
+                enableOAuthServiceProvider: false,
+                canUseAccessTokens: false,
+            },
+        });
+        const available = buildUserSettingsSearchItems(intl, false, {}, {
+            availability: {
+                mfaAvailable: true,
+                enableOAuthServiceProvider: true,
+                canUseAccessTokens: true,
+            },
+        });
+
+        expect(unavailable.some((item) => item.section === 'mfa')).toBe(false);
+        expect(unavailable.some((item) => item.section === 'apps')).toBe(false);
+        expect(unavailable.some((item) => item.section === 'tokens')).toBe(false);
+
+        expect(available.some((item) => item.section === 'mfa')).toBe(true);
+        expect(available.some((item) => item.section === 'apps')).toBe(true);
+        expect(available.some((item) => item.section === 'tokens')).toBe(true);
+    });
+
+    it('omits Theme in admin mode even when theme selection is enabled', () => {
+        const items = buildUserSettingsSearchItems(intl, true, {}, {
+            availability: {
+                enableThemeSelection: true,
+                adminMode: true,
+            },
+        });
+
+        expect(items.some((item) => item.section === 'theme')).toBe(false);
+    });
 });

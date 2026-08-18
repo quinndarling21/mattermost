@@ -45,6 +45,11 @@ jest.mock('@mattermost/client', () => ({
     },
 }));
 
+jest.mock('components/user_settings/display/user_settings_theme', () => ({
+    __esModule: true,
+    default: () => <div>{'Theme Setting'}</div>,
+}));
+
 describe('do first render to avoid other testing issues', () => {
     // For some reason, the first time we render, the modal does not
     // completly renders. This makes it so further tests go properly
@@ -260,9 +265,19 @@ describe('plugin tabs use the correct icon', () => {
     });
 });
 
+const themeEnabledState: DeepPartial<GlobalState> = mergeObjects(baseState, {
+    entities: {
+        general: {
+            config: {
+                EnableThemeSelection: 'true',
+            },
+        },
+    },
+});
+
 describe('settings search', () => {
     it('shows Find settings and routes dark mode to Display theme', async () => {
-        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+        renderWithContext(<UserSettingsModal {...baseProps}/>, themeEnabledState);
 
         const search = await screen.findByPlaceholderText('Find settings');
         fireEvent.change(search, {target: {value: 'dark mode'}});
@@ -271,6 +286,16 @@ describe('settings search', () => {
         expect(screen.getByRole('heading', {name: 'Display'})).toBeInTheDocument();
         expect(screen.getByRole('heading', {name: 'Display Settings'})).toBeInTheDocument();
         expect(search).toHaveFocus();
+    });
+
+    it('does not index Theme when theme selection is disabled', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        const search = await screen.findByPlaceholderText('Find settings');
+        fireEvent.change(search, {target: {value: 'dark mode'}});
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+        expect(screen.queryByRole('option', {name: 'Theme'})).not.toBeInTheDocument();
     });
 
     it('shows no results for an unmatched query without leaving the current tab', async () => {

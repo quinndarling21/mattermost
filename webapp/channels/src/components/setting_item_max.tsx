@@ -105,11 +105,22 @@ const SettingItemMax = ({
         };
 
         if (settingList.current) {
-            const focusableElements: NodeListOf<HTMLElement> = settingList.current.querySelectorAll('.btn:not(.save-button):not(.btn-tertiary), input.form-control, input[type="radio"][checked], input[type="checkbox"], select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (focusableElements.length > 0) {
-                a11yFocus(focusableElements[0]);
-            } else {
-                a11yFocus(settingList.current);
+            const activeElement = document.activeElement as HTMLElement | null;
+            const activeTag = activeElement?.tagName;
+            const focusIsInExternalField = Boolean(
+                activeElement &&
+                !settingList.current.contains(activeElement) &&
+                (activeTag === 'INPUT' || activeTag === 'TEXTAREA'),
+            );
+
+            // Expanding a section during Find settings auto-route must not steal typing focus.
+            if (!focusIsInExternalField) {
+                const focusableElements: NodeListOf<HTMLElement> = settingList.current.querySelectorAll('.btn:not(.save-button):not(.btn-tertiary), input.form-control, input[type="radio"][checked], input[type="checkbox"], select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (focusableElements.length > 0) {
+                    a11yFocus(focusableElements[0]);
+                } else {
+                    a11yFocus(settingList.current);
+                }
             }
         }
 

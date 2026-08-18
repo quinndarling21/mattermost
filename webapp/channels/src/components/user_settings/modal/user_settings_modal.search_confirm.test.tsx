@@ -53,15 +53,34 @@ const baseState: DeepPartial<GlobalState> = {
                 id: TestHelper.getUserMock({id: 'id', locale: 'en'}),
             },
         },
+        general: {
+            config: {
+                EnableThemeSelection: 'true',
+            },
+        },
     },
 };
 
 describe('settings search unsaved-change confirmation', () => {
-    it('keeps the current tab and query when discard is cancelled', async () => {
+    it('does not prompt to discard while typing a search query', async () => {
         renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
 
         await userEvent.click(await screen.findByTestId('mark-dirty'));
         fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'dark mode'}});
+
+        expect(screen.queryByText('Discard Changes?')).not.toBeInTheDocument();
+        expect(screen.getByTestId('active-tab')).toHaveTextContent('notifications');
+        expect(screen.getByTestId('active-section')).toHaveTextContent('');
+        expect(screen.getByPlaceholderText('Find settings')).toHaveValue('dark mode');
+        expect(screen.getByRole('option', {name: 'Theme'})).toBeInTheDocument();
+    });
+
+    it('keeps the current tab and query when discard is cancelled after choosing a result', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        await userEvent.click(await screen.findByTestId('mark-dirty'));
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'dark mode'}});
+        await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
 
         expect(await screen.findByText('Discard Changes?')).toBeInTheDocument();
         expect(document.getElementById('confirmModal')).toHaveClass('in');
@@ -79,6 +98,7 @@ describe('settings search unsaved-change confirmation', () => {
 
         await userEvent.click(await screen.findByTestId('mark-dirty'));
         fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'dark mode'}});
+        await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
 
         expect(await screen.findByText('Discard Changes?')).toBeInTheDocument();
         fireEvent.click(screen.getByTestId('cancel-button'));
@@ -99,6 +119,7 @@ describe('settings search unsaved-change confirmation', () => {
 
         await userEvent.click(await screen.findByTestId('mark-dirty'));
         fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'dark mode'}});
+        await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
 
         expect(await screen.findByText('Discard Changes?')).toBeInTheDocument();
         fireEvent.click(screen.getByRole('button', {name: 'Yes, Discard'}));

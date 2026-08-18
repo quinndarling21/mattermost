@@ -7,4 +7,5 @@ export {
     getFirstPartyProductSettingSectionIds,
     getFirstPartyProfileSettingSectionIds,
 } from './user_settings_search_metadata';
+export type {UserSettingsSearchAvailability, BuildUserSettingsSearchItemsOptions} from './user_settings_search_metadata';
 export type {UserSettingsSearchItem, UserSettingsSearchMatch} from './types';

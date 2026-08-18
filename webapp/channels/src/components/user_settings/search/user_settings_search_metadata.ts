@@ -310,9 +310,52 @@ function buildPluginItems(
     return items;
 }
 
+export type UserSettingsSearchAvailability = {
+    enableThemeSelection?: boolean;
+    adminMode?: boolean;
+    enableLinkPreviews?: boolean;
+    lastActiveTimeEnabled?: boolean;
+    enableAutoResponder?: boolean;
+    enableUserDeactivation?: boolean;
+    userAuthService?: string;
+    mfaAvailable?: boolean;
+    enableOAuthServiceProvider?: boolean;
+    canUseAccessTokens?: boolean;
+};
+
 export type BuildUserSettingsSearchItemsOptions = {
     customProfileAttributeFields?: UserPropertyField[];
+    availability?: UserSettingsSearchAvailability;
 };
+
+const gatedSectionAvailable: {[section: string]: (availability: UserSettingsSearchAvailability) => boolean} = {
+    theme: (availability) => Boolean(availability.enableThemeSelection && !availability.adminMode),
+    linkpreview: (availability) => Boolean(availability.enableLinkPreviews),
+    lastactive: (availability) => Boolean(availability.lastActiveTimeEnabled),
+    [UserSettingsNotificationSections.AUTO_RESPONDER]: (availability) => Boolean(availability.enableAutoResponder),
+    mfa: (availability) => Boolean(availability.mfaAvailable),
+    apps: (availability) => Boolean(availability.enableOAuthServiceProvider),
+    tokens: (availability) => Boolean(availability.canUseAccessTokens),
+    deactivateAccount: (availability) => Boolean(
+        availability.enableUserDeactivation &&
+        !availability.adminMode &&
+        !availability.userAuthService,
+    ),
+};
+
+function applyAvailability(
+    items: UserSettingsSearchItem[],
+    availability?: UserSettingsSearchAvailability,
+): UserSettingsSearchItem[] {
+    if (!availability) {
+        return items;
+    }
+
+    return items.filter((entry) => {
+        const isAvailable = gatedSectionAvailable[entry.section];
+        return isAvailable ? isAvailable(availability) : true;
+    });
+}
 
 /**
  * Build the searchable index for the settings currently available in the open modal.
@@ -324,19 +367,19 @@ export function buildUserSettingsSearchItems(
     options: BuildUserSettingsSearchItemsOptions = {},
 ): UserSettingsSearchItem[] {
     if (isContentProductSettings) {
-        return [
+        return applyAvailability([
             ...buildNotificationsItems(intl),
             ...buildDisplayItems(intl),
             ...buildSidebarItems(intl),
             ...buildAdvancedItems(intl),
             ...buildPluginItems(pluginSettings),
-        ];
+        ], options.availability);
     }
 
-    return [
+    return applyAvailability([
         ...buildProfileItems(intl, options.customProfileAttributeFields),
         ...buildSecurityItems(intl),
-    ];
+    ], options.availability);
 }
 
 const stubIntl = {
