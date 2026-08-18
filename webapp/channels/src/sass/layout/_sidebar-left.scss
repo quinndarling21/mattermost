@@ -187,7 +187,8 @@ $sidebarOpacityAnimationDuration: 0.15s;
         }
 
         &__inviteMembersLhsButton,
-        &__addChannelsCtaLhsButton {
+        &__addChannelsCtaLhsButton,
+        &__createCategoryLhsButton {
             display: flex;
             padding-top: 6px;
             padding-right: 0px;
@@ -199,6 +200,10 @@ $sidebarOpacityAnimationDuration: 0.15s;
 
             i {
                 font-size: 20px;
+            }
+
+            svg {
+                flex-shrink: 0;
             }
 
             span {
@@ -488,6 +493,11 @@ $sidebarOpacityAnimationDuration: 0.15s;
         min-height: 0;
         flex: 1;
         flex-direction: column;
+
+        > [data-simplebar] {
+            min-height: 0;
+            flex: 1;
+        }
     }
 
     .SidebarCategory_newLabel {
@@ -656,7 +666,8 @@ $sidebarOpacityAnimationDuration: 0.15s;
     }
 
     #inviteMembersButton,
-    #addChannelsCta {
+    #addChannelsCta,
+    #createCategoryButton {
         display: flex;
         width: 100%;
         margin-top: -6px;
@@ -664,6 +675,12 @@ $sidebarOpacityAnimationDuration: 0.15s;
         &:hover, &[aria-expanded=true] {
             background-color: var(--sidebar-text-hover-bg);
         }
+    }
+
+    #createCategoryButton {
+        flex-shrink: 0;
+        margin-top: 0;
+        border-top: 1px solid rgba(var(--sidebar-text-rgb), 0.08);
     }
 
     .SidebarChannelNavigator_inviteUsersSticky {
