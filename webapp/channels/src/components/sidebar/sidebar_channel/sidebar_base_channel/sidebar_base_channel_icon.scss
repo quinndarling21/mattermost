@@ -3,6 +3,7 @@
 
 .SidebarBaseChannelIcon {
     display: flex;
+    overflow: hidden;
     width: 18px;
     height: 18px;
     flex: 0 0 18px;
@@ -13,10 +14,11 @@
     i {
         font-size: 18px;
     }
+}
 
-    > .emoticon + &__fallback {
-        display: none;
-    }
+// Root selector: nesting `> .emoticon + &__fallback` is dropped by Sass as invalid CSS.
+.SidebarBaseChannelIcon:has(.emoticon) .SidebarBaseChannelIcon__fallback {
+    display: none;
 }
 
 .SidebarLink.muted .SidebarBaseChannelIcon {
