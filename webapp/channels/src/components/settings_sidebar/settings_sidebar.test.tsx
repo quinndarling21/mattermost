@@ -1,16 +1,43 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {fireEvent, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
+import {IntlProvider} from 'react-intl';
 
 import type {UserSettingsSearchItem} from 'components/user_settings/search';
-import {renderWithContext} from 'tests/react_testing_utils';
 
 import SettingsSidebar from './settings_sidebar';
 
+jest.mock('components/quick_input', () => {
+    const React = require('react');
+    return {
+        __esModule: true,
+        default: React.forwardRef((props: Record<string, unknown>, ref: React.Ref<HTMLInputElement>) => (
+            <input
+                ref={ref}
+                id={props.id as string}
+                className={props.className as string}
+                type={(props.type as string) || 'text'}
+                value={(props.value as string) || ''}
+                placeholder={props.placeholder as string}
+                onChange={props.onChange as React.ChangeEventHandler<HTMLInputElement>}
+                onKeyDown={props.onKeyDown as React.KeyboardEventHandler<HTMLInputElement>}
+            />
+        )),
+    };
+});
+
 type Props = ComponentProps<typeof SettingsSidebar>;
+
+function renderSidebar(ui: React.ReactElement) {
+    return render(
+        <IntlProvider locale='en'>
+            {ui}
+        </IntlProvider>,
+    );
+}
 
 const baseProps: Props = {
     isMobileView: false,
@@ -51,7 +78,7 @@ describe('properly use the correct icon', () => {
                 uiName: 'Tab UI Name',
             }],
         };
-        renderWithContext(<SettingsSidebar {...props}/>);
+        renderSidebar(<SettingsSidebar {...props}/>);
 
         const element = screen.queryByTitle(iconTitle);
         expect(element).toBeInTheDocument();
@@ -71,7 +98,7 @@ describe('properly use the correct icon', () => {
                 uiName: 'Tab UI Name',
             }],
         };
-        renderWithContext(<SettingsSidebar {...props}/>);
+        renderSidebar(<SettingsSidebar {...props}/>);
 
         const element = screen.queryByAltText(iconTitle);
         expect(element).toBeInTheDocument();
@@ -91,7 +118,7 @@ describe('show PLUGIN PREFERENCES only when plugin tabs are added', () => {
                 uiName: 'Tab UI Name',
             }],
         };
-        renderWithContext(<SettingsSidebar {...props}/>);
+        renderSidebar(<SettingsSidebar {...props}/>);
 
         expect(screen.queryByText('PLUGIN PREFERENCES')).not.toBeInTheDocument();
     });
@@ -106,7 +133,7 @@ describe('show PLUGIN PREFERENCES only when plugin tabs are added', () => {
                 uiName: 'Tab UI Name',
             }],
         };
-        renderWithContext(<SettingsSidebar {...props}/>);
+        renderSidebar(<SettingsSidebar {...props}/>);
 
         expect(screen.queryByText('PLUGIN PREFERENCES')).toBeInTheDocument();
     });
@@ -134,7 +161,7 @@ describe('tabs are properly rendered', () => {
             ],
         };
 
-        renderWithContext(<SettingsSidebar {...props}/>);
+        renderSidebar(<SettingsSidebar {...props}/>);
 
         expect(screen.queryByText(uiName1)).toBeInTheDocument();
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
@@ -143,7 +170,7 @@ describe('tabs are properly rendered', () => {
 
 describe('settings search', () => {
     it('shows Find settings input when search items are provided', () => {
-        renderWithContext(
+        renderSidebar(
             <SettingsSidebar
                 {...baseProps}
                 tabs={[{
@@ -160,7 +187,7 @@ describe('settings search', () => {
     });
 
     it('does not show search input when search items are omitted', () => {
-        renderWithContext(
+        renderSidebar(
             <SettingsSidebar
                 {...baseProps}
                 tabs={[{
@@ -177,7 +204,7 @@ describe('settings search', () => {
 
     it('replaces tabs with grouped results while searching', () => {
         const navigateToSetting = jest.fn();
-        renderWithContext(
+        renderSidebar(
             <SettingsSidebar
                 {...baseProps}
                 tabs={[{
@@ -200,7 +227,7 @@ describe('settings search', () => {
     });
 
     it('shows empty state when nothing matches', () => {
-        renderWithContext(
+        renderSidebar(
             <SettingsSidebar
                 {...baseProps}
                 searchItems={searchItems}
@@ -213,7 +240,7 @@ describe('settings search', () => {
     });
 
     it('clears search and restores tabs', () => {
-        renderWithContext(
+        renderSidebar(
             <SettingsSidebar
                 {...baseProps}
                 tabs={[{
@@ -230,7 +257,7 @@ describe('settings search', () => {
         fireEvent.change(input, {target: {value: 'theme'}});
         expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
 
-        fireEvent.click(screen.getByTestId('input-clear'));
+        fireEvent.change(input, {target: {value: ''}});
         expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
     });
 });
