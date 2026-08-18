@@ -285,4 +285,18 @@ describe('Channel Utils', () => {
             expect(Utils.isChannelAccessControlled({policy_enforced: false})).toBe(false);
         });
     });
+
+    describe('getChannelEmojiName', () => {
+        test('returns empty string when no emoji is set', () => {
+            expect(Utils.getChannelEmojiName(undefined)).toBe('');
+            expect(Utils.getChannelEmojiName(null)).toBe('');
+            expect(Utils.getChannelEmojiName({})).toBe('');
+            expect(Utils.getChannelEmojiName({emoji: ''})).toBe('');
+        });
+
+        test('returns the short name and strips surrounding colons', () => {
+            expect(Utils.getChannelEmojiName({emoji: 'rocket'})).toBe('rocket');
+            expect(Utils.getChannelEmojiName({emoji: ':smile:'})).toBe('smile');
+        });
+    });
 });

@@ -18,6 +18,7 @@ import LocalStorageStore from 'stores/local_storage_store';
 import JoinPrivateChannelModal from 'components/join_private_channel_modal';
 
 import Constants, {ModalIdentifiers} from 'utils/constants';
+import {trimmedEmojiName} from 'utils/emoji_utils';
 import * as Utils from 'utils/utils';
 
 import type {ActionFuncAsync, GlobalState} from 'types/store';
@@ -206,6 +207,14 @@ export function isMembershipPolicyEnforced(channel?: Pick<Channel, 'policy_enfor
  */
 export function isChannelAccessControlled(channel?: Pick<Channel, 'policy_enforced'> | null): boolean {
     return Boolean(channel?.policy_enforced);
+}
+
+export function getChannelEmojiName(channel?: Pick<Channel, 'emoji'> | null): string {
+    if (!channel?.emoji) {
+        return '';
+    }
+
+    return trimmedEmojiName(channel.emoji);
 }
 
 export function makeNewEmptyChannel(displayName: string, teamId: string): Channel {

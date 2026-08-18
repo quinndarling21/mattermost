@@ -25,8 +25,10 @@ import {
 import {getChannelHeaderMenuPluginComponents} from 'selectors/plugins';
 
 import {getIsChannelBookmarksEnabled} from 'components/channel_bookmarks/utils';
+import RenderEmoji from 'components/emoji/render_emoji';
 import * as Menu from 'components/menu';
 
+import {getChannelEmojiName} from 'utils/channel_utils';
 import {Constants} from 'utils/constants';
 import {canPopout, isChannelPopoutWindow} from 'utils/popouts/popout_windows';
 
@@ -94,6 +96,8 @@ export default function ChannelHeaderMenu({dmUser, gmMembers, isMobile, archived
         channelTitle = <ChannelHeaderTitleGroup gmMembers={gmMembers}/>;
     }
 
+    const channelEmojiName = getChannelEmojiName(channel);
+
     let pluginItems: JSX.Element[] = [];
 
     if (pluginItemsVisible) {
@@ -126,6 +130,13 @@ export default function ChannelHeaderMenu({dmUser, gmMembers, isMobile, archived
                 children: (
                     <>
                         {archivedIcon}
+                        {channelEmojiName && (
+                            <RenderEmoji
+                                emojiName={channelEmojiName}
+                                size={16}
+                                emojiStyle={{marginRight: 6}}
+                            />
+                        )}
                         <strong
                             id='channelHeaderTitle'
                             className='heading'

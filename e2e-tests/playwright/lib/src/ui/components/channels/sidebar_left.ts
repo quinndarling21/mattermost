@@ -76,4 +76,8 @@ export default class ChannelsSidebarLeft {
     getUnreadChannels(): Locator {
         return this.container.locator('.SidebarLink.unread-title');
     }
+
+    getChannelItem(channelName: string) {
+        return this.container.locator(`#sidebarItem_${channelName}`);
+    }
 }

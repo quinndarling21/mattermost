@@ -59,6 +59,82 @@ func TestChannelPatchDiscoverable(t *testing.T) {
 	})
 }
 
+func TestChannelPatchEmoji(t *testing.T) {
+	t.Run("applies emoji when set", func(t *testing.T) {
+		emoji := "rocket"
+		p := &ChannelPatch{Emoji: &emoji}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(p)
+		require.Equal(t, "rocket", o.Emoji)
+	})
+
+	t.Run("normalizes surrounding colons", func(t *testing.T) {
+		emoji := ":smile:"
+		p := &ChannelPatch{Emoji: &emoji}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(p)
+		require.Equal(t, "smile", o.Emoji)
+	})
+
+	t.Run("clears emoji when set to empty", func(t *testing.T) {
+		empty := ""
+		p := &ChannelPatch{Emoji: &empty}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, Emoji: "rocket"}
+		o.Patch(p)
+		require.Equal(t, "", o.Emoji)
+	})
+
+	t.Run("nil emoji leaves channel untouched", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, Emoji: "rocket"}
+		o.Patch(&ChannelPatch{})
+		require.Equal(t, "rocket", o.Emoji)
+	})
+}
+
+func TestNormalizeChannelEmoji(t *testing.T) {
+	require.Equal(t, "smile", NormalizeChannelEmoji("  :smile:  "))
+	require.Equal(t, "smile", NormalizeChannelEmoji("smile"))
+	require.Equal(t, "", NormalizeChannelEmoji("   "))
+	require.Equal(t, "", NormalizeChannelEmoji(""))
+}
+
+func TestChannelIsValidEmoji(t *testing.T) {
+	base := Channel{
+		Id:          NewId(),
+		CreateAt:    GetMillis(),
+		UpdateAt:    GetMillis(),
+		DisplayName: "x",
+		Name:        "valid-name",
+		Header:      "h",
+		Purpose:     "p",
+		Type:        ChannelTypeOpen,
+	}
+
+	t.Run("empty emoji is valid", func(t *testing.T) {
+		c := base
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("system emoji short name is valid", func(t *testing.T) {
+		c := base
+		c.Emoji = "rocket"
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("invalid characters are rejected", func(t *testing.T) {
+		c := base
+		c.Emoji = "not a valid emoji!"
+		require.NotNil(t, c.IsValid())
+	})
+
+	t.Run("emoji is not allowed on direct channels", func(t *testing.T) {
+		c := base
+		c.Type = ChannelTypeDirect
+		c.Emoji = "rocket"
+		require.NotNil(t, c.IsValid())
+	})
+}
+
 func TestChannelIsValidDiscoverable(t *testing.T) {
 	base := Channel{
 		Id:          NewId(),

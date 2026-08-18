@@ -63,6 +63,28 @@ jest.mock('actions/views/textbox', () => ({
     setShowPreviewOnChannelSettingsPurposeModal: jest.fn(),
 }));
 
+jest.mock('./channel_emoji_input', () => ({
+    __esModule: true,
+    default: ({
+        emoji,
+        onChange,
+        disabled,
+    }: {
+        emoji: string;
+        onChange: (emoji: string) => void;
+        disabled?: boolean;
+    }) => (
+        <button
+            type='button'
+            data-testid='channel-emoji-input'
+            disabled={disabled}
+            onClick={() => onChange(emoji === 'rocket' ? '' : 'rocket')}
+        >
+            {emoji || 'none'}
+        </button>
+    ),
+}));
+
 // Mock the isChannelAdmin function
 jest.mock('mattermost-redux/utils/user_utils', () => {
     const original = jest.requireActual('mattermost-redux/utils/user_utils');
@@ -620,6 +642,31 @@ describe('ChannelSettingsInfoTab', () => {
 
         // Verify updateChannelPrivacy was not called
         expect(updateChannelPrivacy).not.toHaveBeenCalled();
+    });
+
+    it('should patch emoji when the channel emoji is changed', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: 'rocket'}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        await userEvent.click(screen.getByTestId('channel-emoji-input'));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {
+            emoji: 'rocket',
+        });
+    });
+
+    it('should not show the channel emoji control for direct messages', () => {
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                channel={mockDirectMessageChannel}
+                setAreThereUnsavedChanges={jest.fn()}
+            />,
+        );
+
+        expect(screen.queryByTestId('channel-emoji-input')).not.toBeInTheDocument();
     });
 
     it('should handle errors when converting channel privacy', async () => {
