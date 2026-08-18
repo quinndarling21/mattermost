@@ -16,8 +16,9 @@
     }
 }
 
-// Root selector: nesting `> .emoticon + &__fallback` is dropped by Sass as invalid CSS.
-.SidebarBaseChannelIcon:has(.emoticon) .SidebarBaseChannelIcon__fallback {
+// Written at the root: nesting `> .emoticon + &__fallback` compiles to an
+// invalid leading-combinator selector and is dropped by Sass.
+.SidebarBaseChannelIcon > .emoticon + .SidebarBaseChannelIcon__fallback {
     display: none;
 }
 

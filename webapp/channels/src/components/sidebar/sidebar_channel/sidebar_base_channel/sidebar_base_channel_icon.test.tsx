@@ -21,6 +21,7 @@ describe('SidebarBaseChannelIcon', () => {
         expect(container.querySelector('[data-emoticon="tada"]')).toBeInTheDocument();
         expect(container.querySelector('.SidebarBaseChannelIcon')).toBeInTheDocument();
         expect(container.querySelector('.SidebarBaseChannelIcon__fallback .icon-globe')).toBeInTheDocument();
+        expect(container.querySelector('.SidebarBaseChannelIcon > .emoticon + .SidebarBaseChannelIcon__fallback')).toBeInTheDocument();
     });
 
     test('falls back to the channel type icon when the emoji name is unknown', () => {
@@ -33,6 +34,7 @@ describe('SidebarBaseChannelIcon', () => {
 
         expect(container.querySelector('[data-emoticon]')).not.toBeInTheDocument();
         expect(container.querySelector('.icon-globe')).toBeInTheDocument();
+        expect(container.querySelector('.SidebarBaseChannelIcon > .emoticon + .SidebarBaseChannelIcon__fallback')).not.toBeInTheDocument();
     });
 
     test('renders the channel type icon when no emoji is assigned', () => {
