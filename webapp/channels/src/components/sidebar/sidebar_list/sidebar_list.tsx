@@ -572,26 +572,28 @@ export class SidebarList extends React.PureComponent<Props, State> {
                     data-a11y-sort-order='7'
                     onTransitionEnd={this.onTransitionEnd}
                 >
-                    <UnreadChannelIndicator
-                        name='Top'
-                        show={this.state.showTopUnread}
-                        onClick={this.scrollToFirstUnreadChannel}
-                        extraClass='nav-pills__unread-indicator-top'
-                        content={above}
-                    />
-                    <UnreadChannelIndicator
-                        name='Bottom'
-                        show={this.state.showBottomUnread}
-                        onClick={this.scrollToLastUnreadChannel}
-                        extraClass='nav-pills__unread-indicator-bottom'
-                        content={below}
-                    />
-                    <Scrollbars
-                        ref={this.scrollbar}
-                        onScroll={this.onScroll}
-                    >
-                        {channelList}
-                    </Scrollbars>
+                    <div className='SidebarNavContainer_list'>
+                        <UnreadChannelIndicator
+                            name='Top'
+                            show={this.state.showTopUnread}
+                            onClick={this.scrollToFirstUnreadChannel}
+                            extraClass='nav-pills__unread-indicator-top'
+                            content={above}
+                        />
+                        <UnreadChannelIndicator
+                            name='Bottom'
+                            show={this.state.showBottomUnread}
+                            onClick={this.scrollToLastUnreadChannel}
+                            extraClass='nav-pills__unread-indicator-bottom'
+                            content={below}
+                        />
+                        <Scrollbars
+                            ref={this.scrollbar}
+                            onScroll={this.onScroll}
+                        >
+                            {channelList}
+                        </Scrollbars>
+                    </div>
                     <CreateCategoryButton/>
                 </div>
             </>

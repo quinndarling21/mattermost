@@ -494,9 +494,17 @@ $sidebarOpacityAnimationDuration: 0.15s;
         flex: 1;
         flex-direction: column;
 
-        > [data-simplebar] {
+        .SidebarNavContainer_list {
+            position: relative;
+            display: flex;
             min-height: 0;
             flex: 1;
+            flex-direction: column;
+
+            > [data-simplebar] {
+                min-height: 0;
+                flex: 1;
+            }
         }
     }
 
