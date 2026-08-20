@@ -88,8 +88,8 @@ const AutosizeTextarea = React.forwardRef<HTMLTextAreaElement, Props>(({
 
             height.current = scrollHeight;
 
-            // Only show scrollbar if content height exceeds 44px
-            setShowScrollbar(scrollHeight > 44);
+            // Only show scrollbar if content height exceeds the default single-line min-height
+            setShowScrollbar(scrollHeight > 49);
 
             onHeightChange?.(scrollHeight, parseInt(style.maxHeight || '0', 10));
         }
