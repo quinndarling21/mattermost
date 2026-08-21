@@ -2,8 +2,9 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-
-import {renderWithContext, screen, userEvent} from 'tests/react_testing_utils';
+import {IntlProvider} from 'react-intl';
+import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import ChannelEmojiSelector from './channel_emoji_selector';
 
@@ -30,11 +31,19 @@ jest.mock('components/emoji/render_emoji', () => ({
     ),
 }));
 
+function renderSelector(ui: React.ReactElement) {
+    return render(
+        <IntlProvider locale='en'>
+            {ui}
+        </IntlProvider>,
+    );
+}
+
 describe('ChannelEmojiSelector', () => {
     test('calls onChange when an emoji is selected', async () => {
         const onChange = jest.fn();
 
-        renderWithContext(
+        renderSelector(
             <ChannelEmojiSelector
                 emoji=''
                 onChange={onChange}
@@ -49,7 +58,7 @@ describe('ChannelEmojiSelector', () => {
     test('clears the emoji when remove is clicked', async () => {
         const onChange = jest.fn();
 
-        renderWithContext(
+        renderSelector(
             <ChannelEmojiSelector
                 emoji=':smile:'
                 onChange={onChange}
