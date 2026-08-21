@@ -44,6 +44,7 @@ const (
 	ChannelPurposeMaxRunes     = 250
 	ChannelCacheSize           = 25000
 	ChannelBannerInfoMaxLength = 1024
+	ChannelEmojiMaxLength      = 64
 
 	ChannelSortByUsername = "username"
 	ChannelSortByStatus   = "status"
@@ -104,6 +105,7 @@ type Channel struct {
 	PolicyID          *string            `json:"policy_id"`
 	LastRootPostAt    int64              `json:"last_root_post_at"`
 	BannerInfo        *ChannelBannerInfo `json:"banner_info"`
+	Emoji             string             `json:"emoji"`
 	PolicyEnforced    bool               `json:"policy_enforced"`
 	// PolicyActions maps each action key declared by the channel's access
 	// control policy (and any imported parent policies) to true. It is
@@ -188,6 +190,7 @@ type ChannelPatch struct {
 	Purpose             *string            `json:"purpose"`
 	GroupConstrained    *bool              `json:"group_constrained"`
 	BannerInfo          *ChannelBannerInfo `json:"banner_info"`
+	Emoji               *string            `json:"emoji"`
 	AutoTranslation     *bool              `json:"autotranslation"`
 	ManagedCategoryName *string            `json:"managed_category_name"`
 	DefaultCategoryName *string            `json:"default_category_name"`
@@ -199,6 +202,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"header":                c.Header,
 		"group_constrained":     c.GroupConstrained,
 		"purpose":               c.Purpose,
+		"emoji":                 c.Emoji,
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
@@ -376,6 +380,14 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.discoverable.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if utf8.RuneCountInString(o.Emoji) > ChannelEmojiMaxLength {
+		return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.app_error", map[string]any{"maxLength": ChannelEmojiMaxLength}, "id="+o.Id, http.StatusBadRequest)
+	}
+
+	if o.Emoji != "" && o.Type != ChannelTypeOpen && o.Type != ChannelTypePrivate {
+		return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.channel_type.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+	}
+
 	return nil
 }
 
@@ -405,6 +417,7 @@ func (o *Channel) PreSave() {
 
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = strings.Trim(o.Emoji, ":")
 	if o.CreateAt == 0 {
 		o.CreateAt = GetMillis()
 	}
@@ -416,6 +429,7 @@ func (o *Channel) PreUpdate() {
 	o.UpdateAt = GetMillis()
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = strings.Trim(o.Emoji, ":")
 }
 
 func (o *Channel) IsGroupOrDirect() bool {
@@ -468,6 +482,10 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 
 	if patch.GroupConstrained != nil {
 		o.GroupConstrained = patch.GroupConstrained
+	}
+
+	if patch.Emoji != nil {
+		o.Emoji = strings.Trim(*patch.Emoji, ":")
 	}
 
 	// patching channel banner info

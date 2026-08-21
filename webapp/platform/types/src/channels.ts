@@ -67,7 +67,8 @@ export type Channel = {
     shared?: boolean;
     props?: Record<string, any>;
     policy_id?: string | null;
-    banner_info?: ChannelBanner;
+	banner_info?: ChannelBanner;
+    emoji?: string;
     policy_enforced?: boolean;
 
     /**
