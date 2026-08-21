@@ -36,6 +36,39 @@
         }
     }
 
+    // Let the settings content scroll on its own so the left nav (settings search +
+    // tab list) stays fixed and visible. Without this, the whole modal body scrolls
+    // and the nav is dragged out of view when navigating to a setting deep in a tab
+    // (e.g. via search). The flex/min-height:0 chain is required for the inner
+    // scroll container to receive a bounded height.
+    .GenericModal__body {
+        display: flex;
+        min-height: 0;
+        flex: 1 1 auto;
+        flex-direction: column;
+    }
+
+    &__bodyWrapper {
+        display: flex;
+        min-height: 0;
+        flex: 1 1 auto;
+        flex-direction: column;
+    }
+
+    .settings-table {
+        min-height: 0;
+        flex: 1 1 auto;
+
+        .settings-links {
+            overflow-y: auto;
+        }
+
+        .settings-content {
+            min-height: 0;
+            overflow-y: auto;
+        }
+    }
+
     &__headerWrapper{
         display: flex;
         justify-content: space-between;
