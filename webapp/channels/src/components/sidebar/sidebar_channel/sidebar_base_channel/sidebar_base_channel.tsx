@@ -1,10 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useIntl} from 'react-intl';
+import {useDispatch} from 'react-redux';
 
 import type {Channel} from '@mattermost/types/channels';
+
+import {loadCustomEmojisIfNeeded} from 'actions/emoji_actions';
 
 import LeaveChannelModal from 'components/leave_channel_modal';
 import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_channel_link';
@@ -28,6 +31,7 @@ const SidebarBaseChannel = ({
     actions,
 }: Props) => {
     const intl = useIntl();
+    const dispatch = useDispatch();
 
     const handleLeavePublicChannel = useCallback((callback: () => void) => {
         actions.leaveChannel(channel.id);
@@ -47,6 +51,13 @@ const SidebarBaseChannel = ({
     }
 
     const emojiName = channel.emoji ? trimmedEmojiName(channel.emoji) : '';
+
+    useEffect(() => {
+        if (emojiName) {
+            dispatch(loadCustomEmojisIfNeeded([emojiName]));
+        }
+    }, [dispatch, emojiName]);
+
     const channelIcon = emojiName ? (
         <RenderEmoji
             emojiName={emojiName}

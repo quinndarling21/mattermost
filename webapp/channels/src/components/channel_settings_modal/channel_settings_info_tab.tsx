@@ -33,6 +33,7 @@ import PublicPrivateSelector from 'components/widgets/public-private-selector/pu
 
 import {isMembershipPolicyEnforced} from 'utils/channel_utils';
 import Constants from 'utils/constants';
+import {trimmedEmojiName} from 'utils/emoji_utils';
 
 import type {GlobalState} from 'types/store';
 
@@ -173,7 +174,7 @@ function ChannelSettingsInfoTab({
             channelUrl.trim() !== channel.name ||
             channelPurpose.trim() !== channel.purpose ||
             channelHeader.trim() !== channel.header ||
-            channelEmoji !== (channel.emoji ?? '') ||
+            trimmedEmojiName(channelEmoji) !== trimmedEmojiName(channel.emoji ?? '') ||
             channelType !== channel.type ||
             (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '') ||
             managedCategoryName !== serverManagedCategoryName
@@ -321,8 +322,8 @@ function ChannelSettingsInfoTab({
         if (managedCategoryName !== serverManagedCategoryName) {
             updated.managed_category_name = managedCategoryName ?? '';
         }
-        if (!isDMorGroupChannel && channelEmoji !== (channel.emoji ?? '')) {
-            updated.emoji = channelEmoji;
+        if (!isDMorGroupChannel && trimmedEmojiName(channelEmoji) !== trimmedEmojiName(channel.emoji ?? '')) {
+            updated.emoji = trimmedEmojiName(channelEmoji);
         }
 
         if (Object.keys(updated).length === 0) {
@@ -423,7 +424,7 @@ function ChannelSettingsInfoTab({
                 unsavedChanges = unsavedChanges || channelUrl.trim() !== channel.name;
                 unsavedChanges = unsavedChanges || channelPurpose.trim() !== channel.purpose;
                 unsavedChanges = unsavedChanges || channelType !== channel.type;
-                unsavedChanges = unsavedChanges || channelEmoji !== (channel.emoji ?? '');
+                unsavedChanges = unsavedChanges || trimmedEmojiName(channelEmoji) !== trimmedEmojiName(channel.emoji ?? '');
                 unsavedChanges = unsavedChanges || (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '');
                 unsavedChanges = unsavedChanges || managedCategoryName !== serverManagedCategoryName;
             }

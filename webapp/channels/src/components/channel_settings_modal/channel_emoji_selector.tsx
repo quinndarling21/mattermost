@@ -48,7 +48,7 @@ const ChannelEmojiSelector = ({
     const handleEmojiClick = useCallback((selectedEmoji: Emoji) => {
         setShowEmojiPicker(false);
         const emojiName = ('short_name' in selectedEmoji) ? selectedEmoji.short_name : selectedEmoji.name;
-        onChange(`:${emojiName}:`);
+        onChange(trimmedEmojiName(emojiName));
         refocusEmojiButton();
     }, [onChange]);
 

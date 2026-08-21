@@ -43,7 +43,7 @@ describe('ChannelEmojiSelector', () => {
 
         await userEvent.click(screen.getByTestId('mock-emoji-picker'));
 
-        expect(onChange).toHaveBeenCalledWith(':rocket:');
+        expect(onChange).toHaveBeenCalledWith('rocket');
     });
 
     test('clears the emoji when remove is clicked', async () => {
