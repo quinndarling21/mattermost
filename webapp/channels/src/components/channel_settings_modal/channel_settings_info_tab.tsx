@@ -392,6 +392,7 @@ function ChannelSettingsInfoTab({
         setChannelPurpose(channel?.purpose ?? '');
         setChannelHeader(channel?.header ?? '');
         setChannelType(channel?.type as ChannelType ?? Constants.OPEN_CHANNEL as ChannelType);
+        setChannelEmoji(serverChannelEmoji);
         setDefaultCategoryName(serverDefaultCategoryName);
         setManagedCategoryName(serverManagedCategoryName);
 
@@ -405,7 +406,7 @@ function ChannelSettingsInfoTab({
         if (onCancel) {
             onCancel();
         }
-    }, [channel, onCancel, serverDefaultCategoryName, serverManagedCategoryName, setFormError]);
+    }, [channel, onCancel, serverChannelEmoji, serverDefaultCategoryName, serverManagedCategoryName, setFormError]);
 
     // Calculate if there are errors
     const hasErrors = Boolean(formError) ||
