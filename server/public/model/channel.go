@@ -38,6 +38,7 @@ const (
 	ChannelGroupMinUsers       = 3
 	DefaultChannelName         = "town-square"
 	ChannelDisplayNameMaxRunes = 64
+	ChannelEmojiMaxLength      = 64
 	ChannelNameMinLength       = 1
 	ChannelNameMaxLength       = 64
 	ChannelHeaderMaxRunes      = 1024
@@ -118,6 +119,7 @@ type Channel struct {
 	DefaultCategoryName string          `json:"default_category_name"`
 	ManagedCategoryName string          `json:"managed_category_name"`
 	Discoverable        bool            `json:"discoverable"`
+	Emoji               string          `json:"emoji"`
 }
 
 // HasPolicyAction reports whether the channel's policy declares the given
@@ -192,6 +194,7 @@ type ChannelPatch struct {
 	ManagedCategoryName *string            `json:"managed_category_name"`
 	DefaultCategoryName *string            `json:"default_category_name"`
 	Discoverable        *bool              `json:"discoverable"`
+	Emoji               *string            `json:"emoji"`
 }
 
 func (c *ChannelPatch) Auditable() map[string]any {
@@ -202,6 +205,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
+		"emoji":                 c.Emoji,
 	}
 }
 
@@ -376,6 +380,10 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.discoverable.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if len(o.Emoji) > ChannelEmojiMaxLength {
+		return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.app_error", map[string]any{"maxLength": ChannelEmojiMaxLength}, "id="+o.Id, http.StatusBadRequest)
+	}
+
 	return nil
 }
 
@@ -499,6 +507,10 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 
 	if patch.Discoverable != nil {
 		o.Discoverable = *patch.Discoverable
+	}
+
+	if patch.Emoji != nil {
+		o.Emoji = strings.TrimSpace(*patch.Emoji)
 	}
 }
 
