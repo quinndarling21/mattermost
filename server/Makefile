@@ -455,6 +455,7 @@ modules-tidy: ## Tidy Go modules
 	mv enterprise/external_imports.go enterprise/external_imports.go.orig
 	-$(GO) mod tidy
 	-cd public && $(GO) mod tidy
+	-cd ../integrations/channel-summarizer && $(GO) mod tidy
 	mv enterprise/external_imports.go.orig enterprise/external_imports.go
 
 test-server-pre: check-prereqs-enterprise start-docker gotestsum golang-versions ## Runs tests.
