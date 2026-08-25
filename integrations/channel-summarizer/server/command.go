@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
@@ -71,7 +72,7 @@ func (p *Plugin) ExecuteCommand(_ *plugin.Context, args *model.CommandArgs) (*mo
 
 	// Run the summary asynchronously so the slash command returns
 	// immediately; the result arrives as a follow-up ephemeral post.
-	go p.runSummary(cfg, args.UserId, args.ChannelId, messageCount)
+	go p.runSummary(cfg, args.UserId, args.ChannelId, args.RootId, messageCount)
 
 	return &model.CommandResponse{
 		ResponseType: model.CommandResponseTypeEphemeral,
@@ -95,15 +96,15 @@ func parseMessageCount(command string) (int, error) {
 	return count, nil
 }
 
-func (p *Plugin) runSummary(cfg configuration, userID, channelID string, messageCount int) {
+func (p *Plugin) runSummary(cfg configuration, userID, channelID, rootID string, messageCount int) {
 	transcript, included, err := p.buildTranscript(channelID, messageCount)
 	if err != nil {
 		p.API.LogError("Failed to collect channel messages for summary", "channel_id", channelID, "error", err.Error())
-		p.sendEphemeral(userID, channelID, "", "Could not read this channel's recent messages: "+err.Error())
+		p.sendEphemeral(userID, channelID, rootID, "Could not read this channel's recent messages: "+err.Error())
 		return
 	}
 	if included == 0 {
-		p.sendEphemeral(userID, channelID, "", "There are no recent user messages in this channel to summarize.")
+		p.sendEphemeral(userID, channelID, rootID, "There are no recent user messages in this channel to summarize.")
 		return
 	}
 
@@ -114,11 +115,11 @@ func (p *Plugin) runSummary(cfg configuration, userID, channelID string, message
 	})
 	if err != nil {
 		p.API.LogError("Grok summarization request failed", "channel_id", channelID, "error", redactKey(err.Error(), cfg.XAIAPIKey))
-		p.sendEphemeral(userID, channelID, "", "Summarization failed: "+redactKey(err.Error(), cfg.XAIAPIKey))
+		p.sendEphemeral(userID, channelID, rootID, "Summarization failed: "+redactKey(err.Error(), cfg.XAIAPIKey))
 		return
 	}
 
-	p.sendEphemeral(userID, channelID, "", formatSummaryPost(result, included))
+	p.sendEphemeral(userID, channelID, rootID, formatSummaryPost(result, included))
 }
 
 // buildTranscript returns the prompt for the model plus the number of
@@ -146,10 +147,7 @@ func (p *Plugin) buildTranscript(channelID string, messageCount int) (string, in
 	}
 
 	usernames := map[string]string{}
-	var sb strings.Builder
-	fmt.Fprintf(&sb, "Channel: %s\nMessages (oldest first):\n", channelName)
-
-	included := 0
+	lines := make([]string, 0, len(posts))
 	for _, post := range posts {
 		username, ok := usernames[post.UserId]
 		if !ok {
@@ -159,19 +157,53 @@ func (p *Plugin) buildTranscript(channelID string, messageCount int) (string, in
 			}
 			usernames[post.UserId] = username
 		}
-
-		line := fmt.Sprintf("- @%s: %s\n", username, strings.ReplaceAll(post.Message, "\n", " "))
-		if sb.Len()+len(line) > transcriptCharBudget {
-			break
-		}
-		sb.WriteString(line)
-		included++
+		lines = append(lines, fmt.Sprintf("- @%s: %s\n", username, strings.ReplaceAll(post.Message, "\n", " ")))
 	}
-
-	if included == 0 {
+	if len(lines) == 0 {
 		return "", 0, nil
 	}
-	return sb.String(), included, nil
+
+	header := fmt.Sprintf("Channel: %s\nMessages (oldest first):\n", channelName)
+	budget := transcriptCharBudget - len(header)
+
+	// When the budget cannot hold everything, keep the newest messages: the
+	// latest activity is what a summary must not miss.
+	total := 0
+	start := len(lines)
+	for i := len(lines) - 1; i >= 0; i-- {
+		if total+len(lines[i]) > budget {
+			break
+		}
+		total += len(lines[i])
+		start = i
+	}
+	if start == len(lines) {
+		// Even the newest message alone exceeds the budget; truncate it,
+		// reserving room for the ellipsis (3 bytes) and trailing newline.
+		start = len(lines) - 1
+		lines[start] = truncateUTF8(lines[start], budget-4) + "…\n"
+	}
+
+	var sb strings.Builder
+	sb.WriteString(header)
+	for _, line := range lines[start:] {
+		sb.WriteString(line)
+	}
+	return sb.String(), len(lines) - start, nil
+}
+
+// truncateUTF8 shortens s to at most n bytes without splitting a rune.
+func truncateUTF8(s string, n int) string {
+	if n <= 0 {
+		return ""
+	}
+	if len(s) <= n {
+		return s
+	}
+	for n > 0 && !utf8.RuneStart(s[n]) {
+		n--
+	}
+	return s[:n]
 }
 
 func formatSummaryPost(result *summaryResult, messageCount int) string {

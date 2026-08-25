@@ -3,8 +3,10 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
@@ -109,6 +111,102 @@ func TestExecuteCommandEndToEnd(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("timed out waiting for the summary post")
 	}
+}
+
+func TestExecuteCommandFromThreadKeepsRootID(t *testing.T) {
+	xaiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(completionFixture))
+	}))
+	defer xaiServer.Close()
+
+	postList := model.NewPostList()
+	post := &model.Post{Id: model.NewId(), UserId: "u1", Message: "a message", CreateAt: 1000}
+	postList.AddPost(post)
+	postList.AddOrder(post.Id)
+
+	api := &plugintest.API{}
+	api.On("GetPostsForChannel", "channel1", 0, defaultMessageCount).Return(postList, nil)
+	api.On("GetChannel", "channel1").Return(&model.Channel{Id: "channel1", DisplayName: "Town Square"}, nil)
+	api.On("GetUser", mock.AnythingOfType("string")).Return(&model.User{Username: "casey"}, nil)
+
+	resultCh := make(chan *model.Post, 1)
+	api.On("SendEphemeralPost", "user1", mock.AnythingOfType("*model.Post")).
+		Run(func(args mock.Arguments) {
+			resultCh <- args.Get(1).(*model.Post)
+		}).
+		Return(&model.Post{})
+
+	p := &Plugin{botUserID: "bot1"}
+	p.SetAPI(api)
+	p.configuration = &configuration{XAIAPIKey: "test-key", XAIAPIURL: xaiServer.URL, Model: "grok-4.6"}
+
+	_, appErr := p.ExecuteCommand(nil, &model.CommandArgs{
+		Command:   "/summarize",
+		UserId:    "user1",
+		ChannelId: "channel1",
+		RootId:    "root42",
+	})
+	require.Nil(t, appErr)
+
+	select {
+	case result := <-resultCh:
+		assert.Equal(t, "root42", result.RootId, "summary should stay in the thread it was requested from")
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for the summary post")
+	}
+}
+
+func TestBuildTranscriptKeepsNewestWhenOverBudget(t *testing.T) {
+	big := strings.Repeat("x", 10000)
+	oldest := &model.Post{Id: model.NewId(), UserId: "u1", Message: "OLDEST " + big, CreateAt: 1000}
+	middle := &model.Post{Id: model.NewId(), UserId: "u1", Message: "MIDDLE " + big, CreateAt: 2000}
+	newest := &model.Post{Id: model.NewId(), UserId: "u1", Message: "NEWEST " + big, CreateAt: 3000}
+
+	postList := model.NewPostList()
+	for _, post := range []*model.Post{newest, middle, oldest} {
+		postList.AddPost(post)
+		postList.AddOrder(post.Id)
+	}
+
+	api := &plugintest.API{}
+	api.On("GetPostsForChannel", "channel1", 0, 10).Return(postList, nil)
+	api.On("GetChannel", "channel1").Return(&model.Channel{Id: "channel1", DisplayName: "Busy"}, nil)
+	api.On("GetUser", "u1").Return(&model.User{Username: "alex"}, nil)
+
+	p := &Plugin{}
+	p.SetAPI(api)
+
+	transcript, included, err := p.buildTranscript("channel1", 10)
+	require.NoError(t, err)
+	assert.Equal(t, 2, included)
+	assert.LessOrEqual(t, len(transcript), transcriptCharBudget)
+	assert.Contains(t, transcript, "NEWEST")
+	assert.Contains(t, transcript, "MIDDLE")
+	assert.NotContains(t, transcript, "OLDEST")
+}
+
+func TestBuildTranscriptTruncatesOversizedNewestMessage(t *testing.T) {
+	huge := &model.Post{Id: model.NewId(), UserId: "u1", Message: strings.Repeat("é", 30000), CreateAt: 1000}
+
+	postList := model.NewPostList()
+	postList.AddPost(huge)
+	postList.AddOrder(huge.Id)
+
+	api := &plugintest.API{}
+	api.On("GetPostsForChannel", "channel1", 0, 10).Return(postList, nil)
+	api.On("GetChannel", "channel1").Return(&model.Channel{Id: "channel1", DisplayName: "Busy"}, nil)
+	api.On("GetUser", "u1").Return(&model.User{Username: "alex"}, nil)
+
+	p := &Plugin{}
+	p.SetAPI(api)
+
+	transcript, included, err := p.buildTranscript("channel1", 10)
+	require.NoError(t, err)
+	assert.Equal(t, 1, included)
+	assert.LessOrEqual(t, len(transcript), transcriptCharBudget)
+	assert.True(t, utf8.ValidString(transcript), "truncation must not split a rune")
+	assert.Contains(t, transcript, "@alex")
 }
 
 func TestBuildTranscriptFiltersAndOrders(t *testing.T) {

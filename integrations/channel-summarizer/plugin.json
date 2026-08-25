@@ -21,6 +21,7 @@
                 "key": "XAIAPIKey",
                 "display_name": "xAI API Key",
                 "type": "text",
+                "secret": true,
                 "help_text": "API key from https://console.x.ai. If empty, the server falls back to the XAI_API_KEY environment variable.",
                 "placeholder": "",
                 "default": ""
