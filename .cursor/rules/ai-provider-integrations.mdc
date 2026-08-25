@@ -1,0 +1,10 @@
+# AI provider integrations
+
+Applies to any code in this repository that calls an external LLM or AI provider API (for example the channel-summarizer plugin under `integrations/channel-summarizer/`).
+
+- Never commit API keys, tokens, or key-shaped strings — not in code, config, fixtures, tests, skills, docs, logs, or PR descriptions. Credentials come from server environment variables (e.g. `XAI_API_KEY`) or System Console plugin settings only.
+- Redact key material from any error message or log line that could echo a request URL, header, or provider error. Follow the `redactKey` pattern in `integrations/channel-summarizer/server/plugin.go`.
+- A missing or invalid key must produce a clear in-product message, never a crash or a silent failure.
+- When showing per-call cost, compute it from the provider's usage object in the API response (real token counts), not from estimates. Keep pricing tables in code next to a link to the provider's published pricing, and update them when list prices change.
+- Unit tests must not require network access or real keys; test provider clients against local stub servers with fixture responses. The live code path always targets the real provider endpoint by default.
+- Keep repository paths, identifiers, branches, and comments generic: name things after the feature (summarize, summarizer) or the technology vendor (xAI, Grok), never after a customer or prospect.

@@ -1,0 +1,46 @@
+{
+    "id": "com.mattermost.channel-summarizer",
+    "name": "Channel Summarizer",
+    "description": "Summarizes recent channel activity with xAI Grok and reports token usage and per-call cost.",
+    "homepage_url": "https://github.com/mattermost/mattermost",
+    "version": "0.1.0",
+    "min_server_version": "9.0.0",
+    "server": {
+        "executables": {
+            "linux-amd64": "server/dist/plugin-linux-amd64",
+            "linux-arm64": "server/dist/plugin-linux-arm64",
+            "darwin-amd64": "server/dist/plugin-darwin-amd64",
+            "darwin-arm64": "server/dist/plugin-darwin-arm64"
+        }
+    },
+    "settings_schema": {
+        "header": "Summarizes recent channel messages with the xAI Grok API. Trigger it with the /summarize slash command.",
+        "footer": "",
+        "settings": [
+            {
+                "key": "XAIAPIKey",
+                "display_name": "xAI API Key",
+                "type": "text",
+                "help_text": "API key from https://console.x.ai. If empty, the server falls back to the XAI_API_KEY environment variable.",
+                "placeholder": "",
+                "default": ""
+            },
+            {
+                "key": "XAIAPIURL",
+                "display_name": "xAI API Base URL",
+                "type": "text",
+                "help_text": "Base URL of the xAI API. The XAI_API_URL environment variable overrides an empty value.",
+                "placeholder": "https://api.x.ai/v1",
+                "default": "https://api.x.ai/v1"
+            },
+            {
+                "key": "Model",
+                "display_name": "Model",
+                "type": "text",
+                "help_text": "Grok model id used for summarization.",
+                "placeholder": "grok-4.6",
+                "default": "grok-4.6"
+            }
+        ]
+    }
+}
