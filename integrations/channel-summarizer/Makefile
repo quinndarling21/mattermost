@@ -22,7 +22,7 @@ dist: server
 	mkdir -p dist/$(PLUGIN_ID)/server/dist
 	cp plugin.json dist/$(PLUGIN_ID)/
 	cp server/dist/plugin-* dist/$(PLUGIN_ID)/server/dist/
-	cd dist && tar -czf $(BUNDLE_NAME) $(PLUGIN_ID)
+	cd dist && COPYFILE_DISABLE=1 tar -czf $(BUNDLE_NAME) $(PLUGIN_ID)
 	@echo "Bundle: dist/$(BUNDLE_NAME)"
 
 .PHONY: test
