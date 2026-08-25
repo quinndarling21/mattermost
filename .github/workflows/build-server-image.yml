@@ -70,6 +70,7 @@ jobs:
           tags: mattermost/mattermost-build-server:${{ steps.go.outputs.GO_VERSION }}
 
   build-image-fips:
+    if: github.repository_owner == 'mattermost'
     runs-on: ubuntu-22.04
     steps:
       - uses: chainguard-dev/setup-chainctl@c125f765e82b09a42af3185f3214465314d75c5d # v0.5.0
