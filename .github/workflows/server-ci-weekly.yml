@@ -24,6 +24,7 @@ permissions:
 jobs:
   go:
     name: Compute Go Version
+    if: github.repository_owner == 'mattermost'
     runs-on: ubuntu-22.04
     outputs:
       version: ${{ steps.calculate.outputs.GO_VERSION }}

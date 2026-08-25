@@ -3,6 +3,11 @@
 # - server-ci-report.yml
 # - sentry.yaml
 # If you rename this workflow, be sure to update those workflows as well.
+#
+# Demo fork: keep static checks + server package build. Skip upstream
+# integration suites (Postgres shards, Elasticsearch, OpenSearch, FIPS,
+# mmctl). Those jobs need 8-core runners or private FIPS images this
+# fork does not have, so they queue or fail on every PR.
 name: Server CI
 on:
   workflow_dispatch:  # Allow manual/API triggering for linked plugin CI
@@ -251,6 +256,7 @@ jobs:
 
   # -- Sharded into 4 parallel runners for ~88% wall-time improvement --
   test-postgres-normal:
+    if: github.repository_owner == 'mattermost'
     name: Postgres (shard ${{ matrix.shard }})
     needs: go
     strategy:
@@ -274,7 +280,7 @@ jobs:
   merge-postgres-test-results:
     name: Merge Postgres Test Results
     needs: test-postgres-normal
-    if: always()
+    if: github.repository_owner == 'mattermost' && always()
     uses: ./.github/workflows/server-test-merge-template.yml
     with:
       artifact-pattern: postgres-server-test-logs-shard-*
@@ -283,6 +289,7 @@ jobs:
       all-shards-passed: ${{ needs.test-postgres-normal.result == 'success' }}
 
   test-elasticsearch-v8:
+    if: github.repository_owner == 'mattermost'
     name: Elasticsearch v8 Compatibility
     needs: go
     uses: ./.github/workflows/server-test-template.yml
@@ -298,6 +305,7 @@ jobs:
       test-target: "test-server-elasticsearch"
 
   test-opensearch-v2:
+    if: github.repository_owner == 'mattermost'
     name: OpenSearch v2 Compatibility
     needs: go
     uses: ./.github/workflows/server-test-template.yml
@@ -315,7 +323,7 @@ jobs:
   # FIPS tests: run on PRs when go.mod changed or branch name contains "fips".
   # Sharded for fast iteration. Weekly workflow provides regular full coverage.
   test-postgres-normal-fips:
-    if: contains(github.head_ref, 'fips') || needs.go.outputs.gomod-changed == 'true'
+    if: github.repository_owner == 'mattermost' && (contains(github.head_ref, 'fips') || needs.go.outputs.gomod-changed == 'true')
     name: "Postgres FIPS (shard ${{ matrix.shard }})"
     needs: go
     strategy:
@@ -336,13 +344,14 @@ jobs:
   merge-postgres-fips-test-results:
     name: Merge Postgres FIPS Test Results
     needs: test-postgres-normal-fips
-    if: needs.test-postgres-normal-fips.result != 'skipped'
+    if: github.repository_owner == 'mattermost' && needs.test-postgres-normal-fips.result != 'skipped'
     uses: ./.github/workflows/server-test-merge-template.yml
     with:
       artifact-pattern: postgres-server-fips-test-logs-shard-*
       artifact-name: postgres-server-fips-test-logs
 
   test-mmctl:
+    if: github.repository_owner == 'mattermost'
     name: Run mmctl tests
     needs: go
     uses: ./.github/workflows/mmctl-test-template.yml
@@ -355,7 +364,7 @@ jobs:
       go-version: ${{ needs.go.outputs.version }}
       fips-enabled: false
   test-mmctl-fips:
-    if: contains(github.head_ref, 'fips') || needs.go.outputs.gomod-changed == 'true'
+    if: github.repository_owner == 'mattermost' && (contains(github.head_ref, 'fips') || needs.go.outputs.gomod-changed == 'true')
     name: Run mmctl tests (FIPS)
     needs: go
     uses: ./.github/workflows/mmctl-test-template.yml
