@@ -11034,14 +11034,22 @@
     "id": "model.channel.is_valid.creator_id.app_error",
     "translation": "Invalid creator id."
   },
-  {
-    "id": "model.channel.is_valid.discoverable.app_error",
-    "translation": "Only private channels can be marked as discoverable."
-  },
-  {
-    "id": "model.channel.is_valid.display_name.app_error",
-    "translation": "Invalid display name."
-  },
+	{
+		"id": "model.channel.is_valid.discoverable.app_error",
+		"translation": "Only private channels can be marked as discoverable."
+	},
+	{
+		"id": "model.channel.is_valid.emoji.app_error",
+		"translation": "Channel emoji is too long. Max allowed length is {{.maxLength}} characters."
+	},
+	{
+		"id": "model.channel.is_valid.emoji.channel_type.app_error",
+		"translation": "Channel emoji can only be configured on Public and Private channels"
+	},
+	{
+		"id": "model.channel.is_valid.display_name.app_error",
+		"translation": "Invalid display name."
+	},
   {
     "id": "model.channel.is_valid.header.app_error",
     "translation": "Invalid header."

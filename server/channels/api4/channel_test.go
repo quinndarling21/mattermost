@@ -848,6 +848,21 @@ func TestPatchChannel(t *testing.T) {
 		require.Equal(t, *patch.Purpose, channel.Purpose, "do not match")
 	})
 
+	t.Run("should be able to patch channel emoji", func(t *testing.T) {
+		emoji := ":rocket:"
+		patch := &model.ChannelPatch{Emoji: &emoji}
+
+		channel, _, err := client.PatchChannel(context.Background(), th.BasicChannel.Id, patch)
+		require.NoError(t, err)
+		require.Equal(t, "rocket", channel.Emoji)
+
+		empty := ""
+		clearPatch := &model.ChannelPatch{Emoji: &empty}
+		channel, _, err = client.PatchChannel(context.Background(), th.BasicChannel.Id, clearPatch)
+		require.NoError(t, err)
+		require.Empty(t, channel.Emoji)
+	})
+
 	t.Run("should be able to patch with no name", func(t *testing.T) {
 		channel := &model.Channel{
 			DisplayName: GenerateTestChannelName(),
