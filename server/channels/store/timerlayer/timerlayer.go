@@ -11384,6 +11384,22 @@ func (s *TimerLayerTeamStore) GetCommonTeamIDsForMultipleUsers(userIDs []string)
 	return result, err
 }
 
+func (s *TimerLayerTeamStore) GetMembersMatchingDigestFilter(teamID string, search string) ([]*model.DigestMemberActivity, error) {
+	start := time.Now()
+
+	result, err := s.TeamStore.GetMembersMatchingDigestFilter(teamID, search)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("TeamStore.GetMembersMatchingDigestFilter", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerTeamStore) GetCommonTeamIDsForTwoUsers(userID string, otherUserID string) ([]string, error) {
 	start := time.Now()
 

@@ -349,6 +349,7 @@ func Init(srv *app.Server) (*API, error) {
 	api.InitUser()
 	api.InitBot()
 	api.InitTeam()
+	api.InitTeamDigest()
 	api.InitChannel()
 	api.InitPost()
 	api.InitFile()

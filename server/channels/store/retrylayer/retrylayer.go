@@ -14412,6 +14412,27 @@ func (s *RetryLayerTeamStore) GetCommonTeamIDsForMultipleUsers(userIDs []string)
 
 }
 
+func (s *RetryLayerTeamStore) GetMembersMatchingDigestFilter(teamID string, search string) ([]*model.DigestMemberActivity, error) {
+
+	tries := 0
+	for {
+		result, err := s.TeamStore.GetMembersMatchingDigestFilter(teamID, search)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerTeamStore) GetCommonTeamIDsForTwoUsers(userID string, otherUserID string) ([]string, error) {
 
 	tries := 0

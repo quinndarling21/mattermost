@@ -29,6 +29,8 @@ import {StatTypes} from 'utils/constants';
 import {getMonthLong} from 'utils/i18n';
 
 import {formatPostsPerDayData, formatUsersWithPostsPerDayData, synchronizeChartLabels} from '../format';
+import {TeamDigestSettingsPanel} from '../team_digest';
+
 
 const LAST_ANALYTICS_TEAM = 'last_analytics_team';
 
@@ -346,6 +348,7 @@ export default class TeamAnalytics extends React.PureComponent<Props, State> {
                                 data={newlyCreatedUsers}
                             />
                         </div>
+                        <TeamDigestSettingsPanel teamId={this.state.team.id}/>
                     </div>
                 </div>
             </div>

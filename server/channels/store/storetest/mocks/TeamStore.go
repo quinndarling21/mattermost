@@ -1424,6 +1424,36 @@ func (_m *TeamStore) UserBelongsToTeams(userID string, teamIds []string) (bool, 
 	return r0, r1
 }
 
+// GetMembersMatchingDigestFilter provides a mock function with given fields: teamID, search
+func (_m *TeamStore) GetMembersMatchingDigestFilter(teamID string, search string) ([]*model.DigestMemberActivity, error) {
+	ret := _m.Called(teamID, search)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMembersMatchingDigestFilter")
+	}
+
+	var r0 []*model.DigestMemberActivity
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) ([]*model.DigestMemberActivity, error)); ok {
+		return rf(teamID, search)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) []*model.DigestMemberActivity); ok {
+		r0 = rf(teamID, search)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.DigestMemberActivity)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(teamID, search)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewTeamStore creates a new instance of TeamStore. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTeamStore(t interface {

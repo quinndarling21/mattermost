@@ -143,6 +143,9 @@ import type {
     TeamSearchOpts,
     PagedTeamSearchOpts,
     NotPagedTeamSearchOpts,
+    TeamDigestSettings,
+    TeamDigestPreview,
+    TeamDigestMemberSummary,
 } from '@mattermost/types/teams';
 import type {TermsOfService} from '@mattermost/types/terms_of_service';
 import type {UserThreadList, UserThread, UserThreadWithPost} from '@mattermost/types/threads';
@@ -1549,6 +1552,41 @@ export default class Client4 {
     getTeamStats = (teamId: string) => {
         return this.doFetch<TeamStats>(
             `${this.getTeamRoute(teamId)}/stats`,
+            {method: 'get'},
+        );
+    };
+
+    getTeamDigestSettings = (teamId: string) => {
+        return this.doFetch<TeamDigestSettings>(
+            `${this.getTeamRoute(teamId)}/digest`,
+            {method: 'get'},
+        );
+    };
+
+    saveTeamDigestSettings = (teamId: string, settings: TeamDigestSettings) => {
+        return this.doFetch<TeamDigestSettings>(
+            `${this.getTeamRoute(teamId)}/digest`,
+            {method: 'put', body: JSON.stringify(settings)},
+        );
+    };
+
+    getTeamDigestPreview = (teamId: string, search = '') => {
+        return this.doFetch<TeamDigestPreview>(
+            `${this.getTeamRoute(teamId)}/digest/preview${buildQueryString({search})}`,
+            {method: 'get'},
+        );
+    };
+
+    testTeamDigestWebhook = (teamId: string, webhookUrl: string) => {
+        return this.doFetch<{status_code: number}>(
+            `${this.getTeamRoute(teamId)}/digest/test`,
+            {method: 'post', body: JSON.stringify({webhook_url: webhookUrl})},
+        );
+    };
+
+    getMemberDigestSummary = (teamId: string, userId: string) => {
+        return this.doFetch<TeamDigestMemberSummary>(
+            `${this.getTeamMemberRoute(teamId, userId)}/digest_summary`,
             {method: 'get'},
         );
     };
