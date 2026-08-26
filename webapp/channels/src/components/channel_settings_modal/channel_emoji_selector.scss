@@ -1,0 +1,72 @@
+.ChannelEmojiSelector {
+    margin-bottom: 24px;
+
+    &__label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+        margin-bottom: 4px;
+        color: var(--center-channel-color);
+    }
+
+    &__help {
+        font-size: 12px;
+        line-height: 16px;
+        color: rgba(var(--center-channel-color-rgb), 0.64);
+        margin: 0 0 12px;
+    }
+
+    &__controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__button {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 56px;
+        height: 40px;
+        padding: 0 8px;
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+        border-radius: var(--radius-s);
+        background: var(--center-channel-bg);
+        color: var(--center-channel-color);
+
+        &:hover:not(:disabled) {
+            background: rgba(var(--center-channel-color-rgb), 0.08);
+        }
+
+        &:disabled {
+            opacity: 0.64;
+            cursor: not-allowed;
+        }
+    }
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+    }
+
+    &__clear {
+        border: none;
+        background: transparent;
+        color: var(--link-color);
+        font-size: 12px;
+        padding: 0;
+
+        &:hover:not(:disabled) {
+            text-decoration: underline;
+        }
+
+        &:disabled {
+            opacity: 0.64;
+            cursor: not-allowed;
+        }
+    }
+}
