@@ -1,13 +1,20 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
+
+import type {UserSettingsSearchItem} from 'components/user_settings/search';
 
 import {renderWithContext} from 'tests/react_testing_utils';
 
 import SettingsSidebar from './settings_sidebar';
+
+jest.mock('@mattermost/shared/context', () => ({
+    SharedProvider: ({children}: {children: React.ReactNode}) => children,
+}));
 
 type Props = ComponentProps<typeof SettingsSidebar>;
 
@@ -118,5 +125,354 @@ describe('tabs are properly rendered', () => {
 
         expect(screen.queryByText(uiName1)).toBeInTheDocument();
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
+    });
+});
+
+const searchItems: UserSettingsSearchItem[] = [
+    {
+        id: 'display:theme:Theme',
+        tab: 'display',
+        tabLabel: 'Display',
+        section: 'theme',
+        label: 'Theme',
+        aliases: ['dark mode', 'appearance'],
+    },
+    {
+        id: 'display:clock:Clock Display',
+        tab: 'display',
+        tabLabel: 'Display',
+        section: 'clock',
+        label: 'Clock Display',
+        aliases: ['clock', 'time format'],
+    },
+    {
+        id: 'notifications:desktopAndMobile:Desktop and mobile notifications',
+        tab: 'notifications',
+        tabLabel: 'Notifications',
+        section: 'desktopAndMobile',
+        label: 'Desktop and mobile notifications',
+        aliases: ['desktop', 'mobile'],
+    },
+    {
+        id: 'demo:Demo Section:Demo Setting',
+        tab: 'demo',
+        tabLabel: 'Demo Plugin',
+        section: 'Demo Section',
+        label: 'Demo Setting',
+        aliases: ['plugin'],
+        isPlugin: true,
+    },
+];
+
+describe('settings search', () => {
+    it('shows Find settings input when search items are provided', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+            />,
+        );
+
+        expect(screen.getByPlaceholderText('Find settings')).toBeInTheDocument();
+        expect(screen.getByLabelText('Find settings')).toBeInTheDocument();
+    });
+
+    it('does not show search input when search items are omitted', () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+            />,
+        );
+
+        expect(screen.queryByPlaceholderText('Find settings')).not.toBeInTheDocument();
+    });
+
+    it('replaces tabs with grouped results and auto-routes while searching', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'dark mode');
+
+        expect(screen.getByText('Theme')).toBeInTheDocument();
+        expect(screen.getByText('Display')).toBeInTheDocument();
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme', {preview: true});
+        expect(screen.getByPlaceholderText('Find settings')).toHaveFocus();
+    });
+
+    it('marks only one empty-section plugin result as selected', async () => {
+        const pluginSearchItems: UserSettingsSearchItem[] = [
+            {
+                id: 'demo:root:Demo Plugin',
+                tab: 'demo',
+                tabLabel: 'Demo Plugin',
+                section: '',
+                label: 'Demo Plugin',
+                aliases: ['plugin'],
+                isPlugin: true,
+            },
+            {
+                id: 'demo:root:Open Demo',
+                tab: 'demo',
+                tabLabel: 'Demo Plugin',
+                section: '',
+                label: 'Open Demo',
+                aliases: ['plugin'],
+                isPlugin: true,
+            },
+        ];
+
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                activeTab='demo'
+                activeSection=''
+                searchItems={pluginSearchItems}
+                navigateToSetting={jest.fn()}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'plugin');
+
+        const selected = screen.getAllByRole('option').filter((option) => option.getAttribute('aria-selected') === 'true');
+        expect(selected).toHaveLength(1);
+    });
+
+    it('auto-routes as a preview and confirms only on explicit selection', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'dark mode');
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'theme', {preview: true});
+
+        await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
+        expect(navigateToSetting).toHaveBeenLastCalledWith('display', 'theme', undefined);
+    });
+
+    it('shows plugin results under PLUGIN PREFERENCES', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'Demo Setting');
+
+        expect(screen.getByText('PLUGIN PREFERENCES')).toBeInTheDocument();
+        expect(screen.getByText('Demo Setting')).toBeInTheDocument();
+    });
+
+    it('shows empty state when nothing matches', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'zzzz-not-a-setting');
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+    });
+
+    it('clears search and restores tabs', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+            />,
+        );
+
+        const input = screen.getByPlaceholderText('Find settings');
+        await userEvent.type(input, 'theme');
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+
+        await userEvent.clear(input);
+        expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
+    });
+
+    it('clears search from the clear control without changing the current setting', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                tabs={[{
+                    icon: 'icon',
+                    iconTitle: 'title',
+                    name: 'display',
+                    uiName: 'Display',
+                }]}
+                searchItems={searchItems}
+                activeTab='display'
+                activeSection='theme'
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'theme');
+        expect(screen.queryByTestId('display-tab-button')).not.toBeInTheDocument();
+        navigateToSetting.mockClear();
+
+        await userEvent.click(screen.getByRole('button', {name: 'Clear'}));
+
+        expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Find settings')).toHaveValue('');
+        await waitFor(() => {
+            expect(screen.getByPlaceholderText('Find settings')).toHaveFocus();
+        });
+        expect(navigateToSetting).not.toHaveBeenCalled();
+    });
+
+    it('keeps the current match selected while it still matches', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                activeTab='display'
+                activeSection='theme'
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'theme'}});
+
+        expect(navigateToSetting).not.toHaveBeenCalled();
+        expect(screen.getByRole('option', {name: 'Theme'})).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('routes to the first match when the current selection no longer matches', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                activeTab='display'
+                activeSection='theme'
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'clock'}});
+
+        expect(navigateToSetting).toHaveBeenCalledWith('display', 'clock', {preview: true});
+    });
+
+    it('highlights matching text in result labels', async () => {
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+            />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'heme'}});
+
+        expect(screen.getByText('heme')).toHaveClass('SettingsSidebar__searchHighlight');
+    });
+
+    it('moves keyboard focus through results with arrow keys', async () => {
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        const input = screen.getByPlaceholderText('Find settings');
+        await userEvent.type(input, 'desktop');
+        await userEvent.keyboard('{ArrowDown}');
+
+        expect(screen.getByRole('option', {name: /Desktop and mobile notifications/i})).toHaveFocus();
+    });
+
+    it('moves focus into the setting when a result is clicked', async () => {
+        const edit = document.createElement('button');
+        edit.id = 'themeEdit';
+        edit.scrollIntoView = jest.fn();
+        document.body.appendChild(edit);
+
+        const navigateToSetting = jest.fn();
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={navigateToSetting}
+            />,
+        );
+
+        await userEvent.type(screen.getByPlaceholderText('Find settings'), 'theme');
+        await userEvent.click(screen.getByRole('option', {name: 'Theme'}));
+
+        expect(navigateToSetting).toHaveBeenLastCalledWith('display', 'theme', undefined);
+        await waitFor(() => {
+            expect(edit).toHaveFocus();
+        });
+
+        edit.remove();
+    });
+
+    it('moves focus into the setting when Enter confirms the first result', async () => {
+        const edit = document.createElement('button');
+        edit.id = 'themeEdit';
+        edit.scrollIntoView = jest.fn();
+        document.body.appendChild(edit);
+
+        renderWithContext(
+            <SettingsSidebar
+                {...baseProps}
+                searchItems={searchItems}
+                navigateToSetting={jest.fn()}
+            />,
+        );
+
+        const input = screen.getByPlaceholderText('Find settings');
+        await userEvent.type(input, 'theme');
+        await userEvent.keyboard('{Enter}');
+
+        await waitFor(() => {
+            expect(edit).toHaveFocus();
+        });
+
+        edit.remove();
     });
 });

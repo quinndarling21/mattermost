@@ -1,9 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type {ComponentProps} from 'react';
 import React from 'react';
+
+jest.mock('@mattermost/shared/context', () => ({
+    SharedProvider: ({children}: {children: React.ReactNode}) => children,
+}));
 
 import type {DeepPartial} from '@mattermost/types/utilities';
 
@@ -27,7 +32,7 @@ const baseState: DeepPartial<GlobalState> = {
         users: {
             currentUserId: 'id',
             profiles: {
-                id: TestHelper.getUserMock({id: 'id'}),
+                id: TestHelper.getUserMock({id: 'id', locale: 'en'}),
             },
         },
     },
@@ -38,6 +43,11 @@ jest.mock('@mattermost/client', () => ({
     Client4: class MockClient4 extends jest.requireActual('@mattermost/client').Client4 {
         getUserCustomProfileAttributesValues = jest.fn();
     },
+}));
+
+jest.mock('components/user_settings/display/user_settings_theme', () => ({
+    __esModule: true,
+    default: () => <div>{'Theme Setting'}</div>,
 }));
 
 describe('do first render to avoid other testing issues', () => {
@@ -252,5 +262,66 @@ describe('plugin tabs use the correct icon', () => {
         expect(element).toBeInTheDocument();
         expect(element!.nodeName).toBe('I');
         expect(element?.className).toBe('icon icon-phone-in-talk');
+    });
+});
+
+const themeEnabledState: DeepPartial<GlobalState> = mergeObjects(baseState, {
+    entities: {
+        general: {
+            config: {
+                EnableThemeSelection: 'true',
+            },
+        },
+    },
+});
+
+describe('settings search', () => {
+    it('shows Find settings and routes dark mode to Display theme', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, themeEnabledState);
+
+        const search = await screen.findByPlaceholderText('Find settings');
+        fireEvent.change(search, {target: {value: 'dark mode'}});
+
+        expect(await screen.findByRole('option', {name: 'Theme'})).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByRole('heading', {name: 'Display'})).toBeInTheDocument();
+        expect(screen.getByRole('heading', {name: 'Display Settings'})).toBeInTheDocument();
+        expect(search).toHaveFocus();
+    });
+
+    it('does not index Theme when theme selection is disabled', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        const search = await screen.findByPlaceholderText('Find settings');
+        fireEvent.change(search, {target: {value: 'dark mode'}});
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+        expect(screen.queryByRole('option', {name: 'Theme'})).not.toBeInTheDocument();
+    });
+
+    it('shows no results for an unmatched query without leaving the current tab', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        expect(await screen.findByTestId('notifications-tab-button')).toBeInTheDocument();
+
+        fireEvent.change(screen.getByPlaceholderText('Find settings'), {target: {value: 'xyzzy-not-a-setting'}});
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+        expect(screen.getByRole('heading', {name: 'Notifications'})).toBeInTheDocument();
+    });
+
+    it('does not include product settings when the Profile modal is open', async () => {
+        renderWithContext(
+            <UserSettingsModal
+                {...baseProps}
+                isContentProductSettings={false}
+            />,
+            baseState,
+        );
+
+        const search = await screen.findByPlaceholderText('Find settings');
+        await userEvent.type(search, 'dark mode');
+
+        expect(screen.getByText('No settings found')).toBeInTheDocument();
+        expect(screen.queryByText('Theme')).not.toBeInTheDocument();
     });
 });
