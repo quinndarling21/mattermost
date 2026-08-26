@@ -226,6 +226,9 @@ components:
           format: int64
         creator_id:
           type: string
+        emoji:
+          type: string
+          description: Optional emoji short name shown next to the channel in the sidebar. Empty when unset.
     ChannelStats:
       type: object
       properties:

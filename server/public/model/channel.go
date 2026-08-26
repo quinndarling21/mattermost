@@ -118,6 +118,9 @@ type Channel struct {
 	DefaultCategoryName string          `json:"default_category_name"`
 	ManagedCategoryName string          `json:"managed_category_name"`
 	Discoverable        bool            `json:"discoverable"`
+	// Emoji is an optional system or custom emoji short name (without colons)
+	// shown next to the channel in the sidebar. Empty means no emoji is set.
+	Emoji string `json:"emoji"`
 }
 
 // HasPolicyAction reports whether the channel's policy declares the given
@@ -162,6 +165,7 @@ func (o *Channel) Auditable() map[string]any {
 		"autotranslation":      o.AutoTranslation,
 		"policy_is_active":     o.PolicyIsActive, // this field is only for logging purposes
 		"discoverable":         o.Discoverable,
+		"emoji":                o.Emoji,
 	}
 }
 
@@ -192,6 +196,7 @@ type ChannelPatch struct {
 	ManagedCategoryName *string            `json:"managed_category_name"`
 	DefaultCategoryName *string            `json:"default_category_name"`
 	Discoverable        *bool              `json:"discoverable"`
+	Emoji               *string            `json:"emoji"`
 }
 
 func (c *ChannelPatch) Auditable() map[string]any {
@@ -202,6 +207,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
+		"emoji":                 c.Emoji,
 	}
 }
 
@@ -376,6 +382,16 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.discoverable.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if o.Emoji != "" {
+		if o.Type != ChannelTypeOpen && o.Type != ChannelTypePrivate {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.channel_type.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+		}
+
+		if utf8.RuneCountInString(o.Emoji) > EmojiNameMaxLength || !IsValidAlphaNumHyphenUnderscorePlus(o.Emoji) {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+		}
+	}
+
 	return nil
 }
 
@@ -405,6 +421,7 @@ func (o *Channel) PreSave() {
 
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = NormalizeChannelEmoji(o.Emoji)
 	if o.CreateAt == 0 {
 		o.CreateAt = GetMillis()
 	}
@@ -416,6 +433,17 @@ func (o *Channel) PreUpdate() {
 	o.UpdateAt = GetMillis()
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = NormalizeChannelEmoji(o.Emoji)
+}
+
+// NormalizeChannelEmoji trims whitespace and surrounding colons so callers can
+// pass either "smile" or ":smile:". Empty input stays empty.
+func NormalizeChannelEmoji(emoji string) string {
+	emoji = strings.TrimSpace(emoji)
+	if len(emoji) >= 2 && strings.HasPrefix(emoji, ":") && strings.HasSuffix(emoji, ":") {
+		emoji = emoji[1 : len(emoji)-1]
+	}
+	return emoji
 }
 
 func (o *Channel) IsGroupOrDirect() bool {
@@ -499,6 +527,10 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 
 	if patch.Discoverable != nil {
 		o.Discoverable = *patch.Discoverable
+	}
+
+	if patch.Emoji != nil {
+		o.Emoji = NormalizeChannelEmoji(*patch.Emoji)
 	}
 }
 

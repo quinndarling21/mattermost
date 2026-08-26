@@ -11,6 +11,7 @@ type ChannelInput = {
     purpose?: string;
     header?: string;
     unique?: boolean;
+    emoji?: string;
 };
 
 function getRandomSuffix(): string {
@@ -25,6 +26,7 @@ export function createRandomChannel(channelInput: ChannelInput): Channel {
         type: channelInput.type || 'O',
         purpose: channelInput.type || '',
         header: channelInput.type || '',
+        emoji: channelInput.emoji || '',
     };
 
     if (channelInput.unique) {

@@ -1091,6 +1091,7 @@ $sidebarOpacityAnimationDuration: 0.15s;
         &.muted {
             div.SidebarChannelLinkLabel_wrapper,
             >i,
+            .SidebarChannelEmoji,
             .status.status--group,
             .badge,
             .status-wrapper {
@@ -1188,11 +1189,13 @@ $sidebarOpacityAnimationDuration: 0.15s;
         font-weight: 600;
     }
 
-    .SidebarChannel.unread .SidebarLink > i {
+    .SidebarChannel.unread .SidebarLink > i,
+    .SidebarChannel.unread .SidebarLink > .SidebarChannelEmoji {
         color: var(--sidebar-unread-text);
     }
 
-    .SidebarChannel .SidebarLink > i {
+    .SidebarChannel .SidebarLink > i,
+    .SidebarChannel .SidebarLink > .SidebarChannelEmoji {
         display: flex;
         margin: 0 6px 0 -2px;
         font-size: 18px;

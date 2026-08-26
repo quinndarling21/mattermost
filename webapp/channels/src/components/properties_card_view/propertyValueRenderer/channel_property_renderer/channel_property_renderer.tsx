@@ -31,6 +31,7 @@ export default function ChannelPropertyRenderer({value, metadata}: Props) {
                     <>
                         <SidebarBaseChannelIcon
                             channelType={channel.type}
+                            emoji={channel.emoji}
                         />
                         {channel.display_name}
                     </>

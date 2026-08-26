@@ -6,10 +6,14 @@ import {Locator, expect} from '@playwright/test';
 export default class InfoSettings {
     readonly container: Locator;
     readonly nameInput: Locator;
+    readonly emojiButton: Locator;
+    readonly removeEmojiButton: Locator;
 
     constructor(container: Locator) {
         this.container = container;
         this.nameInput = container.locator('#input_channel-settings-name');
+        this.emojiButton = container.getByTestId('channel-emoji-button');
+        this.removeEmojiButton = container.getByTestId('channel-emoji-remove');
     }
 
     async toBeVisible() {

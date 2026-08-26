@@ -27,6 +27,11 @@
         border-radius: 4px;
         margin-right: 2px;
 
+        .channel-header__emoji {
+            display: flex;
+            margin-right: 8px;
+        }
+
         &:hover {
             background: rgba(functions.v(center-channel-color-rgb), 0.08);
         }

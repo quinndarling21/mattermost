@@ -479,6 +479,16 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.Equal(t, "banner text", *updatedChannel.BannerInfo.Text)
 	require.Equal(t, "#000000", *updatedChannel.BannerInfo.BackgroundColor)
 
+	channel.Emoji = "rocket"
+	updatedChannel, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err)
+	require.Equal(t, "rocket", updatedChannel.Emoji)
+
+	channel.Emoji = ""
+	updatedChannel, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err)
+	require.Equal(t, "", updatedChannel.Emoji)
+
 	// can turn off channel banners
 	channel.BannerInfo.Enabled = new(false)
 
