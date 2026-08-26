@@ -10,7 +10,7 @@ env:
 
 jobs:
   approve-e2e:
-    if: github.event.label.name == 'E2E Tests/verified'
+    if: github.repository_owner == 'mattermost' && github.event.label.name == 'E2E Tests/verified'
     runs-on: ubuntu-24.04
     steps:
       - name: ci/check-user-permission

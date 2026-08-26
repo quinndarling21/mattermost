@@ -11,6 +11,7 @@ on:
 
 jobs:
   generate-report-matrix:
+    if: github.repository_owner == 'mattermost'
     runs-on: ubuntu-22.04
     outputs:
       REPORT_MATRIX: ${{ steps.report.outputs.REPORT_MATRIX }}
