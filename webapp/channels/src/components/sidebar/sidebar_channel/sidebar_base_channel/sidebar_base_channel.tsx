@@ -47,6 +47,7 @@ const SidebarBaseChannel = ({
     const channelIcon = (
         <SidebarBaseChannelIcon
             channelType={channel.type}
+            emojiName={channel.emoji_name}
         />
     );
 

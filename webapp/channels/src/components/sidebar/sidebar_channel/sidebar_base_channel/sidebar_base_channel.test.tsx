@@ -9,6 +9,10 @@ import SidebarBaseChannel from 'components/sidebar/sidebar_channel/sidebar_base_
 
 import {renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
 
+jest.mock('components/emoji/render_emoji', () => ({emojiName}: {emojiName: string}) => (
+    <span data-testid='render-emoji'>{emojiName}</span>
+));
+
 jest.mock('components/tours/onboarding_tour', () => ({
     ChannelsAndDirectMessagesTour: () => null,
 }));
@@ -16,11 +20,12 @@ jest.mock('components/tours/onboarding_tour', () => ({
 jest.mock('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
     const React = require('react');
 
-    return ({label, channelLeaveHandler}: {label: string; channelLeaveHandler?: (callback: () => void) => void}) => {
+    return ({label, channelLeaveHandler, icon}: {label: string; channelLeaveHandler?: (callback: () => void) => void; icon?: React.ReactNode}) => {
         const [isOpen, setIsOpen] = React.useState(false);
 
         return (
             <div>
+                <span data-testid='channel-icon'>{icon}</span>
                 <button
                     aria-label='Channel options'
                     onClick={() => setIsOpen(true)}
@@ -78,6 +83,23 @@ describe('components/sidebar/sidebar_channel/sidebar_base_channel', () => {
         );
 
         expect(container).toMatchSnapshot();
+    });
+
+    test('should render channel emoji when one is set', () => {
+        const props = {
+            ...baseProps,
+            channel: {
+                ...baseProps.channel,
+                emoji_name: 'dog',
+            },
+        };
+
+        renderWithContext(
+            <SidebarBaseChannel {...props}/>,
+        );
+
+        expect(screen.getByTestId('render-emoji')).toHaveTextContent('dog');
+        expect(screen.queryByTestId('channel-icon')?.querySelector('.icon-globe')).not.toBeInTheDocument();
     });
 
     test('should match snapshot when shared channel', () => {

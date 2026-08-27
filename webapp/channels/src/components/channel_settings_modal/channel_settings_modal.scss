@@ -112,6 +112,47 @@
         margin-top: 16px;
     }
 
+    &__emojiField {
+        margin-top: 24px;
+    }
+
+    &__emojiFieldLabel {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--center-channel-color);
+        font-family: Open Sans, sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+    }
+
+    &__emojiFieldControls {
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+        gap: 8px;
+    }
+
+    &__emojiButton {
+        display: flex;
+        min-height: 40px;
+        align-items: center;
+        padding: 0 12px;
+        border: var(--border-default);
+        border-radius: var(--radius-s);
+        background: var(--center-channel-bg);
+        color: var(--center-channel-color);
+        gap: 8px;
+
+        &:disabled {
+            opacity: 0.48;
+        }
+    }
+
+    &__emojiClear {
+        min-height: 40px;
+    }
+
     &__purposeContainer, &__headerContainer {
         margin-top: 28px;
 

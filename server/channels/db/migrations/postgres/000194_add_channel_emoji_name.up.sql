@@ -1,0 +1,1 @@
+ALTER TABLE Channels ADD COLUMN IF NOT EXISTS EmojiName varchar(64) NOT NULL DEFAULT '';

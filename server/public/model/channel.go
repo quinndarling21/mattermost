@@ -19,7 +19,8 @@ import (
 
 var (
 	// Validates both 3-digit (#RGB) and 6-digit (#RRGGBB) hex colors
-	channelHexColorRegex = regexp.MustCompile(`^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$`)
+	channelHexColorRegex  = regexp.MustCompile(`^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$`)
+	channelEmojiNameRegex = regexp.MustCompile(`^[a-zA-Z0-9_+-]+$`)
 )
 
 type ChannelType string
@@ -44,6 +45,7 @@ const (
 	ChannelPurposeMaxRunes     = 250
 	ChannelCacheSize           = 25000
 	ChannelBannerInfoMaxLength = 1024
+	ChannelEmojiNameMaxRunes   = 64
 
 	ChannelSortByUsername = "username"
 	ChannelSortByStatus   = "status"
@@ -118,6 +120,7 @@ type Channel struct {
 	DefaultCategoryName string          `json:"default_category_name"`
 	ManagedCategoryName string          `json:"managed_category_name"`
 	Discoverable        bool            `json:"discoverable"`
+	EmojiName           string          `json:"emoji_name"`
 }
 
 // HasPolicyAction reports whether the channel's policy declares the given
@@ -162,6 +165,7 @@ func (o *Channel) Auditable() map[string]any {
 		"autotranslation":      o.AutoTranslation,
 		"policy_is_active":     o.PolicyIsActive, // this field is only for logging purposes
 		"discoverable":         o.Discoverable,
+		"emoji_name":           o.EmojiName,
 	}
 }
 
@@ -192,6 +196,7 @@ type ChannelPatch struct {
 	ManagedCategoryName *string            `json:"managed_category_name"`
 	DefaultCategoryName *string            `json:"default_category_name"`
 	Discoverable        *bool              `json:"discoverable"`
+	EmojiName           *string            `json:"emoji_name"`
 }
 
 func (c *ChannelPatch) Auditable() map[string]any {
@@ -202,6 +207,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
+		"emoji_name":            c.EmojiName,
 	}
 }
 
@@ -376,6 +382,18 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.discoverable.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if o.EmojiName != "" {
+		if o.Type != ChannelTypeOpen && o.Type != ChannelTypePrivate {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji_name.channel_type.app_error", nil, "", http.StatusBadRequest)
+		}
+		if utf8.RuneCountInString(o.EmojiName) > ChannelEmojiNameMaxRunes {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji_name.invalid_length.app_error", map[string]any{"maxLength": ChannelEmojiNameMaxRunes}, "", http.StatusBadRequest)
+		}
+		if !channelEmojiNameRegex.MatchString(o.EmojiName) {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji_name.invalid.app_error", nil, "", http.StatusBadRequest)
+		}
+	}
+
 	return nil
 }
 
@@ -499,6 +517,10 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 
 	if patch.Discoverable != nil {
 		o.Discoverable = *patch.Discoverable
+	}
+
+	if patch.EmojiName != nil {
+		o.EmojiName = strings.Trim(strings.TrimSpace(*patch.EmojiName), ":")
 	}
 }
 

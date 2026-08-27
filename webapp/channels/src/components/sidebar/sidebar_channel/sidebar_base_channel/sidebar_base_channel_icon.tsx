@@ -5,15 +5,28 @@ import React from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
+import RenderEmoji from 'components/emoji/render_emoji';
+
 import Constants from 'utils/constants';
 
 type Props = {
     channelType: ChannelType;
+    emojiName?: string;
 }
 
 const SidebarBaseChannelIcon = ({
     channelType,
+    emojiName,
 }: Props) => {
+    if (emojiName) {
+        return (
+            <RenderEmoji
+                emojiName={emojiName}
+                size={16}
+            />
+        );
+    }
+
     if (channelType === Constants.OPEN_CHANNEL) {
         return (
             <i className='icon icon-globe'/>
