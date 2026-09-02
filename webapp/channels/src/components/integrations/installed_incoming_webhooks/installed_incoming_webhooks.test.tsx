@@ -8,7 +8,7 @@ import type {IncomingWebhook} from '@mattermost/types/integrations';
 
 import InstalledIncomingWebhooks from 'components/integrations/installed_incoming_webhooks/installed_incoming_webhooks';
 
-import {renderWithContext} from 'tests/react_testing_utils';
+import {renderWithContext, userEvent} from 'tests/react_testing_utils';
 import {TestHelper} from 'utils/test_helper';
 
 describe('components/integrations/InstalledIncomingWebhooks', () => {
@@ -150,5 +150,52 @@ describe('components/integrations/InstalledIncomingWebhooks', () => {
         // Verify DOM order: Town Square (channel fallback) should appear before Zeta Webhook
         const position = townSquareEl.compareDocumentPosition(zetaEl);
         expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    test('shows unfiltered empty state when no incoming webhooks exist', async () => {
+        const props = {
+            ...defaultProps,
+            incomingHooks: [],
+            incomingHooksTotalCount: 0,
+        };
+
+        renderWithContext(
+            <InstalledIncomingWebhooks
+                {...props}
+            />,
+            initialState,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('No incoming webhooks found')).toBeInTheDocument();
+        });
+
+        expect(screen.queryByText('No incoming webhooks found')).toBeInTheDocument();
+        expect(document.getElementById('emptySearchResultsMessage')).not.toBeInTheDocument();
+    });
+
+    test('shows filtered empty state when search matches no incoming webhooks', async () => {
+        renderWithContext(
+            <InstalledIncomingWebhooks
+                {...defaultProps}
+            />,
+            initialState,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Alpha Webhook')).toBeInTheDocument();
+        });
+
+        const searchInput = screen.getByPlaceholderText('Search Incoming Webhooks');
+        await userEvent.type(searchInput, 'nomatchterm');
+
+        await waitFor(() => {
+            expect(document.getElementById('emptySearchResultsMessage')).toBeInTheDocument();
+        });
+
+        const emptySearchMessage = document.getElementById('emptySearchResultsMessage');
+        expect(emptySearchMessage).toHaveTextContent('No incoming webhooks match nomatchterm');
+        expect(screen.queryByText('No incoming webhooks found')).not.toBeInTheDocument();
+        expect(screen.queryByText('Alpha Webhook')).not.toBeInTheDocument();
     });
 });

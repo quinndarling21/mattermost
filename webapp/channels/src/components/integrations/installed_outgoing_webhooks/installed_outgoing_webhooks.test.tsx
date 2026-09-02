@@ -166,4 +166,49 @@ describe('components/integrations/InstalledOutgoingWebhooks', () => {
         expect(removeOutgoingHook).toHaveBeenCalledTimes(1);
         expect(removeOutgoingHook).toHaveBeenCalledWith(outgoingWebhooks[1].id);
     });
+
+    test('shows unfiltered empty state when no outgoing webhooks exist', async () => {
+        const props = {
+            ...defaultProps,
+            outgoingWebhooks: [],
+        };
+
+        renderWithContext(
+            <InstalledOutgoingWebhooks
+                {...props}
+            />,
+            initialState,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('No outgoing webhooks found')).toBeInTheDocument();
+        });
+
+        expect(document.getElementById('emptySearchResultsMessage')).not.toBeInTheDocument();
+    });
+
+    test('shows filtered empty state when search matches no outgoing webhooks', async () => {
+        renderWithContext(
+            <InstalledOutgoingWebhooks
+                {...defaultProps}
+            />,
+            initialState,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('build status')).toBeInTheDocument();
+        });
+
+        const searchInput = screen.getByPlaceholderText('Search Outgoing Webhooks');
+        await userEvent.type(searchInput, 'nomatchterm');
+
+        await waitFor(() => {
+            expect(document.getElementById('emptySearchResultsMessage')).toBeInTheDocument();
+        });
+
+        const emptySearchMessage = document.getElementById('emptySearchResultsMessage');
+        expect(emptySearchMessage).toHaveTextContent('No outgoing webhooks match nomatchterm');
+        expect(screen.queryByText('No outgoing webhooks found')).not.toBeInTheDocument();
+        expect(screen.queryByText('build status')).not.toBeInTheDocument();
+    });
 });
