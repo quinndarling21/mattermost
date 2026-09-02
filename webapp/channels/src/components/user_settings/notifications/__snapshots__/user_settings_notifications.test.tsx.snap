@@ -268,6 +268,135 @@ Object {
             class="divider-light"
           />
           <div
+            class="QuietHoursSettings"
+          >
+            <div
+              class="QuietHoursSettings__header"
+            >
+              <h4>
+                Quiet hours
+              </h4>
+              <label
+                class="QuietHoursSettings__toggle"
+              >
+                <input
+                  type="checkbox"
+                />
+                Mute notifications during quiet hours
+              </label>
+            </div>
+            <fieldset
+              class="QuietHoursSettings__body"
+              disabled=""
+            >
+              <div
+                class="QuietHoursSettings__times"
+              >
+                <label>
+                  From
+                  <input
+                    type="time"
+                    value="22:00"
+                  />
+                </label>
+                <label>
+                  To
+                  <input
+                    type="time"
+                    value="07:00"
+                  />
+                </label>
+              </div>
+              <div
+                class="QuietHoursSettings__days"
+              >
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Sun
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Mon
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Tue
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Wed
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Thu
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Fri
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Sat
+                </button>
+              </div>
+              <label
+                class="QuietHoursSettings__toggle"
+              >
+                <input
+                  checked=""
+                  type="checkbox"
+                />
+                Always let urgent messages through
+              </label>
+              <label
+                class="QuietHoursSettings__auto_reply"
+              >
+                Auto-reply message
+                <textarea
+                  placeholder="I have notifications muted right now and will reply later."
+                />
+              </label>
+              <p
+                class="QuietHoursSettings__summary"
+              >
+                Notifications will be muted 10:00 PM – 7:00 AM on the selected days.
+              </p>
+            </fieldset>
+            <div
+              class="QuietHoursSettings__actions"
+            >
+              <button
+                class="btn btn-primary btn-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+          <div
+            class="divider-light"
+          />
+          <div
             style="margin-top: 20px;"
           >
             <div
@@ -575,6 +704,135 @@ Object {
         <div
           class="divider-light"
         />
+        <div
+          class="divider-light"
+        />
+        <div
+          class="QuietHoursSettings"
+        >
+          <div
+            class="QuietHoursSettings__header"
+          >
+            <h4>
+              Quiet hours
+            </h4>
+            <label
+              class="QuietHoursSettings__toggle"
+            >
+              <input
+                type="checkbox"
+              />
+              Mute notifications during quiet hours
+            </label>
+          </div>
+          <fieldset
+            class="QuietHoursSettings__body"
+            disabled=""
+          >
+            <div
+              class="QuietHoursSettings__times"
+            >
+              <label>
+                From
+                <input
+                  type="time"
+                  value="22:00"
+                />
+              </label>
+              <label>
+                To
+                <input
+                  type="time"
+                  value="07:00"
+                />
+              </label>
+            </div>
+            <div
+              class="QuietHoursSettings__days"
+            >
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Sun
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Mon
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Tue
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Wed
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Thu
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Fri
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Sat
+              </button>
+            </div>
+            <label
+              class="QuietHoursSettings__toggle"
+            >
+              <input
+                checked=""
+                type="checkbox"
+              />
+              Always let urgent messages through
+            </label>
+            <label
+              class="QuietHoursSettings__auto_reply"
+            >
+              Auto-reply message
+              <textarea
+                placeholder="I have notifications muted right now and will reply later."
+              />
+            </label>
+            <p
+              class="QuietHoursSettings__summary"
+            >
+              Notifications will be muted 10:00 PM – 7:00 AM on the selected days.
+            </p>
+          </fieldset>
+          <div
+            class="QuietHoursSettings__actions"
+          >
+            <button
+              class="btn btn-primary btn-sm"
+            >
+              Save
+            </button>
+          </div>
+        </div>
         <div
           class="divider-light"
         />
@@ -958,6 +1216,135 @@ Object {
             class="divider-light"
           />
           <div
+            class="QuietHoursSettings"
+          >
+            <div
+              class="QuietHoursSettings__header"
+            >
+              <h4>
+                Quiet hours
+              </h4>
+              <label
+                class="QuietHoursSettings__toggle"
+              >
+                <input
+                  type="checkbox"
+                />
+                Mute notifications during quiet hours
+              </label>
+            </div>
+            <fieldset
+              class="QuietHoursSettings__body"
+              disabled=""
+            >
+              <div
+                class="QuietHoursSettings__times"
+              >
+                <label>
+                  From
+                  <input
+                    type="time"
+                    value="22:00"
+                  />
+                </label>
+                <label>
+                  To
+                  <input
+                    type="time"
+                    value="07:00"
+                  />
+                </label>
+              </div>
+              <div
+                class="QuietHoursSettings__days"
+              >
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Sun
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Mon
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Tue
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Wed
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Thu
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Fri
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Sat
+                </button>
+              </div>
+              <label
+                class="QuietHoursSettings__toggle"
+              >
+                <input
+                  checked=""
+                  type="checkbox"
+                />
+                Always let urgent messages through
+              </label>
+              <label
+                class="QuietHoursSettings__auto_reply"
+              >
+                Auto-reply message
+                <textarea
+                  placeholder="I have notifications muted right now and will reply later."
+                />
+              </label>
+              <p
+                class="QuietHoursSettings__summary"
+              >
+                Notifications will be muted 10:00 PM – 7:00 AM on the selected days.
+              </p>
+            </fieldset>
+            <div
+              class="QuietHoursSettings__actions"
+            >
+              <button
+                class="btn btn-primary btn-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+          <div
+            class="divider-light"
+          />
+          <div
             style="margin-top: 20px;"
           >
             <div
@@ -1265,6 +1652,135 @@ Object {
             id="keywordsAndHighlightDesc"
           >
             None
+          </div>
+        </div>
+        <div
+          class="divider-light"
+        />
+        <div
+          class="QuietHoursSettings"
+        >
+          <div
+            class="QuietHoursSettings__header"
+          >
+            <h4>
+              Quiet hours
+            </h4>
+            <label
+              class="QuietHoursSettings__toggle"
+            >
+              <input
+                type="checkbox"
+              />
+              Mute notifications during quiet hours
+            </label>
+          </div>
+          <fieldset
+            class="QuietHoursSettings__body"
+            disabled=""
+          >
+            <div
+              class="QuietHoursSettings__times"
+            >
+              <label>
+                From
+                <input
+                  type="time"
+                  value="22:00"
+                />
+              </label>
+              <label>
+                To
+                <input
+                  type="time"
+                  value="07:00"
+                />
+              </label>
+            </div>
+            <div
+              class="QuietHoursSettings__days"
+            >
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Sun
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Mon
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Tue
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Wed
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Thu
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Fri
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Sat
+              </button>
+            </div>
+            <label
+              class="QuietHoursSettings__toggle"
+            >
+              <input
+                checked=""
+                type="checkbox"
+              />
+              Always let urgent messages through
+            </label>
+            <label
+              class="QuietHoursSettings__auto_reply"
+            >
+              Auto-reply message
+              <textarea
+                placeholder="I have notifications muted right now and will reply later."
+              />
+            </label>
+            <p
+              class="QuietHoursSettings__summary"
+            >
+              Notifications will be muted 10:00 PM – 7:00 AM on the selected days.
+            </p>
+          </fieldset>
+          <div
+            class="QuietHoursSettings__actions"
+          >
+            <button
+              class="btn btn-primary btn-sm"
+            >
+              Save
+            </button>
           </div>
         </div>
         <div
@@ -1612,6 +2128,135 @@ Object {
             class="divider-light"
           />
           <div
+            class="QuietHoursSettings"
+          >
+            <div
+              class="QuietHoursSettings__header"
+            >
+              <h4>
+                Quiet hours
+              </h4>
+              <label
+                class="QuietHoursSettings__toggle"
+              >
+                <input
+                  type="checkbox"
+                />
+                Mute notifications during quiet hours
+              </label>
+            </div>
+            <fieldset
+              class="QuietHoursSettings__body"
+              disabled=""
+            >
+              <div
+                class="QuietHoursSettings__times"
+              >
+                <label>
+                  From
+                  <input
+                    type="time"
+                    value="22:00"
+                  />
+                </label>
+                <label>
+                  To
+                  <input
+                    type="time"
+                    value="07:00"
+                  />
+                </label>
+              </div>
+              <div
+                class="QuietHoursSettings__days"
+              >
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Sun
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Mon
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Tue
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Wed
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Thu
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Fri
+                </button>
+                <button
+                  aria-pressed="true"
+                  class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                  type="button"
+                >
+                  Sat
+                </button>
+              </div>
+              <label
+                class="QuietHoursSettings__toggle"
+              >
+                <input
+                  checked=""
+                  type="checkbox"
+                />
+                Always let urgent messages through
+              </label>
+              <label
+                class="QuietHoursSettings__auto_reply"
+              >
+                Auto-reply message
+                <textarea
+                  placeholder="I have notifications muted right now and will reply later."
+                />
+              </label>
+              <p
+                class="QuietHoursSettings__summary"
+              >
+                Notifications will be muted 10:00 PM – 7:00 AM on the selected days.
+              </p>
+            </fieldset>
+            <div
+              class="QuietHoursSettings__actions"
+            >
+              <button
+                class="btn btn-primary btn-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+          <div
+            class="divider-light"
+          />
+          <div
             style="margin-top: 20px;"
           >
             <div
@@ -1883,6 +2528,135 @@ Object {
         <div
           class="divider-light"
         />
+        <div
+          class="divider-light"
+        />
+        <div
+          class="QuietHoursSettings"
+        >
+          <div
+            class="QuietHoursSettings__header"
+          >
+            <h4>
+              Quiet hours
+            </h4>
+            <label
+              class="QuietHoursSettings__toggle"
+            >
+              <input
+                type="checkbox"
+              />
+              Mute notifications during quiet hours
+            </label>
+          </div>
+          <fieldset
+            class="QuietHoursSettings__body"
+            disabled=""
+          >
+            <div
+              class="QuietHoursSettings__times"
+            >
+              <label>
+                From
+                <input
+                  type="time"
+                  value="22:00"
+                />
+              </label>
+              <label>
+                To
+                <input
+                  type="time"
+                  value="07:00"
+                />
+              </label>
+            </div>
+            <div
+              class="QuietHoursSettings__days"
+            >
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Sun
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Mon
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Tue
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Wed
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Thu
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Fri
+              </button>
+              <button
+                aria-pressed="true"
+                class="QuietHoursSettings__day QuietHoursSettings__day--on"
+                type="button"
+              >
+                Sat
+              </button>
+            </div>
+            <label
+              class="QuietHoursSettings__toggle"
+            >
+              <input
+                checked=""
+                type="checkbox"
+              />
+              Always let urgent messages through
+            </label>
+            <label
+              class="QuietHoursSettings__auto_reply"
+            >
+              Auto-reply message
+              <textarea
+                placeholder="I have notifications muted right now and will reply later."
+              />
+            </label>
+            <p
+              class="QuietHoursSettings__summary"
+            >
+              Notifications will be muted 10:00 PM – 7:00 AM on the selected days.
+            </p>
+          </fieldset>
+          <div
+            class="QuietHoursSettings__actions"
+          >
+            <button
+              class="btn btn-primary btn-sm"
+            >
+              Save
+            </button>
+          </div>
+        </div>
         <div
           class="divider-light"
         />

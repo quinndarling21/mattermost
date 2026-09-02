@@ -15,6 +15,7 @@ import {LightbulbOutlineIcon} from '@mattermost/compass-icons/components';
 import type {UserNotifyProps, UserProfile} from '@mattermost/types/users';
 
 import ExternalLink from 'components/external_link';
+import {QuietHoursSettings} from 'components/quiet_hours';
 import SettingItem from 'components/setting_item';
 import SettingItemMax from 'components/setting_item_max';
 import RestrictedIndicator from 'components/widgets/menu/menu_items/restricted_indicator';
@@ -1108,6 +1109,8 @@ class NotificationsTab extends React.PureComponent<Props, State> {
                             {keywordsWithHighlightSection}
                         </>
                     )}
+                    <div className='divider-light'/>
+                    <QuietHoursSettings/>
                     <SendTestNotificationNotice adminMode={this.props.adminMode}/>
                 </div>
             </div>
