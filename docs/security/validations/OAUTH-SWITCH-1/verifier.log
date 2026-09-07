@@ -1,0 +1,33 @@
+command: go test -v -count=1 .
+working_directory: /workspace/docs/security/validations/OAUTH-SWITCH-1
+product_revision: 8c311f260ff17092de4a8775ddfc92f1b34681e5
+workspace_HEAD: be04ce2a6c14d9bab02da731b13dbffe8397b1ea
+date: 2026-09-07T00:11:30Z
+verifier: security-verifier (did not author the test)
+test_unchanged: git hash-object docs/security/validations/OAUTH-SWITCH-1/oauth_switch_guard_test.go = e36e09cbf7c30f8a870a779b9e794f001c5002ba
+product_diff_vs_8c311f: none (api4/user.go, app/oauth.go, store/sqlstore/user_store.go, model/switch_request.go, model/config.go)
+-----
+=== RUN   TestOAuthSwitchMissingIsOAuthDeny
+=== RUN   TestOAuthSwitchMissingIsOAuthDeny/oauth_to_email_branch_contains_IsOAuth
+    oauth_switch_guard_test.go:27: OAuthToEmail branch of switchAccountType must contain IsOAuth (upstream Session().IsOAuth deny before SwitchOAuthToEmail); got:
+         {
+        		c.SessionRequired()
+        		if c.Err != nil {
+        			return
+        		}
+        
+        		link, err = c.App.SwitchOAuthToEmail(c.AppContext, switchRequest.Email, switchRequest.NewPassword, c.AppContext.Session().UserId)
+        	
+=== RUN   TestOAuthSwitchMissingIsOAuthDeny/switch_oauth_to_email_denies_oauth_session_before_UpdatePassword
+    oauth_switch_guard_test.go:38: SwitchOAuthToEmail must contain Session().IsOAuth before UpdatePassword; Session().IsOAuth not found, UpdatePassword at 1436
+=== RUN   TestOAuthSwitchMissingIsOAuthDeny/createUserAccessToken_denies_oauth
+=== RUN   TestOAuthSwitchMissingIsOAuthDeny/gitlab_to_email_is_OAuthToEmail
+--- FAIL: TestOAuthSwitchMissingIsOAuthDeny (0.05s)
+    --- FAIL: TestOAuthSwitchMissingIsOAuthDeny/oauth_to_email_branch_contains_IsOAuth (0.00s)
+    --- FAIL: TestOAuthSwitchMissingIsOAuthDeny/switch_oauth_to_email_denies_oauth_session_before_UpdatePassword (0.00s)
+    --- PASS: TestOAuthSwitchMissingIsOAuthDeny/createUserAccessToken_denies_oauth (0.00s)
+    --- PASS: TestOAuthSwitchMissingIsOAuthDeny/gitlab_to_email_is_OAuthToEmail (0.05s)
+FAIL
+FAIL	github.com/mattermost/mattermost/docs/security/validations/oauth-switch-1	0.051s
+FAIL
+exit_code: 1

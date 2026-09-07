@@ -18,10 +18,11 @@ Revision: `8c311f260ff17092de4a8775ddfc92f1b34681e5`
 
 - **Domain:** Credential lifecycle
 - **Specialist:** credential-reviewer
-- **Status:** validating
+- **Status:** validated
 - **Attacker:** operator of an OAuth app the victim authorized (`EnableOAuthServiceProvider` default true; app registration is `manage_oauth` / system_admin, then any user who consents)
 - **Chain:** OAuth access token → session `IsOAuth: true` with full `user.Roles` → `POST /api/v4/users/login/switch` OAuthToEmail with attacker-chosen `new_password` → `SwitchOAuthToEmail` `UpdatePassword` (clears AuthService) → `RevokeAllSessions` → attacker logs in with email+password
-- **Evidence:** `server/channels/api4/user.go:72`, `2810-2832`, `server/channels/app/oauth.go:513-528`, `1207-1253`
+- **Evidence:** `server/channels/api4/user.go:72`, `2810-2832`, `server/channels/app/oauth.go:513-528`, `1207-1253`, `server/channels/store/sqlstore/user_store.go:411-414`
+- **Validation:** `docs/security/validations/OAUTH-SWITCH-1.md` — independent rerun `cd /workspace/docs/security/validations/OAUTH-SWITCH-1 && go test -v -count=1 .` exit 1; FAIL on missing `IsOAuth` in `switchAccountType` OAuthToEmail and missing `Session().IsOAuth` before `UpdatePassword` in `SwitchOAuthToEmail`; negative controls (`createUserAccessToken` IsOAuth deny; gitlab→email `OAuthToEmail`) PASS. Logs: `docs/security/validations/OAUTH-SWITCH-1/author.log`, `docs/security/validations/OAUTH-SWITCH-1/verifier.log`
 - **Upstream fix absent:** `04a0efba6f` (handler + app-layer `IsOAuth` deny)
 - **Impact:** account takeover of SSO users who authorized any integration
 
