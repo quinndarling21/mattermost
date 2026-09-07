@@ -1,0 +1,27 @@
+command: go test -v -count=1 .
+working_directory: /workspace/docs/security/validations/WH-1
+product_revision: 8c311f260ff17092de4a8775ddfc92f1b34681e5
+workspace_HEAD: be04ce2a6c14d9bab02da731b13dbffe8397b1ea
+date: 2026-09-07T00:08:00Z
+verifier: security-verifier (did not author the test)
+product_diff_vs_8c311f: none (api4/webhook.go, app/webhook.go, model/role.go, model/permission.go)
+-----
+=== RUN   TestWH1IncomingWebhookUserIdAttribution
+=== RUN   TestWH1IncomingWebhookUserIdAttribution/precondition:_team_admin_has_manage_others_incoming_webhooks_and_bypass_incoming_webhook_channel_lock
+=== RUN   TestWH1IncomingWebhookUserIdAttribution/negative_control:_team_user_must_not_include_manage_others_incoming_webhooks
+=== RUN   TestWH1IncomingWebhookUserIdAttribution/createIncomingHook_other-user_branch:_GetUser_only;_missing_target-user_authorization
+    webhook_userid_validation_test.go:66: other-user branch has no HasPermissionToChannel or IsSystemAdmin check for the target user
+=== RUN   TestWH1IncomingWebhookUserIdAttribution/ValidateIncomingWebhookUser_must_exist_in_webhook_handlers
+    webhook_userid_validation_test.go:71: /workspace/server/channels/api4/webhook.go does not contain ValidateIncomingWebhookUser
+    webhook_userid_validation_test.go:74: /workspace/server/channels/app/webhook.go does not contain ValidateIncomingWebhookUser
+=== RUN   TestWH1IncomingWebhookUserIdAttribution/HandleIncomingWebhook_posts_as_hook.UserId;_open_channels_skip_membership
+--- FAIL: TestWH1IncomingWebhookUserIdAttribution (0.00s)
+    --- PASS: TestWH1IncomingWebhookUserIdAttribution/precondition:_team_admin_has_manage_others_incoming_webhooks_and_bypass_incoming_webhook_channel_lock (0.00s)
+    --- PASS: TestWH1IncomingWebhookUserIdAttribution/negative_control:_team_user_must_not_include_manage_others_incoming_webhooks (0.00s)
+    --- FAIL: TestWH1IncomingWebhookUserIdAttribution/createIncomingHook_other-user_branch:_GetUser_only;_missing_target-user_authorization (0.00s)
+    --- FAIL: TestWH1IncomingWebhookUserIdAttribution/ValidateIncomingWebhookUser_must_exist_in_webhook_handlers (0.00s)
+    --- PASS: TestWH1IncomingWebhookUserIdAttribution/HandleIncomingWebhook_posts_as_hook.UserId;_open_channels_skip_membership (0.00s)
+FAIL
+FAIL	github.com/mattermost/mattermost/docs/security/validations/WH-1	0.002s
+FAIL
+exit_code: 1
