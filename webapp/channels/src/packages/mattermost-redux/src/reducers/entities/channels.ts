@@ -77,6 +77,11 @@ function channels(state: IDMappedObjects<Channel> = {}, action: MMReduxAction) {
     case ChannelTypes.RECEIVED_CHANNEL: {
         const channel: Channel = toClientChannel(action.data);
 
+        // #region agent log
+        if (channel.name === 'town-square') {
+            fetch('http://127.0.0.1:8765', {method: 'POST', mode: 'no-cors', body: JSON.stringify({hypothesisId: 'A', location: 'reducers/entities/channels.ts:RECEIVED_CHANNEL', message: 'Town Square Redux channel replacement', data: {channelId: channel.id, previousEmoji: state[channel.id]?.emoji ?? null, incomingEmoji: channel.emoji ?? null}, timestamp: Date.now()})}).catch(() => {});
+        }
+        // #endregion
         if (state[channel.id] && channel.type === General.DM_CHANNEL) {
             channel.display_name = channel.display_name || state[channel.id].display_name;
         }

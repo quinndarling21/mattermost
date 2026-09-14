@@ -331,7 +331,13 @@ function ChannelSettingsInfoTab({
             return true;
         }
 
+        // #region agent log
+        fetch('http://127.0.0.1:8765', {method: 'POST', mode: 'no-cors', body: JSON.stringify({hypothesisId: 'A', location: 'channel_settings_info_tab.tsx:before-patch', message: 'Channel patch request', data: {channelId: channel.id, currentEmoji: channel.emoji ?? '', patchEmoji: updated.emoji ?? null}, timestamp: Date.now()})}).catch(() => {});
+        // #endregion
         const {data, error} = await dispatch(patchChannel(channel.id, updated));
+        // #region agent log
+        fetch('http://127.0.0.1:8765', {method: 'POST', mode: 'no-cors', body: JSON.stringify({hypothesisId: 'A', location: 'channel_settings_info_tab.tsx:after-patch', message: 'Channel patch result', data: {channelId: channel.id, responseEmoji: data?.emoji ?? null, error: Boolean(error)}, timestamp: Date.now()})}).catch(() => {});
+        // #endregion
         if (error) {
             handleServerError(error as ServerError);
             return false;

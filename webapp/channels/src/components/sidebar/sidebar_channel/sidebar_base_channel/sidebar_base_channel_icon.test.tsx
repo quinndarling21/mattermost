@@ -12,13 +12,6 @@ import {render} from 'tests/react_testing_utils';
 
 import SidebarBaseChannelIcon from './sidebar_base_channel_icon';
 
-jest.mock('components/emoji/render_emoji', () => ({
-    __esModule: true,
-    default: ({emojiName}: {emojiName: string}) => (
-        <span data-emoticon={emojiName}/>
-    ),
-}));
-
 function renderIcon(ui: React.ReactElement) {
     return render(
         <Provider store={configureStore()}>
@@ -58,5 +51,33 @@ describe('SidebarBaseChannelIcon', () => {
         );
 
         expect(container.querySelector('.icon-lock-outline')).toBeInTheDocument();
+    });
+
+    test('updates an existing emoji element when the channel emoji changes', () => {
+        const store = configureStore();
+        const {container, rerender} = render(
+            <Provider store={store}>
+                <SidebarBaseChannelIcon
+                    channelType={'O' as ChannelType}
+                    emoji='grinning'
+                />
+            </Provider>,
+        );
+
+        const grinningEmoji = container.querySelector<HTMLElement>('[data-emoticon="grinning"]');
+        const grinningBackground = grinningEmoji?.style.backgroundImage;
+
+        rerender(
+            <Provider store={store}>
+                <SidebarBaseChannelIcon
+                    channelType={'O' as ChannelType}
+                    emoji='rocket'
+                />
+            </Provider>,
+        );
+
+        const rocketEmoji = container.querySelector<HTMLElement>('[data-emoticon="rocket"]');
+        expect(rocketEmoji).toBeInTheDocument();
+        expect(rocketEmoji?.style.backgroundImage).not.toBe(grinningBackground);
     });
 });

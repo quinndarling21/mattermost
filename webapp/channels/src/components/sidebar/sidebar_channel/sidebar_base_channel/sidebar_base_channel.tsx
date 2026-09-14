@@ -51,11 +51,21 @@ const SidebarBaseChannel = ({
 
     const emojiName = channel.emoji ? trimmedEmojiName(channel.emoji) : '';
 
+    // #region agent log
+    if (channel.name === Constants.DEFAULT_CHANNEL) {
+        fetch('http://127.0.0.1:8765', {method: 'POST', mode: 'no-cors', body: JSON.stringify({hypothesisId: 'A,E', location: 'sidebar_base_channel.tsx:render', message: 'Town Square sidebar channel prop', data: {channelId: channel.id, channelEmoji: channel.emoji ?? null, normalizedEmoji: emojiName}, timestamp: Date.now()})}).catch(() => {});
+    }
+    // #endregion
     useEffect(() => {
         if (emojiName) {
+            // #region agent log
+            if (channel.name === Constants.DEFAULT_CHANNEL) {
+                fetch('http://127.0.0.1:8765', {method: 'POST', mode: 'no-cors', body: JSON.stringify({hypothesisId: 'C', location: 'sidebar_base_channel.tsx:effect', message: 'Dispatching emoji load check', data: {channelId: channel.id, emojiName}, timestamp: Date.now()})}).catch(() => {});
+            }
+            // #endregion
             dispatch(loadCustomEmojisIfNeeded([emojiName]));
         }
-    }, [dispatch, emojiName]);
+    }, [channel.id, channel.name, dispatch, emojiName]);
 
     const channelIcon = (
         <SidebarBaseChannelIcon
