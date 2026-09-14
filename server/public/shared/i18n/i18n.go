@@ -66,7 +66,15 @@ var TDefault TranslateFunc = func(translationID string, args ...any) string {
 	return t(translationID, args...)
 }
 
-var locales = make(map[string]string)
+var (
+	// locales maps locale code -> translation file path for every supported
+	// locale found on disk. Presence here does not mean the file has been parsed.
+	locales = make(map[string]string)
+	// loadedLocales maps locale code -> path of the file that has been parsed
+	// into the process-wide bundle. The path is stored so a later init against a
+	// different file (tests) reloads instead of treating the locale as done.
+	loadedLocales = make(map[string]string)
+)
 
 // supportedLocales is a hard-coded list of locales considered ready for production use. It must
 // be kept in sync with ../../../../webapp/channels/src/i18n/i18n.jsx.
@@ -100,8 +108,8 @@ var (
 	defaultClientLocale string
 )
 
-// TranslationsPreInit loads translations from filesystem if they are not
-// loaded already and assigns english while loading server config
+// TranslationsPreInit indexes translation files and parses English so T() works
+// while loading server config. Other locales load on first use.
 func TranslationsPreInit(translationsDir string) error {
 	mut.Lock()
 	defer mut.Unlock()
@@ -137,8 +145,11 @@ func TranslationsPreInitFromFileBytes(filename string, buf []byte) error {
 	}
 
 	locales[locale] = filename
-
-	return i18n.ParseTranslationFileBytes(filename, buf)
+	if err := i18n.ParseTranslationFileBytes(filename, buf); err != nil {
+		return err
+	}
+	loadedLocales[locale] = filename
+	return nil
 }
 
 // InitTranslations set the defaults configured in the server and initialize
@@ -147,6 +158,16 @@ func InitTranslations(serverLocale, clientLocale string) error {
 	mut.Lock()
 	defaultServerLocale = serverLocale
 	defaultClientLocale = clientLocale
+	if err := loadLocaleLocked(serverLocale); err != nil && serverLocale != defaultLocale {
+		// English is already required at TranslationsPreInit; a missing configured
+		// locale falls back in GetTranslationsBySystemLocale.
+		mlog.Warn("Failed to load configured server locale, will fall back to default", mlog.String("locale", serverLocale), mlog.Err(err))
+	}
+	if clientLocale != "" && clientLocale != serverLocale {
+		if err := loadLocaleLocked(clientLocale); err != nil {
+			mlog.Warn("Failed to load configured client locale", mlog.String("locale", clientLocale), mlog.Err(err))
+		}
+	}
 	mut.Unlock()
 
 	tfn, err := GetTranslationsBySystemLocale()
@@ -159,6 +180,7 @@ func InitTranslations(serverLocale, clientLocale string) error {
 }
 
 func initTranslationsWithDir(dir string) error {
+	next := make(map[string]string)
 	files, _ := os.ReadDir(dir)
 	for _, f := range files {
 		if filepath.Ext(f.Name()) == ".json" {
@@ -169,14 +191,33 @@ func initTranslationsWithDir(dir string) error {
 				continue
 			}
 
-			locales[locale] = filepath.Join(dir, filename)
-
-			if err := i18n.LoadTranslationFile(filepath.Join(dir, filename)); err != nil {
-				return err
-			}
+			next[locale] = filepath.Join(dir, filename)
 		}
 	}
+	locales = next
 
+	// Only English is parsed during process startup. The remaining locale JSON
+	// files are large and unused for most boots; they load on first use.
+	return loadLocaleLocked(defaultLocale)
+}
+
+// loadLocaleLocked parses a locale file into the process-wide bundle.
+// Caller must hold mut.
+func loadLocaleLocked(locale string) error {
+	if locale == "" {
+		return fmt.Errorf("empty locale")
+	}
+	path, ok := locales[locale]
+	if !ok || path == "" {
+		return fmt.Errorf("unknown locale %s", locale)
+	}
+	if loadedLocales[locale] == path {
+		return nil
+	}
+	if err := i18n.LoadTranslationFile(path); err != nil {
+		return err
+	}
+	loadedLocales[locale] = path
 	return nil
 }
 
@@ -238,6 +279,10 @@ func GetTranslationsBySystemLocale() (TranslateFunc, error) {
 		return nil, fmt.Errorf("failed to load system translations for '%v'", defaultLocale)
 	}
 
+	if err := loadLocaleLocked(locale); err != nil {
+		return nil, fmt.Errorf("failed to load system translations for '%v': %w", locale, err)
+	}
+
 	translations := tfuncWithFallback(locale)
 	if translations == nil {
 		return nil, fmt.Errorf("failed to load system translations")
@@ -254,6 +299,10 @@ func GetUserTranslations(locale string) TranslateFunc {
 	if _, ok := locales[locale]; !ok {
 		locale = defaultLocale
 	}
+	if err := loadLocaleLocked(locale); err != nil {
+		locale = defaultLocale
+		_ = loadLocaleLocked(locale)
+	}
 
 	translations := tfuncWithFallback(locale)
 	return translations
@@ -268,20 +317,20 @@ func GetTranslationsAndLocaleFromRequest(r *http.Request) (TranslateFunc, string
 	headerLocaleFull := strings.Split(r.Header.Get("Accept-Language"), ",")[0]
 	// This is for checking against locales like en, es
 	headerLocale := strings.Split(strings.Split(r.Header.Get("Accept-Language"), ",")[0], "-")[0]
-	defaultLocale := defaultClientLocale
+	clientDefault := defaultClientLocale
 	if locales[headerLocaleFull] != "" {
-		translations := tfuncWithFallback(headerLocaleFull)
-		return translations, headerLocaleFull
+		_ = loadLocaleLocked(headerLocaleFull)
+		return tfuncWithFallback(headerLocaleFull), headerLocaleFull
 	} else if locales[headerLocale] != "" {
-		translations := tfuncWithFallback(headerLocale)
-		return translations, headerLocale
-	} else if locales[defaultLocale] != "" {
-		translations := tfuncWithFallback(defaultLocale)
-		return translations, headerLocale
+		_ = loadLocaleLocked(headerLocale)
+		return tfuncWithFallback(headerLocale), headerLocale
+	} else if locales[clientDefault] != "" {
+		_ = loadLocaleLocked(clientDefault)
+		return tfuncWithFallback(clientDefault), headerLocale
 	}
 
-	translations := tfuncWithFallback(defaultLocale)
-	return translations, defaultLocale
+	_ = loadLocaleLocked(defaultLocale)
+	return tfuncWithFallback(defaultLocale), clientDefault
 }
 
 // GetSupportedLocales return a map of locale code and the file path with the
