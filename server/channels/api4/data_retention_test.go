@@ -750,6 +750,24 @@ func TestGetTeamsForPolicy(t *testing.T) {
 		th.RemovePermissionFromRole(t, model.PermissionSysconsoleReadComplianceDataRetentionPolicy.Id, model.SystemAdminRoleId)
 	})
 
+	t.Run("strips invite_id and email without team invite permission", func(t *testing.T) {
+		inviteID := model.NewId()
+		email := "retention-team@example.com"
+		sampleTeams.Teams[0].InviteId = inviteID
+		sampleTeams.Teams[0].Email = email
+
+		th.AddPermissionToRole(t, model.PermissionSysconsoleReadComplianceDataRetentionPolicy.Id, model.SystemUserRoleId)
+		defer th.RemovePermissionFromRole(t, model.PermissionSysconsoleReadComplianceDataRetentionPolicy.Id, model.SystemUserRoleId)
+
+		teams, resp, err := th.Client.GetTeamsForRetentionPolicy(context.Background(), validPolicyId, 0, 100)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Len(t, teams.Teams, 2)
+		assert.Empty(t, teams.Teams[0].InviteId)
+		assert.Empty(t, teams.Teams[0].Email)
+		assert.Equal(t, "team1", teams.Teams[0].Name)
+	})
+
 	t.Run("NonExistentPolicy", func(t *testing.T) {
 		// Grant necessary permission to system admin
 		th.AddPermissionToRole(t, model.PermissionSysconsoleReadComplianceDataRetentionPolicy.Id, model.SystemAdminRoleId)

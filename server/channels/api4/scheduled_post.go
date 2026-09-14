@@ -6,6 +6,7 @@ package api4
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 
@@ -46,6 +47,11 @@ func scheduledPostChecks(where string, c *Context, scheduledPost *model.Schedule
 
 	postCardTypeCheckWithContext(where, c, scheduledPost.Type)
 	if c.Err != nil {
+		return
+	}
+
+	if strings.HasPrefix(scheduledPost.Type, model.PostSystemMessagePrefix) {
+		c.SetInvalidParam("type")
 		return
 	}
 

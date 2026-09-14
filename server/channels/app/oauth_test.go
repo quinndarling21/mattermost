@@ -1326,6 +1326,50 @@ func TestGetOAuthAccessTokenForCodeFlow(t *testing.T) {
 		})
 	})
 
+	t.Run("RefreshTokenInvalidatesPreviousAccessToken", func(t *testing.T) {
+		oapp := createConfidentialOAuthApp("RefreshInvalidatesOldToken")
+		code := getAuthorizationCode(oapp, "")
+
+		initialResponse, appErr := th.App.GetOAuthAccessTokenForCodeFlow(
+			th.Context,
+			oapp.Id,
+			model.AccessTokenGrantType,
+			oapp.CallbackUrls[0],
+			code,
+			oapp.ClientSecret,
+			"",
+			"",
+			"",
+		)
+		require.Nil(t, appErr)
+		require.NotEmpty(t, initialResponse.AccessToken)
+		require.NotEmpty(t, initialResponse.RefreshToken)
+
+		oldToken := initialResponse.AccessToken
+		session, appErr := th.App.GetSession(oldToken)
+		require.Nil(t, appErr)
+		require.NotNil(t, session)
+
+		refreshResponse, appErr := th.App.GetOAuthAccessTokenForCodeFlow(
+			th.Context,
+			oapp.Id,
+			model.RefreshTokenGrantType,
+			oapp.CallbackUrls[0],
+			"",
+			oapp.ClientSecret,
+			initialResponse.RefreshToken,
+			"",
+			"",
+		)
+		require.Nil(t, appErr)
+		require.NotEmpty(t, refreshResponse.AccessToken)
+		require.NotEqual(t, oldToken, refreshResponse.AccessToken)
+
+		_, appErr = th.App.GetSession(oldToken)
+		require.NotNil(t, appErr)
+		require.Equal(t, http.StatusUnauthorized, appErr.StatusCode)
+	})
+
 	t.Run("RefreshTokenWithResource", func(t *testing.T) {
 		oapp := createConfidentialOAuthApp("TestRefreshResourceApp")
 		resourceParam := "https://api.example.com/resource"

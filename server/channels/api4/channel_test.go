@@ -603,6 +603,31 @@ func TestUpdateChannel(t *testing.T) {
 	})
 }
 
+func TestPatchChannelRejectsGroupConstrainedOnDirectAndGroup(t *testing.T) {
+	mainHelper.Parallel(t)
+	th := Setup(t).InitBasic(t)
+	client := th.Client
+
+	user3 := th.CreateUser(t)
+	th.LinkUserToTeam(t, user3, th.BasicTeam)
+
+	gm, _, err := client.CreateGroupChannel(context.Background(), []string{th.BasicUser.Id, th.BasicUser2.Id, user3.Id})
+	require.NoError(t, err)
+
+	_, resp, err := client.PatchChannel(context.Background(), gm.Id, &model.ChannelPatch{GroupConstrained: new(true)})
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
+	CheckErrorID(t, err, "api.channel.patch_update_channel.update_direct_or_group_messages_not_allowed.app_error")
+
+	dm, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+
+	_, resp, err = client.PatchChannel(context.Background(), dm.Id, &model.ChannelPatch{GroupConstrained: new(true)})
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
+	CheckErrorID(t, err, "api.channel.patch_update_channel.update_direct_or_group_messages_not_allowed.app_error")
+}
+
 func TestPatchChannelGroupConstrained(t *testing.T) {
 	mainHelper.Parallel(t)
 	th := Setup(t).InitBasic(t)

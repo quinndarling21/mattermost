@@ -149,6 +149,26 @@ func TestCreateIncomingWebhook(t *testing.T) {
 		addIncomingWebhookPermissions(t, th, model.TeamUserRoleId)
 	})
 
+	t.Run("team admin cannot bind a system admin as webhook user", func(t *testing.T) {
+		th.LoginTeamAdmin(t)
+		testHook := &model.IncomingWebhook{ChannelId: th.BasicChannel.Id, UserId: th.SystemAdminUser.Id}
+		_, response, err2 := client.CreateIncomingWebhook(context.Background(), testHook)
+		require.Error(t, err2)
+		CheckForbiddenStatus(t, response)
+		th.LoginBasic(t)
+	})
+
+	t.Run("cannot bind a user who cannot read the channel", func(t *testing.T) {
+		private := th.CreatePrivateChannel(t)
+		th.AddUserToChannel(t, th.TeamAdminUser, private)
+		th.LoginTeamAdmin(t)
+		testHook := &model.IncomingWebhook{ChannelId: private.Id, UserId: th.BasicUser2.Id}
+		_, response, err2 := client.CreateIncomingWebhook(context.Background(), testHook)
+		require.Error(t, err2)
+		CheckForbiddenStatus(t, response)
+		th.LoginBasic(t)
+	})
+
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableIncomingWebhooks = false })
 	_, resp, err = client.CreateIncomingWebhook(context.Background(), hook)
 	require.Error(t, err)

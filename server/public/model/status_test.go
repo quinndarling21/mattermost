@@ -43,3 +43,21 @@ func TestStatusListToJSON(t *testing.T) {
 	assert.Equal(t, statuses[0].UserId, dat[0]["user_id"])
 	assert.Equal(t, statuses[1].UserId, dat[1]["user_id"])
 }
+
+func TestStatusHelpersOmitActiveChannel(t *testing.T) {
+	status := Status{UserId: NewId(), Status: StatusOnline, Manual: true, ActiveChannel: "private-channel-id"}
+
+	raw, err := json.Marshal(status)
+	require.NoError(t, err)
+	var rawMap map[string]any
+	require.NoError(t, json.Unmarshal(raw, &rawMap))
+	assert.Equal(t, "private-channel-id", rawMap["active_channel"])
+
+	sanitized, err := status.ToJSON()
+	require.NoError(t, err)
+	var sanitizedMap map[string]any
+	require.NoError(t, json.Unmarshal(sanitized, &sanitizedMap))
+	_, present := sanitizedMap["active_channel"]
+	assert.False(t, present)
+	assert.Equal(t, "private-channel-id", status.ActiveChannel)
+}

@@ -25,6 +25,35 @@ func TestPostToJSON(t *testing.T) {
 	assert.Equal(t, &o, ro.Clone())
 }
 
+func TestThreadResponseJSONOmitsActionIntegrationAfterStrip(t *testing.T) {
+	post := &Post{Id: NewId(), Message: "root"}
+	post.AddProp(PostPropsAttachments, []*MessageAttachment{
+		{
+			Text: "button",
+			Actions: []*PostAction{
+				{
+					Type: PostActionTypeButton,
+					Name: "ok",
+					Integration: &PostActionIntegration{
+						URL:     "https://example.com/hooks/placeholder",
+						Context: map[string]any{"token": "plugin-secret"},
+					},
+				},
+			},
+		},
+	})
+
+	raw, err := json.Marshal(&ThreadResponse{PostId: post.Id, Post: post.Clone()})
+	require.NoError(t, err)
+	assert.Contains(t, string(raw), "https://example.com/hooks/placeholder")
+
+	post.StripActionIntegrations()
+	sanitized, err := json.Marshal(&ThreadResponse{PostId: post.Id, Post: post})
+	require.NoError(t, err)
+	assert.NotContains(t, string(sanitized), "https://example.com/hooks/placeholder")
+	assert.NotContains(t, string(sanitized), "plugin-secret")
+}
+
 func TestPostIsValid(t *testing.T) {
 	o := Post{}
 	maxPostSize := 10000

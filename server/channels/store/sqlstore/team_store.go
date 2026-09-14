@@ -519,7 +519,7 @@ func (s SqlTeamStore) teamSearchQuery(opts *model.TeamSearch, countQuery bool) s
 		if teamFilters == nil {
 			teamFilters = groupConstrainedFilter
 		} else {
-			teamFilters = sq.Or{teamFilters, groupConstrainedFilter}
+			teamFilters = sq.And{teamFilters, groupConstrainedFilter}
 		}
 	}
 
@@ -581,6 +581,7 @@ func (s SqlTeamStore) SearchAllPaged(opts *model.TeamSearch) ([]*model.Team, int
 func (s SqlTeamStore) SearchOpen(opts *model.TeamSearch) ([]*model.Team, error) {
 	opts.TeamType = new("O")
 	opts.AllowOpenInvite = new(true)
+	opts.GroupConstrained = nil
 	return s.SearchAll(opts)
 }
 
@@ -589,6 +590,7 @@ func (s SqlTeamStore) SearchOpen(opts *model.TeamSearch) ([]*model.Team, error) 
 func (s SqlTeamStore) SearchPrivate(opts *model.TeamSearch) ([]*model.Team, error) {
 	opts.TeamType = new("O")
 	opts.AllowOpenInvite = new(false)
+	opts.GroupConstrained = nil
 	return s.SearchAll(opts)
 }
 

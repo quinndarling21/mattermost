@@ -91,6 +91,10 @@ func (a *App) DoPostActionWithCookie(rctx request.CTX, postID, actionId, userID,
 		return "", model.NewAppError("DoPostActionWithCookie", "api.post.do_action.query.app_error", nil, "", http.StatusBadRequest).Wrap(err)
 	}
 
+	if cookie != nil && cookie.PostId != "" && cookie.PostId != postID {
+		return "", model.NewAppError("DoPostActionWithCookie", "api.post.do_action.action_integration.app_error", nil, "postId doesn't match", http.StatusBadRequest)
+	}
+
 	// PostAction may result in the original post being updated. For the
 	// updated post, we need to unconditionally preserve the original
 	// IsPinned and HasReaction attributes, and preserve its entire
@@ -460,12 +464,39 @@ func (a *App) DoActionRequest(rctx request.CTX, rawURL string, body []byte) (*ht
 	return resp, nil
 }
 
+func effectiveURLPort(u *url.URL) string {
+	if port := u.Port(); port != "" {
+		return port
+	}
+	switch u.Scheme {
+	case "https":
+		return "443"
+	case "http":
+		return "80"
+	default:
+		return ""
+	}
+}
+
+func postActionURLIsTrustedPlugin(inURL, siteURL *url.URL, subpath string) bool {
+	if inURL.Scheme != siteURL.Scheme {
+		return false
+	}
+	if !strings.EqualFold(inURL.Hostname(), siteURL.Hostname()) {
+		return false
+	}
+	if effectiveURLPort(inURL) != effectiveURLPort(siteURL) {
+		return false
+	}
+	return strings.HasPrefix(path.Clean(inURL.Path), path.Join(subpath, "plugins"))
+}
+
 func (a *App) getPostActionClient(rctx request.CTX, inURL *url.URL, req *http.Request) *http.Client {
 	// Allow access to plugin routes for action buttons
 	var httpClient *http.Client
 	subpath, _ := utils.GetSubpathFromConfig(a.Config())
 	siteURL, _ := url.Parse(*a.Config().ServiceSettings.SiteURL)
-	if inURL.Hostname() == siteURL.Hostname() && strings.HasPrefix(path.Clean(inURL.Path), path.Join(subpath, "plugins")) {
+	if postActionURLIsTrustedPlugin(inURL, siteURL, subpath) {
 		req.Header.Set(model.HeaderAuth, "Bearer "+rctx.Session().Token)
 		httpClient = a.HTTPService().MakeClient(true)
 	} else {

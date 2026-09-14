@@ -314,6 +314,17 @@ func (a *App) canPostScheduledPost(rctx request.CTX, scheduledPost *model.Schedu
 		return model.ScheduledPostErrorInvalidPost, nil
 	}
 
+	if strings.HasPrefix(scheduledPost.Type, model.PostSystemMessagePrefix) {
+		rctx.Logger().Debug(
+			"canPostScheduledPost scheduled post uses a reserved system message type",
+			mlog.String("scheduled_post_id", scheduledPost.Id),
+			mlog.String("user_id", scheduledPost.UserId),
+			mlog.String("channel_id", scheduledPost.ChannelId),
+			mlog.String("error_code", model.ScheduledPostErrorInvalidPost),
+		)
+		return model.ScheduledPostErrorInvalidPost, nil
+	}
+
 	if appErr := PostCardTypeCheckWithApp("ScheduledPostJob.postChecks", a, scheduledPost.Type); appErr != nil {
 		rctx.Logger().Debug(
 			"canPostScheduledPost card type disabled",

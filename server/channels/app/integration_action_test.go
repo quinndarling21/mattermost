@@ -1640,6 +1640,18 @@ func TestGetPostActionClient(t *testing.T) {
 			expectAuth: true,
 		},
 		{
+			name:       "same host different port does not get auth",
+			siteURL:    "http://localhost:8065",
+			requestURL: "http://localhost:9200/plugins/myplugin/action",
+			expectAuth: false,
+		},
+		{
+			name:       "same host different scheme does not get auth",
+			siteURL:    "http://localhost:8065",
+			requestURL: "https://localhost:8065/plugins/myplugin/action",
+			expectAuth: false,
+		},
+		{
 			name:       "same host with non-plugin path does not get auth",
 			siteURL:    "http://localhost:8065",
 			requestURL: "http://localhost:8065/api/v4/posts",
@@ -1760,6 +1772,22 @@ func TestDoPostActionWithCookieEdgeCases(t *testing.T) {
 
 		_, err := th.App.DoPostActionWithCookie(th.Context, "nonexistent_post_id", "action_id", th.BasicUser.Id, "", cookie, nil)
 		require.Nil(t, err)
+	})
+
+	t.Run("rejects cookie when the target post exists but cookie post id differs", func(t *testing.T) {
+		post := th.CreatePost(t, th.BasicChannel)
+		cookie := &model.PostActionCookie{
+			PostId:    model.NewId(),
+			ChannelId: th.BasicChannel.Id,
+			Type:      model.PostActionTypeButton,
+			Integration: &model.PostActionIntegration{
+				URL: "https://example.com/hooks/placeholder",
+			},
+		}
+
+		_, err := th.App.DoPostActionWithCookie(th.Context, post.Id, "action_id", th.BasicUser.Id, "", cookie, nil)
+		require.NotNil(t, err)
+		assert.Contains(t, err.Error(), "postId doesn't match")
 	})
 
 	t.Run("should handle cookie with mismatched post ID", func(t *testing.T) {

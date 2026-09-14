@@ -102,6 +102,28 @@ func TestGetUserStatus(t *testing.T) {
 	})
 }
 
+func TestGetUserStatusOmitsActiveChannel(t *testing.T) {
+	mainHelper.Parallel(t)
+	th := Setup(t).InitBasic(t)
+
+	private := th.CreatePrivateChannel(t)
+	require.Nil(t, th.App.SetActiveChannel(th.Context, th.BasicUser.Id, private.Id))
+
+	th.LoginBasic2(t)
+	_, resp, err := th.Client.GetChannel(context.Background(), private.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	userStatus, _, err := th.Client.GetUserStatus(context.Background(), th.BasicUser.Id, "")
+	require.NoError(t, err)
+	assert.Empty(t, userStatus.ActiveChannel)
+
+	statuses, _, err := th.Client.GetUsersStatusesByIds(context.Background(), []string{th.BasicUser.Id})
+	require.NoError(t, err)
+	require.Len(t, statuses, 1)
+	assert.Empty(t, statuses[0].ActiveChannel)
+}
+
 func TestGetUsersStatusesByIds(t *testing.T) {
 	mainHelper.Parallel(t)
 	th := Setup(t).InitBasic(t)

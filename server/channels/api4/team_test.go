@@ -2473,6 +2473,34 @@ func TestSearchAllTeamsPaged(t *testing.T) {
 	require.Equal(t, http.StatusNotImplemented, resp.StatusCode)
 }
 
+func TestSearchTeamsDoesNotListInviteOnlyWhenGroupConstrainedFalse(t *testing.T) {
+	mainHelper.Parallel(t)
+	th := Setup(t).InitBasic(t)
+
+	inviteOnly, _, err := th.SystemAdminClient.CreateTeam(context.Background(), &model.Team{
+		DisplayName:     "Invite Only Search",
+		Name:            GenerateTestTeamName(),
+		Email:           th.GenerateTestEmail(),
+		Type:            model.TeamInvite,
+		AllowOpenInvite: false,
+	})
+	require.NoError(t, err)
+
+	defaultPerms := th.SaveDefaultRolePermissions(t)
+	defer th.RestoreDefaultRolePermissions(t, defaultPerms)
+	th.RemovePermissionFromRole(t, model.PermissionListPrivateTeams.Id, model.SystemUserRoleId)
+	th.AddPermissionToRole(t, model.PermissionListPublicTeams.Id, model.SystemUserRoleId)
+
+	rteams, _, err := th.Client.SearchTeams(context.Background(), &model.TeamSearch{
+		Term:             inviteOnly.Name,
+		GroupConstrained: new(false),
+	})
+	require.NoError(t, err)
+	for _, team := range rteams {
+		require.NotEqual(t, inviteOnly.Id, team.Id)
+	}
+}
+
 func TestSearchAllTeamsSanitization(t *testing.T) {
 	mainHelper.Parallel(t)
 	th := Setup(t).InitBasic(t)

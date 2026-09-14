@@ -64,8 +64,21 @@ func createIncomingHook(c *Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if _, err = c.App.GetUser(hook.UserId); err != nil {
-			c.Err = err
+		assignedUser, userErr := c.App.GetUser(hook.UserId)
+		if userErr != nil {
+			c.Err = userErr
+			return
+		}
+
+		if assignedUser.IsSystemAdmin() && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
+			c.LogAudit("fail - cannot bind system admin")
+			c.SetPermissionError(model.PermissionManageSystem)
+			return
+		}
+
+		if ok, _ := c.App.HasPermissionToReadChannel(c.AppContext, hook.UserId, channel); !ok {
+			c.LogAudit("fail - assigned user cannot read channel")
+			c.SetPermissionError(model.PermissionReadChannelContent)
 			return
 		}
 

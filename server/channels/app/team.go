@@ -693,6 +693,10 @@ func (a *App) AddUserToTeamWithToken(rctx request.CTX, userID string, token *mod
 		return nil, nil, model.NewAppError("AddUserToTeamByToken", "api.user.create_user.invalid_invitation_type.app_error", nil, "", http.StatusBadRequest)
 	}
 
+	if email := tokenData["email"]; email != "" && !strings.EqualFold(email, user.Email) {
+		return nil, nil, model.NewAppError("AddUserToTeamByToken", "api.user.create_user.bad_token_email_data.app_error", nil, "", http.StatusBadRequest)
+	}
+
 	teamMember, appErr := a.JoinUserToTeam(rctx, team, user, "")
 	if appErr != nil {
 		return nil, nil, appErr
@@ -1285,6 +1289,9 @@ func (a *App) LeaveTeam(rctx request.CTX, team *model.Team, user *model.User, re
 			a.invalidateCacheForChannelMembers(channel.Id)
 			if nErr = a.Srv().Store().Channel().RemoveMember(rctx, channel.Id, user.Id); nErr != nil {
 				return model.NewAppError("LeaveTeam", "app.channel.remove_member.app_error", nil, "", http.StatusInternalServerError).Wrap(nErr)
+			}
+			if nErr = a.Srv().Store().Thread().DeleteMembershipsForChannel(user.Id, channel.Id); nErr != nil {
+				return model.NewAppError("LeaveTeam", model.NoTranslation, nil, "failed to delete threadmemberships upon leaving team", http.StatusInternalServerError).Wrap(nErr)
 			}
 		}
 	}

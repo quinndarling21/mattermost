@@ -70,6 +70,20 @@ func (p *Plugin) ExecuteCommand(_ *plugin.Context, args *model.CommandArgs) (*mo
 		}, nil
 	}
 
+	user, userErr := p.API.GetUser(args.UserId)
+	if userErr != nil {
+		return &model.CommandResponse{
+			ResponseType: model.CommandResponseTypeEphemeral,
+			Text:         "Could not verify your account.",
+		}, nil
+	}
+	if user.IsGuest() {
+		return &model.CommandResponse{
+			ResponseType: model.CommandResponseTypeEphemeral,
+			Text:         "Guests cannot use /summarize.",
+		}, nil
+	}
+
 	// Run the summary asynchronously so the slash command returns
 	// immediately; the result arrives as a follow-up ephemeral post.
 	go p.runSummary(cfg, args.UserId, args.ChannelId, args.RootId, messageCount)
