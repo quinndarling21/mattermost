@@ -35,6 +35,33 @@ func TestParseMessageCount(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestExecuteCommandRejectsGuest(t *testing.T) {
+	api := &plugintest.API{}
+	api.On("GetUser", "guest1").Return(&model.User{
+		Id:       "guest1",
+		Username: "guest",
+		Roles:    model.SystemGuestRoleId,
+	}, nil)
+
+	p := &Plugin{}
+	p.SetAPI(api)
+	p.configuration = &configuration{
+		XAIAPIKey: "test-key",
+		Model:     "grok-4.6",
+	}
+
+	resp, appErr := p.ExecuteCommand(nil, &model.CommandArgs{
+		Command:   "/summarize",
+		UserId:    "guest1",
+		ChannelId: "channel1",
+	})
+	require.Nil(t, appErr)
+	require.NotNil(t, resp)
+	assert.Equal(t, model.CommandResponseTypeEphemeral, resp.ResponseType)
+	assert.Contains(t, resp.Text, "Guests cannot use /summarize")
+	api.AssertNotCalled(t, "GetPostsForChannel", mock.Anything, mock.Anything, mock.Anything)
+}
+
 func TestExecuteCommandMissingAPIKey(t *testing.T) {
 	t.Setenv("XAI_API_KEY", "")
 

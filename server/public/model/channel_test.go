@@ -145,6 +145,36 @@ func TestChannelIsValid(t *testing.T) {
 	require.NotNil(t, o.IsValid())
 }
 
+func TestChannelIsValidRejectsGroupConstrainedOnDirectAndGroup(t *testing.T) {
+	now := GetMillis()
+	constrained := true
+	o := Channel{
+		Id:               NewId(),
+		CreateAt:         now,
+		UpdateAt:         now,
+		DisplayName:      "test",
+		Name:             "zzzzz",
+		Type:             ChannelTypeOpen,
+		GroupConstrained: &constrained,
+	}
+	require.Nil(t, o.IsValid())
+	require.True(t, o.SupportsGroupSync())
+
+	o.Type = ChannelTypePrivate
+	require.Nil(t, o.IsValid())
+	require.True(t, o.SupportsGroupSync())
+
+	o.Type = ChannelTypeGroup
+	require.False(t, o.SupportsGroupSync())
+	require.NotNil(t, o.IsValid())
+	require.Equal(t, "model.channel.is_valid.group_constrained.app_error", o.IsValid().Id)
+
+	o.Type = ChannelTypeDirect
+	require.False(t, o.SupportsGroupSync())
+	require.NotNil(t, o.IsValid())
+	require.Equal(t, "model.channel.is_valid.group_constrained.app_error", o.IsValid().Id)
+}
+
 func TestChannelIsValidBoard(t *testing.T) {
 	t.Run("rejects non-board type", func(t *testing.T) {
 		c := &Channel{Type: ChannelTypeOpen, TeamId: NewId(), DisplayName: "Board"}

@@ -1774,6 +1774,43 @@ func TestTestExpressionWithChannelContext(t *testing.T) {
 		mockAccessControlService.AssertExpectations(t)
 	})
 
+	t.Run("should deny when admin matches only one OR clause", func(t *testing.T) {
+		mockAccessControlService := &mocks.AccessControlServiceInterface{}
+		th.App.Srv().ch.AccessControl = mockAccessControlService
+
+		expression := "user.attributes.department == 'engineering' || user.attributes.clearance == 'restricted'"
+		opts := model.SubjectSearchOptions{Limit: 50}
+
+		mockAccessControlService.On(
+			"QueryUsersForExpression",
+			th.Context,
+			expression,
+			model.SubjectSearchOptions{SubjectID: th.BasicUser.Id, Limit: 1},
+		).Return([]*model.User{th.BasicUser}, int64(1), nil)
+
+		mockAccessControlService.On(
+			"QueryUsersForExpression",
+			th.Context,
+			"user.attributes.department == 'engineering'",
+			model.SubjectSearchOptions{SubjectID: th.BasicUser.Id, Limit: 1},
+		).Return([]*model.User{th.BasicUser}, int64(1), nil)
+
+		mockAccessControlService.On(
+			"QueryUsersForExpression",
+			th.Context,
+			"user.attributes.clearance == 'restricted'",
+			model.SubjectSearchOptions{SubjectID: th.BasicUser.Id, Limit: 1},
+		).Return([]*model.User{}, int64(0), nil)
+
+		users, count, appErr := th.App.TestExpressionWithChannelContext(th.Context, expression, opts)
+
+		require.Nil(t, appErr)
+		require.Empty(t, users)
+		require.Equal(t, int64(0), count)
+		mockAccessControlService.AssertNotCalled(t, "QueryUsersForExpression", th.Context, expression, opts)
+		mockAccessControlService.AssertExpectations(t)
+	})
+
 	t.Run("should deny when admin partially matches expression", func(t *testing.T) {
 		// Setup mock access control service
 		mockAccessControlService := &mocks.AccessControlServiceInterface{}

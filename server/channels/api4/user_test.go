@@ -2940,6 +2940,35 @@ func TestUpdateUserAuth(t *testing.T) {
 	require.Error(t, err, "Should have errored")
 }
 
+func TestUpdateUserAuthRevokesExistingSessions(t *testing.T) {
+	mainHelper.Parallel(t)
+	th := Setup(t)
+
+	user := th.CreateUser(t)
+	_, err := th.App.Srv().Store().User().VerifyEmail(user.Id, user.Email)
+	require.NoError(t, err)
+
+	userClient := th.CreateClient()
+	_, _, err = userClient.Login(context.Background(), user.Email, user.Password)
+	require.NoError(t, err)
+
+	_, resp, err := userClient.GetMe(context.Background(), "")
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	samlAuthData := "session-revoke@test.com"
+	userAuth := &model.UserAuth{
+		AuthData:    &samlAuthData,
+		AuthService: model.UserAuthServiceSaml,
+	}
+	_, _, err = th.SystemAdminClient.UpdateUserAuth(context.Background(), user.Id, userAuth)
+	require.NoError(t, err)
+
+	_, resp, err = userClient.GetMe(context.Background(), "")
+	require.Error(t, err)
+	CheckUnauthorizedStatus(t, resp)
+}
+
 func TestDeleteUser(t *testing.T) {
 	mainHelper.Parallel(t)
 	th := Setup(t).InitBasic(t)
@@ -5470,6 +5499,27 @@ func TestSwitchAccount(t *testing.T) {
 			link, _, err := th.Client.SwitchAccountType(context.Background(), sr)
 			require.NoError(t, err)
 			require.Equal(t, "/login?extra=signin_change", link)
+		})
+
+		t.Run("OAuth session cannot switch OAuth to email", func(t *testing.T) {
+			setupUserAuth(t, model.UserAuthServiceGitlab, true)
+
+			session, appErr := th.App.GetSession(th.Client.AuthToken)
+			require.Nil(t, appErr)
+			session.IsOAuth = true
+			th.App.AddSessionToCache(session)
+
+			sr := &model.SwitchRequest{
+				CurrentService: model.UserAuthServiceGitlab,
+				NewService:     model.UserAuthServiceEmail,
+				Email:          th.BasicUser.Email,
+				NewPassword:    th.BasicUser.Password,
+			}
+
+			_, resp, err := th.Client.SwitchAccountType(context.Background(), sr)
+			require.Error(t, err)
+			CheckForbiddenStatus(t, resp)
+			CheckErrorID(t, err, "api.user.oauth_to_email.oauth_session.app_error")
 		})
 
 		t.Run("Disabled if EnableSignUpWithEmail is false", func(t *testing.T) {
@@ -8199,6 +8249,46 @@ func TestGetThreadsForUser(t *testing.T) {
 		require.Error(t, err)
 		CheckForbiddenStatus(t, resp)
 	})
+}
+
+func TestGetThreadsForUserOmitsPrivateThreadsAfterTeamLeave(t *testing.T) {
+	mainHelper.Parallel(t)
+	th := Setup(t).InitBasic(t)
+
+	th.App.UpdateConfig(func(cfg *model.Config) {
+		*cfg.ServiceSettings.ThreadAutoFollow = true
+		*cfg.ServiceSettings.CollapsedThreads = model.CollapsedThreadsDefaultOn
+	})
+	th.App.Srv().SetLicense(model.NewTestLicenseSKU(model.LicenseShortSkuProfessional))
+
+	private := th.CreatePrivateChannel(t)
+	rpost, resp, err := th.Client.CreatePost(context.Background(), &model.Post{ChannelId: private.Id, Message: "private thread root"})
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+	_, resp, err = th.Client.CreatePost(context.Background(), &model.Post{ChannelId: private.Id, Message: "private reply", RootId: rpost.Id})
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	uss, _, err := th.Client.GetUserThreads(context.Background(), th.BasicUser.Id, th.BasicTeam.Id, model.GetUserThreadsOpts{})
+	require.NoError(t, err)
+	found := false
+	for _, thread := range uss.Threads {
+		if thread.PostId == rpost.Id {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "expected the private channel thread while the user is still a member")
+
+	appErr := th.App.LeaveTeam(th.Context, th.BasicTeam, th.BasicUser, th.BasicUser.Id)
+	require.Nil(t, appErr)
+	th.LinkUserToTeam(t, th.BasicUser, th.BasicTeam)
+
+	uss, _, err = th.Client.GetUserThreads(context.Background(), th.BasicUser.Id, th.BasicTeam.Id, model.GetUserThreadsOpts{})
+	require.NoError(t, err)
+	for _, thread := range uss.Threads {
+		require.NotEqual(t, rpost.Id, thread.PostId)
+	}
 }
 
 func TestThreadSocketEvents(t *testing.T) {

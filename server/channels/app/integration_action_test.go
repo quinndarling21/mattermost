@@ -1640,6 +1640,18 @@ func TestGetPostActionClient(t *testing.T) {
 			expectAuth: true,
 		},
 		{
+			name:       "same host different port does not get auth",
+			siteURL:    "http://localhost:8065",
+			requestURL: "http://localhost:9200/plugins/myplugin/action",
+			expectAuth: false,
+		},
+		{
+			name:       "same host different scheme does not get auth",
+			siteURL:    "http://localhost:8065",
+			requestURL: "https://localhost:8065/plugins/myplugin/action",
+			expectAuth: false,
+		},
+		{
 			name:       "same host with non-plugin path does not get auth",
 			siteURL:    "http://localhost:8065",
 			requestURL: "http://localhost:8065/api/v4/posts",
