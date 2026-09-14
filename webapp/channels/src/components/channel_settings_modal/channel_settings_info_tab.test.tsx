@@ -63,6 +63,18 @@ jest.mock('actions/views/textbox', () => ({
     setShowPreviewOnChannelSettingsPurposeModal: jest.fn(),
 }));
 
+jest.mock('./channel_emoji_selector', () => ({
+    __esModule: true,
+    default: ({onChange, disabled}: {onChange: (emoji: string) => void; disabled: boolean}) => (
+        <button
+            disabled={disabled}
+            onClick={() => onChange('rocket')}
+        >
+            {'Set channel emoji'}
+        </button>
+    ),
+}));
+
 // Mock the isChannelAdmin function
 jest.mock('mattermost-redux/utils/user_utils', () => {
     const original = jest.requireActual('mattermost-redux/utils/user_utils');
@@ -215,6 +227,18 @@ describe('ChannelSettingsInfoTab', () => {
             purpose: 'Updated purpose',
             header: 'Updated header',
         });
+    });
+
+    it('should save a selected channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        await userEvent.click(screen.getByRole('button', {name: 'Set channel emoji'}));
+        await userEvent.click(await screen.findByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: 'rocket'});
     });
 
     it('should save DM header from channel settings without requiring channel name', async () => {

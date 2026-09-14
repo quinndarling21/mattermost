@@ -1,0 +1,14 @@
+.SidebarBaseChannelIcon {
+    display: flex;
+    overflow: hidden;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    align-items: center;
+    justify-content: center;
+    margin: 0 6px 0 -2px;
+}
+
+.SidebarLink.muted .SidebarBaseChannelIcon {
+    opacity: 0.4;
+}

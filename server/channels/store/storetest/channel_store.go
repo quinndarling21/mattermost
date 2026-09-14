@@ -220,6 +220,7 @@ func testChannelStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
 	o1.DisplayName = "Name"
 	o1.Name = NewTestID()
 	o1.Type = model.ChannelTypeOpen
+	o1.Emoji = "tada"
 	o1.BannerInfo = &model.ChannelBannerInfo{
 		Enabled:         new(true),
 		Text:            new("banner text"),
@@ -232,6 +233,7 @@ func testChannelStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.True(t, *savedChannel.BannerInfo.Enabled)
 	require.Equal(t, "banner text", *savedChannel.BannerInfo.Text)
 	require.Equal(t, "#000000", *savedChannel.BannerInfo.BackgroundColor)
+	require.Equal(t, "tada", savedChannel.Emoji)
 }
 
 func testChannelStoreSaveDirectChannel(t *testing.T, rctx request.CTX, ss store.Store, s SqlStore) {
@@ -471,6 +473,7 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 		Text:            new("banner text"),
 		BackgroundColor: new("#000000"),
 	}
+	channel.Emoji = "rocket"
 
 	updatedChannel, err := ss.Channel().Update(rctx, &channel)
 	require.NoError(t, err, err)
@@ -478,6 +481,7 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.True(t, *updatedChannel.BannerInfo.Enabled)
 	require.Equal(t, "banner text", *updatedChannel.BannerInfo.Text)
 	require.Equal(t, "#000000", *updatedChannel.BannerInfo.BackgroundColor)
+	require.Equal(t, "rocket", updatedChannel.Emoji)
 
 	// can turn off channel banners
 	channel.BannerInfo.Enabled = new(false)

@@ -439,6 +439,18 @@ func TestUpdateChannel(t *testing.T) {
 	require.Equal(t, channel.Header, newChannel.Header, "Update failed for Header")
 	require.Equal(t, channel.Purpose, newChannel.Purpose, "Update failed for Purpose")
 
+	t.Run("does not clear emoji when omitted from a full update", func(t *testing.T) {
+		emoji := "rocket"
+		patched, _, err := client.PatchChannel(context.Background(), channel.Id, &model.ChannelPatch{Emoji: &emoji})
+		require.NoError(t, err)
+		require.Equal(t, emoji, patched.Emoji)
+
+		channel.Emoji = ""
+		updated, _, err := client.UpdateChannel(context.Background(), channel)
+		require.NoError(t, err)
+		require.Equal(t, emoji, updated.Emoji)
+	})
+
 	// Test GroupConstrained flag
 	channel.GroupConstrained = new(true)
 	rchannel, resp, err := client.UpdateChannel(context.Background(), channel)
@@ -545,7 +557,7 @@ func TestUpdateChannel(t *testing.T) {
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
 	})
-	t.Run("Should block changes to name, display name or purpose for group messages", func(t *testing.T) {
+	t.Run("Should block changes to name, display name, purpose or emoji for group messages", func(t *testing.T) {
 		user1 := th.CreateUser(t)
 		user2 := th.CreateUser(t)
 		user3 := th.CreateUser(t)
@@ -572,9 +584,14 @@ func TestUpdateChannel(t *testing.T) {
 		_, resp, err = client.UpdateChannel(context.Background(), updatedChannel3)
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
+
+		updatedChannel4 := &model.Channel{Id: groupChannel.Id, Emoji: "tada"}
+		_, resp, err = client.UpdateChannel(context.Background(), updatedChannel4)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
 	})
 
-	t.Run("Should block changes to name, display name or purpose for direct messages", func(t *testing.T) {
+	t.Run("Should block changes to name, display name, purpose or emoji for direct messages", func(t *testing.T) {
 		user1 := th.CreateUser(t)
 		user2 := th.CreateUser(t)
 
@@ -598,6 +615,11 @@ func TestUpdateChannel(t *testing.T) {
 
 		updatedChannel3 := &model.Channel{Id: directChannel.Id, Purpose: "test purpose"}
 		_, resp, err = client.UpdateChannel(context.Background(), updatedChannel3)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+
+		updatedChannel4 := &model.Channel{Id: directChannel.Id, Emoji: "tada"}
+		_, resp, err = client.UpdateChannel(context.Background(), updatedChannel4)
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
 	})
@@ -848,6 +870,25 @@ func TestPatchChannel(t *testing.T) {
 		require.Equal(t, *patch.Purpose, channel.Purpose, "do not match")
 	})
 
+	t.Run("should be able to patch channel emoji", func(t *testing.T) {
+		emoji := ":rocket:"
+		patch := &model.ChannelPatch{Emoji: &emoji}
+
+		channel, _, err := client.PatchChannel(context.Background(), th.BasicChannel.Id, patch)
+		require.NoError(t, err)
+		require.Equal(t, "rocket", channel.Emoji)
+
+		channel, _, err = client.GetChannel(context.Background(), th.BasicChannel.Id)
+		require.NoError(t, err)
+		require.Equal(t, "rocket", channel.Emoji)
+
+		empty := ""
+		clearPatch := &model.ChannelPatch{Emoji: &empty}
+		channel, _, err = client.PatchChannel(context.Background(), th.BasicChannel.Id, clearPatch)
+		require.NoError(t, err)
+		require.Empty(t, channel.Emoji)
+	})
+
 	t.Run("should be able to patch with no name", func(t *testing.T) {
 		channel := &model.Channel{
 			DisplayName: GenerateTestChannelName(),
@@ -960,6 +1001,11 @@ func TestPatchChannel(t *testing.T) {
 		_, resp, err = client.PatchChannel(context.Background(), groupChannel.Id, groupChannelPatch3)
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
+
+		emoji := "rocket"
+		_, resp, err = client.PatchChannel(context.Background(), groupChannel.Id, &model.ChannelPatch{Emoji: &emoji})
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
 	})
 
 	t.Run("Should block changes to name, display name or purpose for direct messages", func(t *testing.T) {
@@ -995,6 +1041,11 @@ func TestPatchChannel(t *testing.T) {
 		}
 		*directChannelPatch3.Purpose = "test purpose"
 		_, resp, err = client.PatchChannel(context.Background(), directChannel.Id, directChannelPatch3)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+
+		emoji := "rocket"
+		_, resp, err = client.PatchChannel(context.Background(), directChannel.Id, &model.ChannelPatch{Emoji: &emoji})
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
 	})

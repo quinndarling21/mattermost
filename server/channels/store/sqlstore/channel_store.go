@@ -157,6 +157,7 @@ func channelSliceColumns(isSelect bool, prefix ...string) []string {
 		p + "TotalMsgCountRoot",
 		p + "LastRootPostAt",
 		p + "BannerInfo",
+		p + "Emoji",
 		p + "DefaultCategoryName",
 		p + "Discoverable",
 	}
@@ -196,6 +197,7 @@ func channelToSlice(channel *model.Channel) []any {
 		channel.TotalMsgCountRoot,
 		channel.LastRootPostAt,
 		channel.BannerInfo,
+		channel.Emoji,
 		channel.DefaultCategoryName,
 		channel.Discoverable,
 	}
@@ -873,6 +875,7 @@ func (s SqlChannelStore) updateChannelT(transaction *sqlxTxWrapper, channel *mod
 			TotalMsgCountRoot=:TotalMsgCountRoot,
 			LastRootPostAt=:LastRootPostAt,
 		    BannerInfo=:BannerInfo,
+			Emoji=:Emoji,
 			DefaultCategoryName=:DefaultCategoryName,
 			AutoTranslation=:AutoTranslation,
 			Discoverable=:Discoverable
