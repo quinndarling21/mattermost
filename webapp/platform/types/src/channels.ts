@@ -93,6 +93,12 @@ export type Channel = {
     managed_category_name?: string;
     autotranslation?: boolean;
     discoverable?: boolean;
+
+    /**
+     * Name of an emoji (system or custom, without colons) shown in place of
+     * the channel type icon. Empty or undefined means no emoji is assigned.
+     */
+    emoji?: string;
 };
 
 export type ServerChannel = Channel & {

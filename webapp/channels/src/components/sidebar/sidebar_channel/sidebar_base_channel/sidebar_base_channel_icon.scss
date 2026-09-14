@@ -1,0 +1,13 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+// Matches the box of the 18px compass icon it replaces (see `.SidebarChannel .SidebarLink > i`).
+.SidebarChannel .SidebarLink > .SidebarChannelEmoji {
+    display: flex;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    margin: 0 6px 0 -2px;
+}

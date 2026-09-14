@@ -72,6 +72,21 @@ jest.mock('mattermost-redux/utils/user_utils', () => {
     };
 });
 
+// Replace the full emoji picker with a stub that picks a fixed system emoji
+jest.mock('components/emoji_picker/use_emoji_picker', () => (
+    jest.fn().mockImplementation(({showEmojiPicker, setShowEmojiPicker, onEmojiClick}) => ({
+        emojiPicker: showEmojiPicker ? (
+            <div data-testid='mock-emoji-picker'>
+                <button onClick={() => onEmojiClick({short_name: 'rocket', name: 'rocket'})}>
+                    {'Pick rocket'}
+                </button>
+            </div>
+        ) : null,
+        getReferenceProps: () => ({onClick: () => setShowEmojiPicker(!showEmojiPicker)}),
+        setReference: jest.fn(),
+    }))
+));
+
 // Mock the ShowFormat component to make it easier to test
 jest.mock('components/advanced_text_editor/show_formatting/show_formatting', () => (
     jest.fn().mockImplementation((props) => (
@@ -645,5 +660,104 @@ describe('ChannelSettingsInfoTab', () => {
 
         // Verify error state is shown
         expect(screen.getByText(/There are errors in the form above/)).toBeInTheDocument();
+    });
+
+    describe('channel emoji', () => {
+        it('should render the emoji picker button for public channels but not for DMs', () => {
+            const {unmount} = renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+            expect(screen.getByRole('button', {name: 'Choose a channel emoji'})).toBeInTheDocument();
+            expect(screen.queryByRole('button', {name: 'Remove emoji'})).not.toBeInTheDocument();
+            unmount();
+
+            renderWithContext(
+                <ChannelSettingsInfoTab
+                    {...baseProps}
+                    channel={mockDirectMessageChannel}
+                />,
+            );
+            expect(screen.queryByRole('button', {name: 'Choose a channel emoji'})).not.toBeInTheDocument();
+        });
+
+        it('should show the current emoji and a remove button when one is set', () => {
+            renderWithContext(
+                <ChannelSettingsInfoTab
+                    {...baseProps}
+                    channel={{...mockChannel, emoji: 'rocket'}}
+                />,
+            );
+
+            const emojiButton = screen.getByRole('button', {name: 'Change channel emoji'});
+            expect(emojiButton.querySelector('[data-emoticon="rocket"]')).toBeInTheDocument();
+            expect(screen.getByRole('button', {name: 'Remove emoji'})).toBeInTheDocument();
+        });
+
+        it('should patch the channel with the selected emoji', async () => {
+            const {patchChannel} = require('mattermost-redux/actions/channels');
+            patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: 'rocket'}});
+
+            renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+            expect(screen.queryByRole('button', {name: 'Save'})).not.toBeInTheDocument();
+
+            await userEvent.click(screen.getByRole('button', {name: 'Choose a channel emoji'}));
+            await userEvent.click(screen.getByRole('button', {name: 'Pick rocket'}));
+
+            expect(screen.queryByTestId('mock-emoji-picker')).not.toBeInTheDocument();
+            expect(screen.getByRole('button', {name: 'Change channel emoji'}).querySelector('[data-emoticon="rocket"]')).toBeInTheDocument();
+
+            await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+            expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: 'rocket'});
+        });
+
+        it('should patch the channel with an empty emoji when removed', async () => {
+            const {patchChannel} = require('mattermost-redux/actions/channels');
+            patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: ''}});
+
+            renderWithContext(
+                <ChannelSettingsInfoTab
+                    {...baseProps}
+                    channel={{...mockChannel, emoji: 'rocket'}}
+                />,
+            );
+
+            await userEvent.click(screen.getByRole('button', {name: 'Remove emoji'}));
+
+            expect(screen.getByRole('button', {name: 'Choose a channel emoji'})).toBeInTheDocument();
+            expect(screen.queryByRole('button', {name: 'Remove emoji'})).not.toBeInTheDocument();
+
+            await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+            expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: ''});
+        });
+
+        it('should restore the saved emoji when Reset is clicked', async () => {
+            renderWithContext(
+                <ChannelSettingsInfoTab
+                    {...baseProps}
+                    channel={{...mockChannel, emoji: 'rocket'}}
+                />,
+            );
+
+            await userEvent.click(screen.getByRole('button', {name: 'Remove emoji'}));
+            await userEvent.click(screen.getByRole('button', {name: 'Reset'}));
+
+            expect(screen.getByRole('button', {name: 'Change channel emoji'}).querySelector('[data-emoticon="rocket"]')).toBeInTheDocument();
+            expect(screen.queryByRole('button', {name: 'Save'})).not.toBeInTheDocument();
+        });
+
+        it('should disable emoji editing when user lacks permission', () => {
+            mockChannelPropertiesPermission = false;
+
+            renderWithContext(
+                <ChannelSettingsInfoTab
+                    {...baseProps}
+                    channel={{...mockChannel, emoji: 'rocket'}}
+                />,
+            );
+
+            expect(screen.getByRole('button', {name: 'Change channel emoji'})).toBeDisabled();
+            expect(screen.queryByRole('button', {name: 'Remove emoji'})).not.toBeInTheDocument();
+        });
     });
 });
