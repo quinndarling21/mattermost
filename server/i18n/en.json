@@ -11043,6 +11043,14 @@
     "translation": "Invalid display name."
   },
   {
+    "id": "model.channel.is_valid.emoji.app_error",
+    "translation": "Invalid channel emoji, must be {MaxLength} characters or less."
+  },
+  {
+    "id": "model.channel.is_valid.emoji_type.app_error",
+    "translation": "Channel emoji can only be set on public or private channels."
+  },
+  {
     "id": "model.channel.is_valid.header.app_error",
     "translation": "Invalid header."
   },
