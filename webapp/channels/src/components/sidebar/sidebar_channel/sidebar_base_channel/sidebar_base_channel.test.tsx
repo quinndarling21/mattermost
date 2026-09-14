@@ -9,7 +9,7 @@ import SidebarBaseChannel from 'components/sidebar/sidebar_channel/sidebar_base_
 
 import {renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
 
-const mockLoadCustomEmojisIfNeeded = jest.fn(() => ({type: 'MOCK_LOAD_CUSTOM_EMOJIS'}));
+const mockLoadCustomEmojisIfNeeded = jest.fn((_emojiNames: string[]) => ({type: 'MOCK_LOAD_CUSTOM_EMOJIS'}));
 
 jest.mock('actions/emoji_actions', () => ({
     loadCustomEmojisIfNeeded: (emojiNames: string[]) => mockLoadCustomEmojisIfNeeded(emojiNames),

@@ -890,8 +890,11 @@ func TestPatchChannel(t *testing.T) {
 	})
 
 	t.Run("should require permission to patch channel emoji", func(t *testing.T) {
+		nonAdminClient := th.CreateClient()
+		th.LoginBasic2WithClient(t, nonAdminClient)
+
 		emoji := "tada"
-		_, resp, err := th.Client2.PatchChannel(context.Background(), th.BasicChannel.Id, &model.ChannelPatch{Emoji: &emoji})
+		_, resp, err := nonAdminClient.PatchChannel(context.Background(), th.BasicChannel.Id, &model.ChannelPatch{Emoji: &emoji})
 		require.Error(t, err)
 		CheckForbiddenStatus(t, resp)
 
