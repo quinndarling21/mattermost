@@ -73,9 +73,32 @@ describe('ChannelEmojiPicker', () => {
                 onChange={onChange}
             />,
         );
+        expect(screen.getByRole('button', {name: 'Change channel emoji'})).toBeInTheDocument();
         await userEvent.click(
             screen.getByRole('button', {name: 'Remove channel emoji'}),
         );
         expect(onChange).toHaveBeenLastCalledWith('');
+
+        rerender(
+            <ChannelEmojiPicker
+                value=''
+                onChange={onChange}
+            />,
+        );
+        expect(screen.getByRole('button', {name: 'Select channel emoji'})).toBeInTheDocument();
+        expect(screen.queryByRole('button', {name: 'Remove channel emoji'})).not.toBeInTheDocument();
+    });
+
+    test('keeps the plus affordance when the assigned emoji cannot be rendered', () => {
+        renderWithContext(
+            <ChannelEmojiPicker
+                value='not_a_real_emoji'
+                onChange={jest.fn()}
+            />,
+        );
+
+        expect(screen.getByRole('button', {name: 'Change channel emoji'})).toBeInTheDocument();
+        expect(document.querySelector('.ChannelEmojiPicker__plus')).toBeInTheDocument();
+        expect(document.querySelector('.emoticon')).not.toBeInTheDocument();
     });
 });

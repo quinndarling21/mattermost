@@ -69,6 +69,7 @@ const ChannelEmojiPicker = ({
             </label>
             <div className='ChannelEmojiPicker__controls'>
                 <WithTooltip
+                    key={value ? 'filled' : 'empty'}
                     title={selectLabel}
                 >
                     <button
@@ -84,14 +85,18 @@ const ChannelEmojiPicker = ({
                         aria-describedby={helpId}
                         {...getReferenceProps()}
                     >
-                        {value ? (
+                        {value && (
                             <RenderEmoji
                                 emojiName={value}
                                 size={20}
                             />
-                        ) : (
-                            <EmoticonPlusOutlineIcon size={20}/>
                         )}
+                        <span
+                            className='ChannelEmojiPicker__plus'
+                            aria-hidden='true'
+                        >
+                            <EmoticonPlusOutlineIcon size={20}/>
+                        </span>
                     </button>
                 </WithTooltip>
                 {value && (

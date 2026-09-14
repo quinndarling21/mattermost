@@ -53,9 +53,17 @@
     }
 
     &__button {
+        position: relative;
         width: 40px;
         height: 40px;
         border-radius: var(--radius-s);
+
+        // Keep the plus affordance mounted so clearing or an unresolved
+        // emoji never leaves an empty well. Hide it only when a resolved
+        // emoticon is actually rendered.
+        .emoticon ~ .ChannelEmojiPicker__plus {
+            display: none;
+        }
     }
 
     &__clear {

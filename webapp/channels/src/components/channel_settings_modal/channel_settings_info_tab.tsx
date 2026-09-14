@@ -124,10 +124,16 @@ function ChannelSettingsInfoTab({
         setServerDefaultCategoryName(channel.default_category_name);
     }, [channel.id, channel.default_category_name]);
 
+    // Reset the draft when the modal switches channels. Do not also depend on
+    // channel.emoji — that would clobber an in-progress clear/replace before Save.
     useEffect(() => {
         setChannelEmoji(channel.emoji ?? '');
         setServerChannelEmoji(channel.emoji ?? '');
-    }, [channel.id, channel.emoji]);
+    }, [channel.id]); // eslint-disable-line react-hooks/exhaustive-deps -- see comment above
+
+    useEffect(() => {
+        setServerChannelEmoji(channel.emoji ?? '');
+    }, [channel.emoji]);
 
     useEffect(() => {
         setManagedCategoryName(currentManagedCategoryName);
