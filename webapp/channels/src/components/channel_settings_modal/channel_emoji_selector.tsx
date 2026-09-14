@@ -29,7 +29,7 @@ const ChannelEmojiSelector = ({
 }: Props) => {
     const {formatMessage} = useIntl();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const targetRef = useRef<HTMLButtonElement>(null);
+    const targetRef = useRef<HTMLButtonElement | null>(null);
 
     const refocusEmojiButton = () => {
         if (!targetRef.current) {
