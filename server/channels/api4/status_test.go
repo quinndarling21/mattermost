@@ -110,7 +110,7 @@ func TestGetUserStatusOmitsActiveChannel(t *testing.T) {
 	require.Nil(t, th.App.SetActiveChannel(th.Context, th.BasicUser.Id, private.Id))
 
 	th.LoginBasic2(t)
-	_, resp, err := th.Client.GetChannel(context.Background(), private.Id, "")
+	_, resp, err := th.Client.GetChannel(context.Background(), private.Id)
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
 
