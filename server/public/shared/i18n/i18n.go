@@ -330,7 +330,7 @@ func GetTranslationsAndLocaleFromRequest(r *http.Request) (TranslateFunc, string
 	}
 
 	_ = loadLocaleLocked(defaultLocale)
-	return tfuncWithFallback(defaultLocale), defaultLocale
+	return tfuncWithFallback(defaultLocale), clientDefault
 }
 
 // GetSupportedLocales return a map of locale code and the file path with the

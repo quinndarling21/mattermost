@@ -5,6 +5,7 @@ package i18n
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -262,5 +263,101 @@ func TestGetTranslationFuncForDir(t *testing.T) {
 
 		require.Equal(t, "Décembre", translationFunc("fr")("December"))
 		require.Equal(t, "December", translationFunc("en")("December"))
+	})
+}
+
+func copyLocalesForTest(t *testing.T, localesToCopy map[string]string) string {
+	t.Helper()
+	i18nDir, found := utils.FindDir("server/i18n")
+	require.True(t, found, "unable to find i18n dir")
+
+	tempDir, err := os.MkdirTemp(os.TempDir(), "i18n-lazy-load")
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, os.RemoveAll(tempDir))
+	})
+
+	for locale, fromLocale := range localesToCopy {
+		err = utils.CopyFile(
+			filepath.Join(i18nDir, fmt.Sprintf("%s.json", fromLocale)),
+			filepath.Join(tempDir, fmt.Sprintf("%s.json", locale)),
+		)
+		require.NoError(t, err)
+	}
+	return tempDir
+}
+
+func TestGetTranslationsAndLocaleFromRequest(t *testing.T) {
+	tempDir := copyLocalesForTest(t, map[string]string{"en": "en", "fr": "fr", "pt-BR": "pt-BR"})
+	require.NoError(t, initTranslationsWithDir(tempDir))
+	defaultClientLocale = "en"
+
+	req := func(accept string) *http.Request {
+		r, err := http.NewRequest(http.MethodGet, "http://example.local", nil)
+		require.NoError(t, err)
+		if accept != "" {
+			r.Header.Set("Accept-Language", accept)
+		}
+		return r
+	}
+
+	t.Run("full french tag loads on first request", func(t *testing.T) {
+		require.NotEqual(t, filepath.Join(tempDir, "fr.json"), loadedLocales["fr"])
+		tr, locale := GetTranslationsAndLocaleFromRequest(req("fr"))
+		require.Equal(t, "fr", locale)
+		require.Equal(t, "Décembre", tr("December"))
+		require.Equal(t, filepath.Join(tempDir, "fr.json"), loadedLocales["fr"])
+	})
+
+	t.Run("pt-BR matches the full tag", func(t *testing.T) {
+		tr, locale := GetTranslationsAndLocaleFromRequest(req("pt-BR,en;q=0.8"))
+		require.Equal(t, "pt-BR", locale)
+		require.NotEqual(t, "December", tr("December"))
+		require.Equal(t, filepath.Join(tempDir, "pt-BR.json"), loadedLocales["pt-BR"])
+	})
+
+	t.Run("unknown header uses client default and keeps short header locale", func(t *testing.T) {
+		defaultClientLocale = "fr"
+		tr, locale := GetTranslationsAndLocaleFromRequest(req("es-MX"))
+		require.Equal(t, "es", locale)
+		require.Equal(t, "Décembre", tr("December"))
+	})
+
+	t.Run("unknown header and unknown client default returns english translations", func(t *testing.T) {
+		defaultClientLocale = "zz"
+		tr, locale := GetTranslationsAndLocaleFromRequest(req("zz"))
+		require.Equal(t, "zz", locale)
+		require.Equal(t, "December", tr("December"))
+	})
+}
+
+func TestInitTranslationsLazyLocales(t *testing.T) {
+	t.Run("missing configured server locale falls back to english", func(t *testing.T) {
+		tempDir := copyLocalesForTest(t, map[string]string{"en": "en"})
+		require.NoError(t, initTranslationsWithDir(tempDir))
+
+		require.NoError(t, InitTranslations("fr", "en"))
+		require.Equal(t, "December", T("December"))
+		require.Equal(t, filepath.Join(tempDir, "en.json"), loadedLocales["en"])
+		require.NotEqual(t, filepath.Join(tempDir, "fr.json"), loadedLocales["fr"])
+	})
+
+	t.Run("configured server locale is parsed at init", func(t *testing.T) {
+		tempDir := copyLocalesForTest(t, map[string]string{"en": "en", "fr": "fr"})
+		require.NoError(t, initTranslationsWithDir(tempDir))
+
+		require.NoError(t, InitTranslations("fr", "en"))
+		require.Equal(t, "Décembre", T("December"))
+		require.Equal(t, filepath.Join(tempDir, "fr.json"), loadedLocales["fr"])
+	})
+
+	t.Run("distinct client locale is preloaded", func(t *testing.T) {
+		tempDir := copyLocalesForTest(t, map[string]string{"en": "en", "fr": "fr"})
+		require.NoError(t, initTranslationsWithDir(tempDir))
+
+		require.NoError(t, InitTranslations("en", "fr"))
+		require.Equal(t, filepath.Join(tempDir, "en.json"), loadedLocales["en"])
+		require.Equal(t, filepath.Join(tempDir, "fr.json"), loadedLocales["fr"])
+		require.Equal(t, "December", T("December"))
 	})
 }
