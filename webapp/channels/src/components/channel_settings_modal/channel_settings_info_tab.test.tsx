@@ -32,6 +32,17 @@ jest.mock('components/admin_console/team_channel_settings/convert_confirm_modal'
     });
 });
 
+jest.mock('components/channel_emoji_picker/channel_emoji_picker', () => {
+    return ({value, onChange, disabled}: {value?: string; onChange: (emoji: string) => void; disabled?: boolean}) => (
+        <button
+            disabled={disabled}
+            onClick={() => onChange(value ? '' : 'tada')}
+        >
+            {'Set channel emoji'}
+        </button>
+    );
+});
+
 let mockChannelPropertiesPermission = true;
 let mockConvertToPublicPermission = true;
 let mockConvertToPrivatePermission = true;
@@ -215,6 +226,36 @@ describe('ChannelSettingsInfoTab', () => {
             purpose: 'Updated purpose',
             header: 'Updated header',
         });
+    });
+
+    it('should patch the selected channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: 'tada'}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        await userEvent.click(screen.getByRole('button', {name: 'Set channel emoji'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: 'tada'});
+    });
+
+    it('should clear the selected channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: ''}});
+        const channelWithEmoji = TestHelper.getChannelMock({...mockChannel, emoji: 'tada'});
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                {...baseProps}
+                channel={channelWithEmoji}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: 'Set channel emoji'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: ''});
     });
 
     it('should save DM header from channel settings without requiring channel name', async () => {

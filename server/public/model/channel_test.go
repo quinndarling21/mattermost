@@ -18,11 +18,12 @@ func TestChannelCopy(t *testing.T) {
 }
 
 func TestChannelPatch(t *testing.T) {
-	p := &ChannelPatch{Name: new(string), DisplayName: new(string), Header: new(string), Purpose: new(string), GroupConstrained: new(bool)}
+	p := &ChannelPatch{Name: new(string), DisplayName: new(string), Header: new(string), Purpose: new(string), Emoji: new(string), GroupConstrained: new(bool)}
 	*p.Name = NewId()
 	*p.DisplayName = NewId()
 	*p.Header = NewId()
 	*p.Purpose = NewId()
+	*p.Emoji = ":tada:"
 	*p.GroupConstrained = true
 
 	o := Channel{Id: NewId(), Name: NewId()}
@@ -32,6 +33,7 @@ func TestChannelPatch(t *testing.T) {
 	require.Equal(t, *p.DisplayName, o.DisplayName)
 	require.Equal(t, *p.Header, o.Header)
 	require.Equal(t, *p.Purpose, o.Purpose)
+	require.Equal(t, "tada", o.Emoji)
 	require.Equal(t, *p.GroupConstrained, *o.GroupConstrained)
 }
 
@@ -138,6 +140,16 @@ func TestChannelIsValid(t *testing.T) {
 	o.Purpose = strings.Repeat("0123456789", 25)
 	require.Nil(t, o.IsValid())
 
+	o.Emoji = "tada"
+	require.Nil(t, o.IsValid())
+
+	o.Emoji = ":tada:"
+	require.NotNil(t, o.IsValid())
+
+	o.Emoji = strings.Repeat("a", ChannelEmojiMaxLength+1)
+	require.NotNil(t, o.IsValid())
+
+	o.Emoji = ""
 	o.Name = "beu8cc6b3jnxfe9r4na9baooma__36atajbs87dqmpym6o8eiy9saa"
 	require.NotNil(t, o.IsValid())
 
@@ -241,13 +253,15 @@ func TestChannelBannerBackgroundColorValidation(t *testing.T) {
 }
 
 func TestChannelPreSave(t *testing.T) {
-	o := Channel{Name: "test"}
+	o := Channel{Name: "test", Emoji: ":tada:"}
 	o.PreSave()
+	require.Equal(t, "tada", o.Emoji)
 }
 
 func TestChannelPreUpdate(t *testing.T) {
-	o := Channel{Name: "test"}
+	o := Channel{Name: "test", Emoji: ":tada:"}
 	o.PreUpdate()
+	require.Equal(t, "tada", o.Emoji)
 }
 
 func TestGetGroupDisplayNameFromUsers(t *testing.T) {

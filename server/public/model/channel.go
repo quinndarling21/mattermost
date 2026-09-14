@@ -42,6 +42,7 @@ const (
 	ChannelNameMaxLength       = 64
 	ChannelHeaderMaxRunes      = 1024
 	ChannelPurposeMaxRunes     = 250
+	ChannelEmojiMaxLength      = EmojiNameMaxLength
 	ChannelCacheSize           = 25000
 	ChannelBannerInfoMaxLength = 1024
 
@@ -91,6 +92,7 @@ type Channel struct {
 	Name              string             `json:"name"`
 	Header            string             `json:"header"`
 	Purpose           string             `json:"purpose"`
+	Emoji             string             `json:"emoji"`
 	LastPostAt        int64              `json:"last_post_at"`
 	TotalMsgCount     int64              `json:"total_msg_count"`
 	ExtraUpdateAt     int64              `json:"extra_update_at"`
@@ -186,6 +188,7 @@ type ChannelPatch struct {
 	Name                *string            `json:"name"`
 	Header              *string            `json:"header"`
 	Purpose             *string            `json:"purpose"`
+	Emoji               *string            `json:"emoji"`
 	GroupConstrained    *bool              `json:"group_constrained"`
 	BannerInfo          *ChannelBannerInfo `json:"banner_info"`
 	AutoTranslation     *bool              `json:"autotranslation"`
@@ -199,6 +202,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"header":                c.Header,
 		"group_constrained":     c.GroupConstrained,
 		"purpose":               c.Purpose,
+		"emoji":                 c.Emoji,
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
@@ -341,6 +345,10 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.purpose.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if o.Emoji != "" && (len(o.Emoji) > ChannelEmojiMaxLength || !IsValidAlphaNumHyphenUnderscorePlus(o.Emoji)) {
+		return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+	}
+
 	if len(o.CreatorId) > 26 {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.creator_id.app_error", nil, "", http.StatusBadRequest)
 	}
@@ -405,6 +413,7 @@ func (o *Channel) PreSave() {
 
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = strings.Trim(o.Emoji, ":")
 	if o.CreateAt == 0 {
 		o.CreateAt = GetMillis()
 	}
@@ -416,6 +425,7 @@ func (o *Channel) PreUpdate() {
 	o.UpdateAt = GetMillis()
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = strings.Trim(o.Emoji, ":")
 }
 
 func (o *Channel) IsGroupOrDirect() bool {
@@ -464,6 +474,10 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 
 	if patch.Purpose != nil {
 		o.Purpose = *patch.Purpose
+	}
+
+	if patch.Emoji != nil {
+		o.Emoji = strings.Trim(*patch.Emoji, ":")
 	}
 
 	if patch.GroupConstrained != nil {
