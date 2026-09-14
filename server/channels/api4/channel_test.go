@@ -889,6 +889,24 @@ func TestPatchChannel(t *testing.T) {
 		require.Empty(t, channel.Emoji)
 	})
 
+	t.Run("should require permission to patch channel emoji", func(t *testing.T) {
+		emoji := "tada"
+		_, resp, err := th.Client2.PatchChannel(context.Background(), th.BasicChannel.Id, &model.ChannelPatch{Emoji: &emoji})
+		require.Error(t, err)
+		CheckForbiddenStatus(t, resp)
+
+		channel, _, err := client.GetChannel(context.Background(), th.BasicChannel.Id)
+		require.NoError(t, err)
+		require.Empty(t, channel.Emoji)
+	})
+
+	t.Run("should be able to patch private channel emoji", func(t *testing.T) {
+		emoji := "lock"
+		channel, _, err := client.PatchChannel(context.Background(), th.BasicPrivateChannel.Id, &model.ChannelPatch{Emoji: &emoji})
+		require.NoError(t, err)
+		require.Equal(t, emoji, channel.Emoji)
+	})
+
 	t.Run("should be able to patch with no name", func(t *testing.T) {
 		channel := &model.Channel{
 			DisplayName: GenerateTestChannelName(),

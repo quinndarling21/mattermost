@@ -65,13 +65,22 @@ jest.mock('actions/views/textbox', () => ({
 
 jest.mock('./channel_emoji_selector', () => ({
     __esModule: true,
-    default: ({onChange, disabled}: {onChange: (emoji: string) => void; disabled: boolean}) => (
-        <button
-            disabled={disabled}
-            onClick={() => onChange('rocket')}
-        >
-            {'Set channel emoji'}
-        </button>
+    default: ({emoji, onChange, disabled}: {emoji: string; onChange: (emoji: string) => void; disabled: boolean}) => (
+        <div>
+            <span data-testid='selected-channel-emoji'>{emoji}</span>
+            <button
+                disabled={disabled}
+                onClick={() => onChange('rocket')}
+            >
+                {'Set channel emoji'}
+            </button>
+            <button
+                disabled={disabled}
+                onClick={() => onChange('')}
+            >
+                {'Remove channel emoji'}
+            </button>
+        </div>
     ),
 }));
 
@@ -239,6 +248,42 @@ describe('ChannelSettingsInfoTab', () => {
         await userEvent.click(await screen.findByRole('button', {name: 'Save'}));
 
         expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: 'rocket'});
+    });
+
+    it('should clear a channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+        const channel = {...mockChannel, emoji: 'rocket'};
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                {...baseProps}
+                channel={channel}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: 'Remove channel emoji'}));
+        await userEvent.click(await screen.findByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: ''});
+    });
+
+    it('should reset a changed channel emoji', async () => {
+        const channel = {...mockChannel, emoji: 'tada'};
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                {...baseProps}
+                channel={channel}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: 'Set channel emoji'}));
+        expect(screen.getByTestId('selected-channel-emoji')).toHaveTextContent('rocket');
+
+        await userEvent.click(await screen.findByRole('button', {name: 'Reset'}));
+
+        expect(screen.getByTestId('selected-channel-emoji')).toHaveTextContent('tada');
     });
 
     it('should save DM header from channel settings without requiring channel name', async () => {

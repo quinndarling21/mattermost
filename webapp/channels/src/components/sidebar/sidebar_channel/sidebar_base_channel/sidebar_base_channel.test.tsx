@@ -9,6 +9,12 @@ import SidebarBaseChannel from 'components/sidebar/sidebar_channel/sidebar_base_
 
 import {renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
 
+const mockLoadCustomEmojisIfNeeded = jest.fn(() => ({type: 'MOCK_LOAD_CUSTOM_EMOJIS'}));
+
+jest.mock('actions/emoji_actions', () => ({
+    loadCustomEmojisIfNeeded: (emojiNames: string[]) => mockLoadCustomEmojisIfNeeded(emojiNames),
+}));
+
 jest.mock('components/tours/onboarding_tour', () => ({
     ChannelsAndDirectMessagesTour: () => null,
 }));
@@ -72,6 +78,10 @@ describe('components/sidebar/sidebar_channel/sidebar_base_channel', () => {
         },
     };
 
+    beforeEach(() => {
+        mockLoadCustomEmojisIfNeeded.mockClear();
+    });
+
     test('should match snapshot', () => {
         const {container} = renderWithContext(
             <SidebarBaseChannel {...baseProps}/>,
@@ -127,6 +137,22 @@ describe('components/sidebar/sidebar_channel/sidebar_base_channel', () => {
         );
 
         expect(container).toMatchSnapshot();
+    });
+
+    test('loads a configured channel emoji', async () => {
+        renderWithContext(
+            <SidebarBaseChannel
+                {...baseProps}
+                channel={{
+                    ...baseProps.channel,
+                    emoji: 'custom-channel-emoji',
+                }}
+            />,
+        );
+
+        await waitFor(() => {
+            expect(mockLoadCustomEmojisIfNeeded).toHaveBeenCalledWith(['custom-channel-emoji']);
+        });
     });
 
     test('expect leaveChannel to be called when leave public channel ', async () => {
