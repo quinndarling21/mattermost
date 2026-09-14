@@ -892,6 +892,8 @@ func TestPatchChannel(t *testing.T) {
 	t.Run("should require permission to patch channel emoji", func(t *testing.T) {
 		nonAdminClient := th.CreateClient()
 		th.LoginBasic2WithClient(t, nonAdminClient)
+		th.RemovePermissionFromRole(t, model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
+		defer th.AddPermissionToRole(t, model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
 
 		emoji := "tada"
 		_, resp, err := nonAdminClient.PatchChannel(context.Background(), th.BasicChannel.Id, &model.ChannelPatch{Emoji: &emoji})
