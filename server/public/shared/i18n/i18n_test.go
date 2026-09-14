@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/mattermost/go-i18n/i18n/bundle"
 	"github.com/mattermost/go-i18n/i18n/language"
@@ -26,6 +27,19 @@ func init() {
 		"translation": "<p>[[{{ .Foo }}]]</p>",
 	})
 	htmlTestTranslationBundle.AddTranslation(&language.Language{Tag: "en"}, fooBold)
+}
+
+func TestInitTranslationsWithDirLoadDuration(t *testing.T) {
+	i18nDir, found := utils.FindDir("server/i18n")
+	require.True(t, found, "unable to find i18n dir")
+
+	start := time.Now()
+	err := initTranslationsWithDir(i18nDir)
+	require.NoError(t, err)
+	elapsed := time.Since(start)
+
+	t.Logf("initTranslationsWithDir loaded %d locales in %s", len(locales), elapsed)
+	require.Greater(t, len(locales), 0)
 }
 
 func TestTranslateAsHTML(t *testing.T) {
@@ -154,6 +168,20 @@ func TestInitTranslationsWithDir(t *testing.T) {
 		require.True(t, found, "should have found fr locale")
 		_, found = locales["es"]
 		require.False(t, found, "should not have found unloaded es locale")
+	})
+
+	t.Run("indexes locales but parses only english until first use", func(t *testing.T) {
+		tempDir := setup(t, map[string]string{"en": "en", "fr": "fr"})
+
+		err := initTranslationsWithDir(tempDir)
+		require.NoError(t, err)
+
+		require.Equal(t, filepath.Join(tempDir, "en.json"), loadedLocales["en"])
+		require.NotEqual(t, filepath.Join(tempDir, "fr.json"), loadedLocales["fr"], "fr must not be parsed at init")
+
+		tr := GetUserTranslations("fr")
+		require.Equal(t, "Décembre", tr("December"))
+		require.Equal(t, filepath.Join(tempDir, "fr.json"), loadedLocales["fr"])
 	})
 }
 
