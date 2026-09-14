@@ -53,7 +53,7 @@ const SidebarBaseChannelIcon = ({
             >
                 <RenderEmoji
                     emojiName={emoji}
-                    size={16}
+                    size={18}
                 />
             </span>
         );

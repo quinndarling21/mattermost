@@ -56,4 +56,28 @@ describe('SidebarBaseChannelIcon', () => {
         ).toBeInTheDocument();
         expect(container.querySelector('.SidebarBaseChannelIcon')).not.toBeInTheDocument();
     });
+
+    test('renders the channel emoji for a private channel', () => {
+        const {container} = renderWithContext(
+            <SidebarBaseChannelIcon
+                channelType={'P' as ChannelType}
+                emoji='tada'
+            />,
+        );
+
+        expect(container.querySelector('[data-emoticon="tada"]')).toBeInTheDocument();
+        expect(container.querySelector('.icon-lock-outline')).not.toBeInTheDocument();
+    });
+
+    test('falls back to the lock icon when a private channel emoji is unknown', () => {
+        const {container} = renderWithContext(
+            <SidebarBaseChannelIcon
+                channelType={'P' as ChannelType}
+                emoji='not_a_real_emoji'
+            />,
+        );
+
+        expect(container.querySelector('[data-emoticon]')).not.toBeInTheDocument();
+        expect(container.querySelector('.icon-lock-outline')).toBeInTheDocument();
+    });
 });

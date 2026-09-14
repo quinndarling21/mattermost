@@ -611,6 +611,31 @@ func TestUpdateChannel(t *testing.T) {
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
 	})
+
+	t.Run("full channel update does not clear an existing emoji", func(t *testing.T) {
+		channel := &model.Channel{
+			DisplayName: GenerateTestChannelName(),
+			Name:        GenerateTestChannelName(),
+			Type:        model.ChannelTypeOpen,
+			TeamId:      th.BasicTeam.Id,
+			Emoji:       "tada",
+		}
+		channel, _, err := client.CreateChannel(context.Background(), channel)
+		require.NoError(t, err)
+		require.Equal(t, "tada", channel.Emoji)
+
+		channel.Header = "updated header"
+		channel.Emoji = ""
+		updatedChannel, _, err := client.UpdateChannel(context.Background(), channel)
+		require.NoError(t, err)
+		require.Equal(t, "updated header", updatedChannel.Header)
+		require.Equal(t, "tada", updatedChannel.Emoji)
+
+		fetchedChannel, _, err := client.GetChannel(context.Background(), channel.Id)
+		require.NoError(t, err)
+		require.Equal(t, "tada", fetchedChannel.Emoji)
+		require.Equal(t, "updated header", fetchedChannel.Header)
+	})
 }
 
 func TestPatchChannelGroupConstrained(t *testing.T) {
@@ -872,6 +897,10 @@ func TestPatchChannel(t *testing.T) {
 		channel, _, err := client.CreateChannel(context.Background(), channel)
 		require.NoError(t, err)
 		require.Equal(t, "tada", channel.Emoji)
+
+		fetchedWithEmoji, _, err := client.GetChannel(context.Background(), channel.Id)
+		require.NoError(t, err)
+		require.Equal(t, "tada", fetchedWithEmoji.Emoji)
 
 		emptyEmoji := ""
 		patchedChannel, _, err := client.PatchChannel(context.Background(), channel.Id, &model.ChannelPatch{Emoji: &emptyEmoji})

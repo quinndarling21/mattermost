@@ -87,7 +87,7 @@ const ChannelEmojiPicker = ({
                         {value ? (
                             <RenderEmoji
                                 emojiName={value}
-                                size={24}
+                                size={20}
                             />
                         ) : (
                             <EmoticonPlusOutlineIcon size={20}/>

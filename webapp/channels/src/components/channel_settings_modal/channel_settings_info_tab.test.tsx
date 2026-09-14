@@ -502,6 +502,7 @@ describe('ChannelSettingsInfoTab', () => {
         // Check that the name input is disabled
         const nameInput = screen.getByRole('textbox', {name: 'Channel name'});
         expect(nameInput).toBeDisabled();
+        expect(screen.getByRole('button', {name: 'Set channel emoji'})).toBeDisabled();
 
         // When in readOnly mode, the preview toggle button should not be present
         expect(screen.queryByTestId('mock-show-format')).not.toBeInTheDocument();
