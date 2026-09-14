@@ -7732,6 +7732,56 @@ func TestGetThreadsForUser(t *testing.T) {
 		require.Equal(t, uss.Threads[0].ReplyCount, int64(1))
 	})
 
+	t.Run("omits post action integration from thread root", func(t *testing.T) {
+		client := th.Client
+
+		root := &model.Post{
+			ChannelId: th.BasicChannel.Id,
+			Message:   "thread root with action",
+		}
+		root.AddProp(model.PostPropsAttachments, []*model.MessageAttachment{
+			{
+				Text: "button",
+				Actions: []*model.PostAction{
+					{
+						Type: model.PostActionTypeButton,
+						Name: "ok",
+						Integration: &model.PostActionIntegration{
+							URL:     "https://example.com/hooks/placeholder",
+							Context: map[string]any{"token": "plugin-secret"},
+						},
+					},
+				},
+			},
+		})
+		rpost, resp, err := client.CreatePost(context.Background(), root)
+		require.NoError(t, err)
+		CheckCreatedStatus(t, resp)
+		_, resp, err = client.CreatePost(context.Background(), &model.Post{ChannelId: th.BasicChannel.Id, Message: "reply", RootId: rpost.Id})
+		require.NoError(t, err)
+		CheckCreatedStatus(t, resp)
+
+		defer func() {
+			err = th.App.Srv().Store().Post().PermanentDeleteByUser(th.Context, th.BasicUser.Id)
+			require.NoError(t, err)
+		}()
+
+		uss, _, err := th.Client.GetUserThreads(context.Background(), th.BasicUser.Id, th.BasicTeam.Id, model.GetUserThreadsOpts{})
+		require.NoError(t, err)
+		require.Len(t, uss.Threads, 1)
+		require.NotNil(t, uss.Threads[0].Post)
+
+		attachments, _ := uss.Threads[0].Post.Props[model.PostPropsAttachments].([]any)
+		require.Len(t, attachments, 1)
+		att, _ := attachments[0].(map[string]any)
+		require.NotNil(t, att)
+		actions, _ := att["actions"].([]any)
+		require.Len(t, actions, 1)
+		action, _ := actions[0].(map[string]any)
+		require.NotNil(t, action)
+		require.Nil(t, action["integration"])
+	})
+
 	t.Run("extended, 1 thread", func(t *testing.T) {
 		client := th.Client
 

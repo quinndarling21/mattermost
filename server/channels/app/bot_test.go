@@ -650,11 +650,33 @@ func TestPermanentDeleteBot(t *testing.T) {
 	})
 	require.Nil(t, err)
 
+	token, appErr := th.App.CreateUserAccessToken(th.Context, &model.UserAccessToken{
+		UserId:      bot.UserId,
+		Description: "bot token",
+	})
+	require.Nil(t, appErr)
+	require.NotEmpty(t, token.Token)
+
+	session, sessionErr := th.App.CreateSession(th.Context, &model.Session{
+		UserId: bot.UserId,
+		Roles:  model.SystemUserRoleId,
+		Token:  model.NewId(),
+	})
+	require.Nil(t, sessionErr)
+	require.NotEmpty(t, session.Id)
+
 	require.Nil(t, th.App.PermanentDeleteBot(th.Context, bot.UserId))
 
 	_, err = th.App.GetBot(th.Context, bot.UserId, false)
 	require.NotNil(t, err)
 	require.Equal(t, "store.sql_bot.get.missing.app_error", err.Id)
+
+	_, nErr := th.App.Srv().Store().UserAccessToken().GetByToken(token.Token)
+	require.Error(t, nErr)
+
+	sessions, nErr := th.App.Srv().Store().Session().GetSessions(th.Context, bot.UserId)
+	require.NoError(t, nErr)
+	assert.Empty(t, sessions)
 }
 
 func TestDisableUserBots(t *testing.T) {

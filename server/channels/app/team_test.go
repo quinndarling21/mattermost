@@ -298,6 +298,21 @@ func TestAddUserToTeamByToken(t *testing.T) {
 		require.NotNil(t, err, "Should fail on bad user id")
 	})
 
+	t.Run("token extra email does not match existing user email", func(t *testing.T) {
+		token := model.NewToken(
+			model.TokenTypeTeamInvitation,
+			model.MapToJSON(map[string]string{"teamId": th.BasicTeam.Id, "email": "intended@example.com"}),
+		)
+		require.NoError(t, th.App.Srv().Store().Token().Save(token))
+
+		_, _, err := th.App.AddUserToTeamByToken(th.Context, ruser.Id, token.Token)
+		require.NotNil(t, err)
+		assert.Equal(t, "api.user.create_user.bad_token_email_data.app_error", err.Id)
+
+		_, nErr := th.App.Srv().Store().Token().GetByToken(token.Token)
+		require.NoError(t, nErr, "mismatch must not consume the invite token")
+	})
+
 	t.Run("valid request", func(t *testing.T) {
 		token := model.NewToken(
 			model.TokenTypeTeamInvitation,

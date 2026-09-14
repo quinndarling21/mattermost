@@ -1762,6 +1762,22 @@ func TestDoPostActionWithCookieEdgeCases(t *testing.T) {
 		require.Nil(t, err)
 	})
 
+	t.Run("rejects cookie when the target post exists but cookie post id differs", func(t *testing.T) {
+		post := th.CreatePost(t, th.BasicChannel)
+		cookie := &model.PostActionCookie{
+			PostId:    model.NewId(),
+			ChannelId: th.BasicChannel.Id,
+			Type:      model.PostActionTypeButton,
+			Integration: &model.PostActionIntegration{
+				URL: "https://example.com/hooks/placeholder",
+			},
+		}
+
+		_, err := th.App.DoPostActionWithCookie(th.Context, post.Id, "action_id", th.BasicUser.Id, "", cookie, nil)
+		require.NotNil(t, err)
+		assert.Contains(t, err.Error(), "postId doesn't match")
+	})
+
 	t.Run("should handle cookie with mismatched post ID", func(t *testing.T) {
 		cookie := &model.PostActionCookie{
 			PostId:    "different_post_id",

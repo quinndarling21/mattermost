@@ -118,6 +118,23 @@ func TestCreateScheduledPost(t *testing.T) {
 		require.NotNil(t, createdScheduledPost)
 	})
 
+	t.Run("rejects reserved system message types", func(t *testing.T) {
+		scheduledPost := &model.ScheduledPost{
+			Draft: model.Draft{
+				CreateAt:  model.GetMillis(),
+				UserId:    th.BasicUser.Id,
+				ChannelId: th.BasicChannel.Id,
+				Message:   "scheduled notice",
+				Type:      model.PostTypeSystemGeneric,
+			},
+			ScheduledAt: model.GetMillis() + 100000,
+		}
+		createdScheduledPost, resp, err := client.CreateScheduledPost(context.Background(), scheduledPost)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+		require.Nil(t, createdScheduledPost)
+	})
+
 	t.Run("should not allow created scheduled post in read-only channel", func(t *testing.T) {
 		channel := th.CreatePublicChannel(t)
 		th.AddUserToChannel(t, th.BasicUser, channel)
