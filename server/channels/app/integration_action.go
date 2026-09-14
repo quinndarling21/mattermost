@@ -91,6 +91,10 @@ func (a *App) DoPostActionWithCookie(rctx request.CTX, postID, actionId, userID,
 		return "", model.NewAppError("DoPostActionWithCookie", "api.post.do_action.query.app_error", nil, "", http.StatusBadRequest).Wrap(err)
 	}
 
+	if cookie != nil && cookie.PostId != "" && cookie.PostId != postID {
+		return "", model.NewAppError("DoPostActionWithCookie", "api.post.do_action.action_integration.app_error", nil, "postId doesn't match", http.StatusBadRequest)
+	}
+
 	// PostAction may result in the original post being updated. For the
 	// updated post, we need to unconditionally preserve the original
 	// IsPinned and HasReaction attributes, and preserve its entire
