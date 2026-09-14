@@ -3096,6 +3096,9 @@ func (a *App) UpdateThreadFollowForUserFromChannelAdd(rctx request.CTX, userID, 
 		return appErr
 	}
 	userThread.Post = sanitizedPost
+	if userThread.Post != nil {
+		userThread.Post.StripActionIntegrations()
+	}
 
 	payload, jsonErr := json.Marshal(userThread)
 	if jsonErr != nil {

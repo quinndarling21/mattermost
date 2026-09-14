@@ -859,6 +859,9 @@ func (a *App) SendNotifications(rctx request.CTX, post *model.Post, team *model.
 						return nil, err
 					}
 					userThread.Post = sanitizedPost
+					if userThread.Post != nil {
+						userThread.Post.StripActionIntegrations()
+					}
 
 					payload, jsonErr := json.Marshal(userThread)
 					if jsonErr != nil {
@@ -1017,6 +1020,9 @@ func (a *App) RemoveNotifications(rctx request.CTX, post *model.Post, channel *m
 					return err1
 				}
 				userThread.Post = sanitizedPost
+				if userThread.Post != nil {
+					userThread.Post.StripActionIntegrations()
+				}
 
 				payload, jsonErr := json.Marshal(userThread)
 				if jsonErr != nil {
