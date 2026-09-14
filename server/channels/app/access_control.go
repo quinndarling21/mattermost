@@ -2083,6 +2083,24 @@ func (a *App) TestExpressionWithChannelContext(rctx request.CTX, expression stri
 		return []*model.User{}, 0, nil
 	}
 
+	// A caller who matches only one side of an OR must not run the combined
+	// expression as an unrestricted directory search.
+	if strings.Contains(expression, "||") {
+		for _, clause := range strings.Split(expression, "||") {
+			clause = strings.TrimSpace(clause)
+			if clause == "" {
+				continue
+			}
+			clauseMatches, clauseErr := a.ValidateExpressionAgainstRequester(rctx, clause, currentUserID)
+			if clauseErr != nil {
+				return nil, 0, clauseErr
+			}
+			if !clauseMatches {
+				return []*model.User{}, 0, nil
+			}
+		}
+	}
+
 	// If the channel admin matches the expression, run it against all users
 	acs := a.Srv().ch.AccessControl
 	if acs == nil {

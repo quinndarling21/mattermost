@@ -2829,6 +2829,11 @@ func switchAccountType(c *Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if c.AppContext.Session().IsOAuth {
+			c.Err = model.NewAppError("switchAccountType", "api.user.oauth_to_email.oauth_session.app_error", nil, "attempted access by oauth app", http.StatusForbidden)
+			return
+		}
+
 		link, err = c.App.SwitchOAuthToEmail(c.AppContext, switchRequest.Email, switchRequest.NewPassword, c.AppContext.Session().UserId)
 	} else if switchRequest.EmailToLdap() {
 		link, err = c.App.SwitchEmailToLdap(c.AppContext, switchRequest.Email, switchRequest.Password, switchRequest.MfaCode, switchRequest.LdapLoginId, switchRequest.NewPassword)

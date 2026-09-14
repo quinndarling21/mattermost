@@ -1290,6 +1290,9 @@ func (a *App) LeaveTeam(rctx request.CTX, team *model.Team, user *model.User, re
 			if nErr = a.Srv().Store().Channel().RemoveMember(rctx, channel.Id, user.Id); nErr != nil {
 				return model.NewAppError("LeaveTeam", "app.channel.remove_member.app_error", nil, "", http.StatusInternalServerError).Wrap(nErr)
 			}
+			if nErr = a.Srv().Store().Thread().DeleteMembershipsForChannel(user.Id, channel.Id); nErr != nil {
+				return model.NewAppError("LeaveTeam", model.NoTranslation, nil, "failed to delete threadmemberships upon leaving team", http.StatusInternalServerError).Wrap(nErr)
+			}
 		}
 	}
 
