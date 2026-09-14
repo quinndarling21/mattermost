@@ -81,7 +81,7 @@ function ChannelSettingsEmojiSelector({value, onChange, disabled}: Props) {
                     </Button>
                 )}
             </div>
-            <div className='Input___customMessage Input___info'>
+            <div className='ChannelSettingsModal__emojiSelectorDescription'>
                 <span>
                     {formatMessage({id: 'channel_settings.emoji.description', defaultMessage: 'Show a custom emoji instead of the default icon next to this channel in the sidebar.'})}
                 </span>

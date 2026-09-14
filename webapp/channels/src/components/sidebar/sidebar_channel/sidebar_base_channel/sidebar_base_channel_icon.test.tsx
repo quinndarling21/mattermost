@@ -15,16 +15,6 @@ jest.mock('components/emoji/render_emoji', () => {
     );
 });
 
-jest.mock('mattermost-redux/utils/emoji_utils', () => ({
-    getEmojiImageUrl: () => 'https://example.test/emoji.png',
-}));
-
-jest.mock('selectors/emojis', () => ({
-    getEmojiMap: () => ({
-        get: (name: string) => (name === 'rocket' ? {name: 'rocket'} : undefined),
-    }),
-}));
-
 describe('components/sidebar/sidebar_channel/sidebar_base_channel_icon', () => {
     test('renders the public channel icon when no emoji is set', () => {
         renderWithContext(

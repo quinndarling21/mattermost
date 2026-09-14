@@ -125,6 +125,15 @@
         line-height: 20px;
     }
 
+    &__emojiSelectorDescription {
+        margin-top: 4px;
+        color: rgba(var(--center-channel-color-rgb), 0.64);
+        font-family: Open Sans, sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 16px;
+    }
+
     &__emojiSelectorControl {
         display: flex;
         align-items: center;
@@ -147,6 +156,11 @@
 
         &:hover:not(:disabled) {
             background: rgba(var(--center-channel-color-rgb), 0.08);
+        }
+
+        &:active:not(:disabled) {
+            background: rgba(var(--button-bg-rgb), 0.08);
+            color: var(--button-bg);
         }
 
         &:focus-visible {

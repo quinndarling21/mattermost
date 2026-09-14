@@ -85,6 +85,29 @@ jest.mock('components/advanced_text_editor/show_formatting/show_formatting', () 
     ))
 ));
 
+jest.mock('./channel_settings_emoji_selector', () => {
+    return ({
+        value,
+        onChange,
+        disabled,
+    }: {
+        value?: string;
+        onChange: (emoji: string) => void;
+        disabled?: boolean;
+    }) => (
+        <div>
+            <button
+                type='button'
+                disabled={disabled}
+                onClick={() => onChange('rocket')}
+            >
+                {'Set emoji'}
+            </button>
+            <span data-testid='emoji-value'>{value}</span>
+        </div>
+    );
+});
+
 // Create a mock channel member
 const mockChannelMember = TestHelper.getChannelMembershipMock({
     roles: 'channel_user system_admin',
@@ -240,6 +263,40 @@ describe('ChannelSettingsInfoTab', () => {
             header: 'Updated DM header',
         });
         expect(screen.queryByText('Channel name is required')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', {name: 'Set emoji'})).not.toBeInTheDocument();
+    });
+
+    it('should hide the channel emoji selector for direct messages', () => {
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                channel={mockDirectMessageChannel}
+                setAreThereUnsavedChanges={jest.fn()}
+            />,
+        );
+
+        expect(screen.queryByRole('button', {name: 'Set emoji'})).not.toBeInTheDocument();
+    });
+
+    it('should patch the selected channel emoji when Save is clicked', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        await userEvent.click(screen.getByRole('button', {name: 'Set emoji'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {
+            emoji: 'rocket',
+        });
+    });
+
+    it('should disable the channel emoji selector without manage properties permission', () => {
+        mockChannelPropertiesPermission = false;
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        expect(screen.getByRole('button', {name: 'Set emoji'})).toBeDisabled();
     });
 
     it('should trim whitespace from channel fields when saving', async () => {

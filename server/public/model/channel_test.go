@@ -127,9 +127,9 @@ func TestChannelIsValidEmoji(t *testing.T) {
 		require.NotNil(t, c.IsValid())
 	})
 
-	t.Run("emoji is rejected on direct messages", func(t *testing.T) {
+	t.Run("emoji is rejected on group messages", func(t *testing.T) {
 		c := base
-		c.Type = ChannelTypeDirect
+		c.Type = ChannelTypeGroup
 		c.Emoji = "rocket"
 		require.NotNil(t, c.IsValid())
 	})
