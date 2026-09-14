@@ -44,6 +44,7 @@ const (
 	ChannelPurposeMaxRunes     = 250
 	ChannelCacheSize           = 25000
 	ChannelBannerInfoMaxLength = 1024
+	ChannelEmojiMaxLength      = EmojiNameMaxLength
 
 	ChannelSortByUsername = "username"
 	ChannelSortByStatus   = "status"
@@ -118,6 +119,9 @@ type Channel struct {
 	DefaultCategoryName string          `json:"default_category_name"`
 	ManagedCategoryName string          `json:"managed_category_name"`
 	Discoverable        bool            `json:"discoverable"`
+	// Emoji is the name of an emoji (system or custom, without colons) shown
+	// in place of the channel type icon. Empty means no emoji is assigned.
+	Emoji string `json:"emoji"`
 }
 
 // HasPolicyAction reports whether the channel's policy declares the given
@@ -162,6 +166,7 @@ func (o *Channel) Auditable() map[string]any {
 		"autotranslation":      o.AutoTranslation,
 		"policy_is_active":     o.PolicyIsActive, // this field is only for logging purposes
 		"discoverable":         o.Discoverable,
+		"emoji":                o.Emoji,
 	}
 }
 
@@ -192,6 +197,7 @@ type ChannelPatch struct {
 	ManagedCategoryName *string            `json:"managed_category_name"`
 	DefaultCategoryName *string            `json:"default_category_name"`
 	Discoverable        *bool              `json:"discoverable"`
+	Emoji               *string            `json:"emoji"`
 }
 
 func (c *ChannelPatch) Auditable() map[string]any {
@@ -202,6 +208,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
+		"emoji":                 c.Emoji,
 	}
 }
 
@@ -376,6 +383,16 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.discoverable.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if o.Emoji != "" {
+		if o.Type != ChannelTypeOpen && o.Type != ChannelTypePrivate {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.channel_type.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+		}
+
+		if len(o.Emoji) > ChannelEmojiMaxLength || !IsValidAlphaNumHyphenUnderscorePlus(o.Emoji) {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+		}
+	}
+
 	return nil
 }
 
@@ -499,6 +516,10 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 
 	if patch.Discoverable != nil {
 		o.Discoverable = *patch.Discoverable
+	}
+
+	if patch.Emoji != nil {
+		o.Emoji = strings.Trim(strings.TrimSpace(*patch.Emoji), ":")
 	}
 }
 

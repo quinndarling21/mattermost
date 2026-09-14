@@ -1069,6 +1069,94 @@ func TestPatchChannel(t *testing.T) {
 		require.Equal(t, "", cleared.DefaultCategoryName)
 	})
 
+	t.Run("Should be able to set and clear emoji on public and private channels", func(t *testing.T) {
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		th.LoginBasic(t)
+
+		for _, channelType := range []model.ChannelType{model.ChannelTypeOpen, model.ChannelTypePrivate} {
+			channel := &model.Channel{
+				DisplayName: GenerateTestChannelName(),
+				Name:        GenerateTestChannelName(),
+				Type:        channelType,
+				TeamId:      team.Id,
+			}
+			channel, _, err = client.CreateChannel(context.Background(), channel)
+			require.NoError(t, err)
+			require.Empty(t, channel.Emoji)
+
+			emoji := ":rocket:"
+			patched, _, err := client.PatchChannel(context.Background(), channel.Id, &model.ChannelPatch{Emoji: &emoji})
+			require.NoError(t, err)
+			require.Equal(t, "rocket", patched.Emoji, "colons should be stripped from the stored emoji name")
+
+			fetched, _, err := client.GetChannel(context.Background(), channel.Id)
+			require.NoError(t, err)
+			require.Equal(t, "rocket", fetched.Emoji)
+
+			// Patching an unrelated field must not touch the emoji.
+			header := model.NewId()
+			patched, _, err = client.PatchChannel(context.Background(), channel.Id, &model.ChannelPatch{Header: &header})
+			require.NoError(t, err)
+			require.Equal(t, "rocket", patched.Emoji)
+
+			emptyEmoji := ""
+			cleared, _, err := client.PatchChannel(context.Background(), channel.Id, &model.ChannelPatch{Emoji: &emptyEmoji})
+			require.NoError(t, err)
+			require.Empty(t, cleared.Emoji)
+		}
+	})
+
+	t.Run("Should reject an invalid emoji name", func(t *testing.T) {
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		th.LoginBasic(t)
+
+		badEmoji := "not an emoji"
+		_, resp, err := client.PatchChannel(context.Background(), th.BasicChannel.Id, &model.ChannelPatch{Emoji: &badEmoji})
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+	})
+
+	t.Run("Should require manage channel properties permission to set emoji", func(t *testing.T) {
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		th.LoginBasic(t)
+
+		th.RemovePermissionFromRole(t, model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
+		defer th.AddPermissionToRole(t, model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
+
+		emoji := "rocket"
+		_, resp, err := client.PatchChannel(context.Background(), th.BasicChannel.Id, &model.ChannelPatch{Emoji: &emoji})
+		require.Error(t, err)
+		CheckForbiddenStatus(t, resp)
+	})
+
+	t.Run("Should block emoji changes for direct and group messages", func(t *testing.T) {
+		user1 := th.CreateUser(t)
+		user2 := th.CreateUser(t)
+		user3 := th.CreateUser(t)
+
+		_, err := client.Logout(context.Background())
+		require.NoError(t, err)
+		_, _, err = client.Login(context.Background(), user1.Email, user1.Password)
+		require.NoError(t, err)
+
+		directChannel, _, err := client.CreateDirectChannel(context.Background(), user1.Id, user2.Id)
+		require.NoError(t, err)
+		groupChannel, _, err := client.CreateGroupChannel(context.Background(), []string{user1.Id, user2.Id, user3.Id})
+		require.NoError(t, err)
+
+		emoji := "rocket"
+		_, resp, err := client.PatchChannel(context.Background(), directChannel.Id, &model.ChannelPatch{Emoji: &emoji})
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+
+		_, resp, err = client.PatchChannel(context.Background(), groupChannel.Id, &model.ChannelPatch{Emoji: &emoji})
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+	})
+
 	t.Run("Should not be able to configure channel banner without a license", func(t *testing.T) {
 		_, err := client.Logout(context.Background())
 		require.NoError(t, err)

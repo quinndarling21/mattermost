@@ -226,6 +226,10 @@ components:
           format: int64
         creator_id:
           type: string
+        emoji:
+          description: Name of the emoji shown in place of the channel type icon,
+            or an empty string when none is assigned
+          type: string
     ChannelStats:
       type: object
       properties:

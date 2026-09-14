@@ -496,6 +496,25 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.NotNil(t, updatedChannel.BannerInfo)
 	require.Equal(t, "updated text", *updatedChannel.BannerInfo.Text)
 	require.Equal(t, "#FFFFFF", *updatedChannel.BannerInfo.BackgroundColor)
+
+	// channel emoji round-trips through the store and can be cleared
+	channel.Emoji = "rocket"
+	updatedChannel, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err, err)
+	require.Equal(t, "rocket", updatedChannel.Emoji)
+
+	fetched, err := ss.Channel().Get(channel.Id, false)
+	require.NoError(t, err)
+	require.Equal(t, "rocket", fetched.Emoji)
+
+	channel.Emoji = ""
+	updatedChannel, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err, err)
+	require.Empty(t, updatedChannel.Emoji)
+
+	fetched, err = ss.Channel().Get(channel.Id, false)
+	require.NoError(t, err)
+	require.Empty(t, fetched.Emoji)
 }
 
 func testGetChannelUnread(t *testing.T, rctx request.CTX, ss store.Store) {

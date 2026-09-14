@@ -619,7 +619,7 @@
         fields must be provided.
 
         **Public and private channels:** Can update `name`, `display_name`,
-        `purpose`, `header`, `group_constrained`, `autotranslation`, and
+        `purpose`, `header`, `group_constrained`, `autotranslation`, `emoji`, and
         `banner_info` (subject to permissions and channel type).
 
         **Direct and group message channels:** Only `header` and (when not
@@ -631,7 +631,7 @@
 
         ##### Permissions
 
-        - **Public channel:** For property updates (name, display_name, purpose, header, group_constrained),
+        - **Public channel:** For property updates (name, display_name, purpose, header, group_constrained, emoji),
         `manage_public_channel_properties` is required. For `autotranslation`, `manage_public_channel_auto_translation`
         is required. For `banner_info`, `manage_public_channel_banner` is required (Channel Banner feature and
         Enterprise license required).
@@ -683,6 +683,11 @@
                     channels by server configuration.
                 banner_info:
                   $ref: "#/components/schemas/ChannelBanner"
+                emoji:
+                  type: string
+                  description: Name of a system or custom emoji (without colons) shown in
+                    place of the channel type icon in the sidebar. Set to an empty string
+                    to clear. Only applicable to public and private channels.
                 managed_category_name:
                   type: string
                   description: The name of the managed category to assign this channel to.
