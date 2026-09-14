@@ -2086,7 +2086,7 @@ func (a *App) TestExpressionWithChannelContext(rctx request.CTX, expression stri
 	// A caller who matches only one side of an OR must not run the combined
 	// expression as an unrestricted directory search.
 	if strings.Contains(expression, "||") {
-		for _, clause := range strings.Split(expression, "||") {
+		for clause := range strings.SplitSeq(expression, "||") {
 			clause = strings.TrimSpace(clause)
 			if clause == "" {
 				continue
