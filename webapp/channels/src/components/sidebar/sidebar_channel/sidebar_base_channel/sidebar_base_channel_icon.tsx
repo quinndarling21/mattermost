@@ -41,12 +41,6 @@ const SidebarBaseChannelIcon = ({
     const resolvedEmoji = emoji ? emojiMap.get(emoji) : undefined;
     const imageUrl = resolvedEmoji ? getEmojiImageUrl(resolvedEmoji) : '';
 
-    // #region agent log
-    if (emoji) {
-        fetch('http://127.0.0.1:8765', {method: 'POST', mode: 'no-cors', body: JSON.stringify({hypothesisId: 'B,D,E', location: 'sidebar_base_channel_icon.tsx:render', message: 'Sidebar emoji resolution', data: {emoji, customEmojiCount: emojiMap.customEmojis.size, mapHasEmoji: emojiMap.has(emoji), mapHasSystemEmoji: emojiMap.hasSystemEmoji(emoji), resolved: Boolean(resolvedEmoji), resolvedKind: resolvedEmoji && 'short_name' in resolvedEmoji ? 'system' : resolvedEmoji ? 'custom' : 'none', imageUrl, renderEmojiBranch: Boolean(emoji && resolvedEmoji && imageUrl)}, timestamp: Date.now()})}).catch(() => {});
-    }
-    // #endregion
-
     if (emoji && resolvedEmoji && imageUrl) {
         return (
             <span
