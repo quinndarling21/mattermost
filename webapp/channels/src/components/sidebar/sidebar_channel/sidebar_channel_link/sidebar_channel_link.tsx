@@ -12,12 +12,13 @@ import type {Channel} from '@mattermost/types/channels';
 import {mark} from 'actions/telemetry_actions';
 
 import CustomStatusEmoji from 'components/custom_status/custom_status_emoji';
+import RenderEmoji from 'components/emoji/render_emoji';
 import SharedChannelIndicator from 'components/shared_channel_indicator';
 import {ChannelsAndDirectMessagesTour} from 'components/tours/onboarding_tour';
 
 import Pluggable from 'plugins/pluggable';
 import Constants, {RHSStates} from 'utils/constants';
-import {wrapEmojis} from 'utils/emoji_utils';
+import {trimmedEmojiName, wrapEmojis} from 'utils/emoji_utils';
 import {cmdOrCtrlPressed} from 'utils/keyboard';
 import {Mark} from 'utils/performance_telemetry';
 
@@ -251,6 +252,15 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
             />
         ) : null;
 
+        const channelEmoji = channel.emoji ? (
+            <span className='SidebarChannelLinkLabel_emoji'>
+                <RenderEmoji
+                    emojiName={trimmedEmojiName(channel.emoji)}
+                    size={16}
+                />
+            </span>
+        ) : null;
+
         const content = (
             <>
                 <SidebarChannelIcon
@@ -261,6 +271,7 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
                 <div
                     className='SidebarChannelLinkLabel_wrapper'
                 >
+                    {channelEmoji}
                     {labelElement}
                     {customStatus}
                     <Pluggable
