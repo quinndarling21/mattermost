@@ -11027,6 +11027,10 @@
     "translation": "Channel banner info text is too long. Max allowed length is {{.maxLength}} characters."
   },
   {
+    "id": "model.channel.is_valid.channel_emoji.app_error",
+    "translation": "Invalid channel emoji."
+  },
+  {
     "id": "model.channel.is_valid.create_at.app_error",
     "translation": "Create at must be a valid time."
   },

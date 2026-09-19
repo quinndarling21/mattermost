@@ -59,6 +59,79 @@ func TestChannelPatchDiscoverable(t *testing.T) {
 	})
 }
 
+func TestChannelPatchChannelEmoji(t *testing.T) {
+	t.Run("applies emoji when set", func(t *testing.T) {
+		emoji := "tada"
+		p := &ChannelPatch{ChannelEmoji: &emoji}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(p)
+		require.Equal(t, "tada", o.ChannelEmoji)
+	})
+
+	t.Run("trims surrounding whitespace", func(t *testing.T) {
+		emoji := "  smile  "
+		p := &ChannelPatch{ChannelEmoji: &emoji}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(p)
+		require.Equal(t, "smile", o.ChannelEmoji)
+	})
+
+	t.Run("clears emoji when set to empty string", func(t *testing.T) {
+		empty := ""
+		p := &ChannelPatch{ChannelEmoji: &empty}
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, ChannelEmoji: "tada"}
+		o.Patch(p)
+		require.Empty(t, o.ChannelEmoji)
+	})
+
+	t.Run("nil emoji leaves channel untouched", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, ChannelEmoji: "tada"}
+		o.Patch(&ChannelPatch{})
+		require.Equal(t, "tada", o.ChannelEmoji)
+	})
+}
+
+func TestChannelIsValidChannelEmoji(t *testing.T) {
+	base := Channel{
+		Id:          NewId(),
+		CreateAt:    GetMillis(),
+		UpdateAt:    GetMillis(),
+		DisplayName: "x",
+		Name:        "valid-name",
+		Header:      "h",
+		Purpose:     "p",
+		Type:        ChannelTypeOpen,
+	}
+
+	t.Run("empty emoji is valid", func(t *testing.T) {
+		c := base
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("valid emoji short names are accepted", func(t *testing.T) {
+		for _, name := range []string{"tada", "smile", "white_check_mark", "+1", "flag-us"} {
+			c := base
+			c.ChannelEmoji = name
+			require.Nil(t, c.IsValid(), "emoji %q should be valid", name)
+		}
+	})
+
+	t.Run("emoji with invalid characters is rejected", func(t *testing.T) {
+		c := base
+		c.ChannelEmoji = ":tada:"
+		require.NotNil(t, c.IsValid())
+
+		c.ChannelEmoji = "has space"
+		require.NotNil(t, c.IsValid())
+	})
+
+	t.Run("emoji exceeding max length is rejected", func(t *testing.T) {
+		c := base
+		c.ChannelEmoji = strings.Repeat("a", ChannelEmojiMaxRunes+1)
+		require.NotNil(t, c.IsValid())
+	})
+}
+
 func TestChannelIsValidDiscoverable(t *testing.T) {
 	base := Channel{
 		Id:          NewId(),
