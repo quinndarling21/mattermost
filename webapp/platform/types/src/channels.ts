@@ -93,6 +93,13 @@ export type Channel = {
     managed_category_name?: string;
     autotranslation?: boolean;
     discoverable?: boolean;
+
+    /**
+     * Optional emoji shortcode (without wrapping colons, e.g. "rocket") shown
+     * in place of the default channel icon in the sidebar. Empty string or
+     * undefined means no custom emoji is configured.
+     */
+    emoji?: string;
 };
 
 export type ServerChannel = Channel & {

@@ -26,6 +26,7 @@ import {
 import ConvertConfirmModal from 'components/admin_console/team_channel_settings/convert_confirm_modal';
 import CategorySelector from 'components/category_selector/category_selector';
 import ChannelNameFormField from 'components/channel_name_form_field/channel_name_form_field';
+import ChannelSettingsEmojiSelector from 'components/channel_settings_modal/channel_settings_emoji_selector';
 import type {TextboxElement} from 'components/textbox';
 import AdvancedTextbox from 'components/widgets/advanced_textbox/advanced_textbox';
 import SaveChangesPanel, {type SaveChangesPanelState} from 'components/widgets/modals/components/save_changes_panel';
@@ -143,6 +144,7 @@ function ChannelSettingsInfoTab({
     const [channelPurpose, setChannelPurpose] = useState(channel.purpose ?? '');
     const [channelHeader, setChannelHeader] = useState(channel?.header ?? '');
     const [channelType, setChannelType] = useState<ChannelType>(channel?.type as ChannelType ?? Constants.OPEN_CHANNEL as ChannelType);
+    const [channelEmoji, setChannelEmoji] = useState(channel?.emoji ?? '');
 
     // UI Feedback: errors, states
     const [formError, setFormError] = useState('');
@@ -172,12 +174,13 @@ function ChannelSettingsInfoTab({
             channelPurpose.trim() !== channel.purpose ||
             channelHeader.trim() !== channel.header ||
             channelType !== channel.type ||
+            channelEmoji !== (channel.emoji ?? '') ||
             (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '') ||
             managedCategoryName !== serverManagedCategoryName
         ) : false;
 
         setAreThereUnsavedChanges?.(unsavedChanges);
-    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, setAreThereUnsavedChanges]);
+    }, [channel, displayName, channelUrl, channelPurpose, channelHeader, channelType, channelEmoji, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName, setAreThereUnsavedChanges]);
 
     const handleURLChange = useCallback((newURL: string) => {
         if (internalUrlError) {
@@ -308,6 +311,9 @@ function ChannelSettingsInfoTab({
         if (channelHeader.trim() !== channel.header) {
             updated.header = channelHeader.trim();
         }
+        if (!isDMorGroupChannel && channelEmoji !== (channel.emoji ?? '')) {
+            updated.emoji = channelEmoji;
+        }
         if ((defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '')) {
             updated.default_category_name = defaultCategoryName ?? '';
         }
@@ -334,11 +340,14 @@ function ChannelSettingsInfoTab({
             setChannelPurpose(data?.purpose ?? updated.purpose ?? channel.purpose);
         }
         setChannelHeader(data?.header ?? updated.header ?? channel.header);
+        if (!isDMorGroupChannel) {
+            setChannelEmoji(data?.emoji ?? updated.emoji ?? channel.emoji ?? '');
+        }
         setServerDefaultCategoryName(defaultCategoryName);
         setServerManagedCategoryName(managedCategoryName);
 
         return true;
-    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, displayName, channelType, isDMorGroupChannel, channelUrl, channelPurpose, channelHeader, channelEmoji, dispatch, formatMessage, handleServerError, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
 
     // Handle save changes panel actions
     const handleSaveChanges = useCallback(async () => {
@@ -379,6 +388,7 @@ function ChannelSettingsInfoTab({
         setChannelPurpose(channel?.purpose ?? '');
         setChannelHeader(channel?.header ?? '');
         setChannelType(channel?.type as ChannelType ?? Constants.OPEN_CHANNEL as ChannelType);
+        setChannelEmoji(channel?.emoji ?? '');
         setDefaultCategoryName(serverDefaultCategoryName);
         setManagedCategoryName(serverManagedCategoryName);
 
@@ -411,13 +421,14 @@ function ChannelSettingsInfoTab({
                 unsavedChanges = unsavedChanges || channelUrl.trim() !== channel.name;
                 unsavedChanges = unsavedChanges || channelPurpose.trim() !== channel.purpose;
                 unsavedChanges = unsavedChanges || channelType !== channel.type;
+                unsavedChanges = unsavedChanges || channelEmoji !== (channel.emoji ?? '');
                 unsavedChanges = unsavedChanges || (defaultCategoryName ?? '') !== (serverDefaultCategoryName ?? '');
                 unsavedChanges = unsavedChanges || managedCategoryName !== serverManagedCategoryName;
             }
         }
 
         return unsavedChanges || saveChangesPanelState === 'saved';
-    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
+    }, [channel, isDMorGroupChannel, displayName, channelUrl, channelPurpose, channelHeader, channelType, channelEmoji, saveChangesPanelState, defaultCategoryName, serverDefaultCategoryName, managedCategoryName, serverManagedCategoryName]);
 
     return (
         <div className='ChannelSettingsModal__infoTab'>
@@ -483,6 +494,14 @@ function ChannelSettingsInfoTab({
                         tooltip: channelTypeLockTooltip,
                     }}
                     onChange={handleChannelTypeChange}
+                />
+            )}
+            {/* Channel Emoji Section */}
+            {!isDMorGroupChannel && (
+                <ChannelSettingsEmojiSelector
+                    value={channelEmoji}
+                    onChange={setChannelEmoji}
+                    disabled={!canManageChannelProperties}
                 />
             )}
             {/* Default Sidebar Category Selector */}
