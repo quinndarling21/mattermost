@@ -31,6 +31,8 @@ import {copyToClipboard} from 'utils/utils';
 
 import type {GlobalState} from 'types/store';
 
+import SidebarChannelEmojiMenuItems from './sidebar_channel_emoji_menu_items';
+
 import type {PropsFromRedux, OwnProps} from './index';
 
 type Props = PropsFromRedux & OwnProps;
@@ -53,6 +55,9 @@ const SidebarChannelMenu = ({
     unfavoriteChannel,
     unmuteChannel,
     channelLeaveHandler,
+    sidebarEmoji,
+    setChannelSidebarEmoji,
+    removeChannelSidebarEmoji,
 }: Props) => {
     const isLeaving = useRef(false);
     const isInManagedCategory = useSelector((state: GlobalState) => isChannelInManagedCategory(state, channel.id));
@@ -300,6 +305,27 @@ const SidebarChannelMenu = ({
         );
     }
 
+    let channelEmojiMenuItems: JSX.Element | null = null;
+    if (channel.type === Constants.OPEN_CHANNEL || channel.type === Constants.PRIVATE_CHANNEL) {
+        function handleSetSidebarEmoji(emojiName: string) {
+            setChannelSidebarEmoji(currentUserId, channel.id, emojiName);
+        }
+
+        function handleRemoveSidebarEmoji() {
+            removeChannelSidebarEmoji(currentUserId, channel.id);
+        }
+
+        channelEmojiMenuItems = (
+            <SidebarChannelEmojiMenuItems
+                channelId={channel.id}
+                sidebarEmoji={sidebarEmoji}
+                onSetSidebarEmoji={handleSetSidebarEmoji}
+                onRemoveSidebarEmoji={handleRemoveSidebarEmoji}
+                onMenuToggle={onMenuToggle}
+            />
+        );
+    }
+
     return (
         <Menu.Container
             menuButton={{
@@ -327,6 +353,7 @@ const SidebarChannelMenu = ({
             {markAsReadUnreadMenuItem}
             {favoriteUnfavoriteMenuItem}
             {muteUnmuteChannelMenuItem}
+            {channelEmojiMenuItems}
             <Menu.Separator/>
             <ChannelMoveToSubmenu channel={channel}/>
             {(copyLinkMenuItem || addMembersMenuItem) && <Menu.Separator/>}

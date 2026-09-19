@@ -319,6 +319,11 @@ export function isChannelMuted(member?: ChannelMembership): boolean {
     return member?.notify_props ? (member.notify_props.mark_unread === MarkUnread.MENTION) : false;
 }
 
+export function getChannelSidebarEmoji(member?: ChannelMembership): string | undefined {
+    const sidebarEmoji = member?.notify_props?.sidebar_emoji;
+    return sidebarEmoji || undefined;
+}
+
 export function areChannelMentionsIgnored(channelMemberNotifyProps: ChannelNotifyProps, currentUserNotifyProps: UserNotifyProps) {
     let ignoreChannelMentionsDefault = Users.IGNORE_CHANNEL_MENTIONS_OFF;
 

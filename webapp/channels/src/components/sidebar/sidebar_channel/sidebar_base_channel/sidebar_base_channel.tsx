@@ -18,11 +18,13 @@ import type {PropsFromRedux} from './index';
 export interface Props extends PropsFromRedux {
     channel: Channel;
     currentTeamName: string;
+    sidebarEmoji?: string;
 }
 
 const SidebarBaseChannel = ({
     channel,
     currentTeamName,
+    sidebarEmoji,
     actions,
 }: Props) => {
     const intl = useIntl();
@@ -47,6 +49,7 @@ const SidebarBaseChannel = ({
     const channelIcon = (
         <SidebarBaseChannelIcon
             channelType={channel.type}
+            sidebarEmoji={sidebarEmoji}
         />
     );
 
