@@ -158,8 +158,8 @@ describe('getContrastingSimpleColor', () => {
 
     // Test for more realistic use cases
     it('should return appropriate contrast colors for common UI colors', () => {
-        // Mattermost denim blue
-        expect(getContrastingSimpleColor('#1e325c')).toBe('#FFFFFF');
+        // Mattermost denim purple
+        expect(getContrastingSimpleColor('#4b247d')).toBe('#FFFFFF');
 
         // Mattermost Onyx grey
         expect(getContrastingSimpleColor('#202228')).toBe('#FFFFFF');

@@ -59,7 +59,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="sidebarBg-inputColorValue"
               maxlength="7"
               type="text"
-              value="#1e325c"
+              value="#4b247d"
             />
             <span
               class="input-group-addon color-pad"
@@ -70,7 +70,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="sidebarBg-squareColorIconValue"
-                style="background-color: rgb(30, 50, 92);"
+                style="background-color: rgb(75, 36, 125);"
               />
             </span>
           </div>
@@ -127,7 +127,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="sidebarHeaderBg-inputColorValue"
               maxlength="7"
               type="text"
-              value="#192a4d"
+              value="#3f1f69"
             />
             <span
               class="input-group-addon color-pad"
@@ -138,7 +138,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="sidebarHeaderBg-squareColorIconValue"
-                style="background-color: rgb(25, 42, 77);"
+                style="background-color: rgb(63, 31, 105);"
               />
             </span>
           </div>
@@ -161,7 +161,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="sidebarTeamBarBg-inputColorValue"
               maxlength="7"
               type="text"
-              value="#162545"
+              value="#341956"
             />
             <span
               class="input-group-addon color-pad"
@@ -172,7 +172,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="sidebarTeamBarBg-squareColorIconValue"
-                style="background-color: rgb(22, 37, 69);"
+                style="background-color: rgb(52, 25, 86);"
               />
             </span>
           </div>
@@ -263,7 +263,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="sidebarTextHoverBg-inputColorValue"
               maxlength="7"
               type="text"
-              value="#28427b"
+              value="#5b2d96"
             />
             <span
               class="input-group-addon color-pad"
@@ -274,7 +274,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="sidebarTextHoverBg-squareColorIconValue"
-                style="background-color: rgb(40, 66, 123);"
+                style="background-color: rgb(91, 45, 150);"
               />
             </span>
           </div>
@@ -297,7 +297,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="sidebarTextActiveBorder-inputColorValue"
               maxlength="7"
               type="text"
-              value="#5d89ea"
+              value="#bb87fc"
             />
             <span
               class="input-group-addon color-pad"
@@ -308,7 +308,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="sidebarTextActiveBorder-squareColorIconValue"
-                style="background-color: rgb(93, 137, 234);"
+                style="background-color: rgb(187, 135, 252);"
               />
             </span>
           </div>
@@ -501,7 +501,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="mentionColor-inputColorValue"
               maxlength="7"
               type="text"
-              value="#1e325c"
+              value="#4b247d"
             />
             <span
               class="input-group-addon color-pad"
@@ -512,7 +512,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="mentionColor-squareColorIconValue"
-                style="background-color: rgb(30, 50, 92);"
+                style="background-color: rgb(75, 36, 125);"
               />
             </span>
           </div>
@@ -860,7 +860,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="linkColor-inputColorValue"
               maxlength="7"
               type="text"
-              value="#386fe5"
+              value="#7b4dd8"
             />
             <span
               class="input-group-addon color-pad"
@@ -871,7 +871,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="linkColor-squareColorIconValue"
-                style="background-color: rgb(56, 111, 229);"
+                style="background-color: rgb(123, 77, 216);"
               />
             </span>
           </div>
@@ -894,7 +894,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
               id="buttonBg-inputColorValue"
               maxlength="7"
               type="text"
-              value="#1c58d9"
+              value="#6d3ccf"
             />
             <span
               class="input-group-addon color-pad"
@@ -905,7 +905,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
                 class="color-icon"
                 data-testid="color-icon"
                 id="buttonBg-squareColorIconValue"
-                style="background-color: rgb(28, 88, 217);"
+                style="background-color: rgb(109, 60, 207);"
               />
             </span>
           </div>
@@ -962,7 +962,7 @@ exports[`components/user_settings/display/CustomThemeChooser should match, init 
           class="form-control"
           id="pasteBox"
         >
-          {"sidebarBg":"#1e325c","sidebarText":"#ffffff","sidebarUnreadText":"#ffffff","sidebarTextHoverBg":"#28427b","sidebarTextActiveBorder":"#5d89ea","sidebarTextActiveColor":"#ffffff","sidebarHeaderBg":"#192a4d","sidebarHeaderTextColor":"#ffffff","sidebarTeamBarBg":"#162545","onlineIndicator":"#3db887","awayIndicator":"#ffbc1f","dndIndicator":"#d24b4e","mentionBg":"#ffffff","mentionBj":"#ffffff","mentionColor":"#1e325c","centerChannelBg":"#ffffff","centerChannelColor":"#3f4350","newMessageSeparator":"#cc8f00","linkColor":"#386fe5","buttonBg":"#1c58d9","buttonColor":"#ffffff","errorTextColor":"#d24b4e","mentionHighlightBg":"#ffd470","mentionHighlightLink":"#1b1d22","codeTheme":"github"}
+          {"sidebarBg":"#4b247d","sidebarText":"#ffffff","sidebarUnreadText":"#ffffff","sidebarTextHoverBg":"#5b2d96","sidebarTextActiveBorder":"#bb87fc","sidebarTextActiveColor":"#ffffff","sidebarHeaderBg":"#3f1f69","sidebarHeaderTextColor":"#ffffff","sidebarTeamBarBg":"#341956","onlineIndicator":"#3db887","awayIndicator":"#ffbc1f","dndIndicator":"#d24b4e","mentionBg":"#ffffff","mentionBj":"#ffffff","mentionColor":"#4b247d","centerChannelBg":"#ffffff","centerChannelColor":"#3f4350","newMessageSeparator":"#cc8f00","linkColor":"#7b4dd8","buttonBg":"#6d3ccf","buttonColor":"#ffffff","errorTextColor":"#d24b4e","mentionHighlightBg":"#ffd470","mentionHighlightLink":"#1b1d22","codeTheme":"github"}
         </textarea>
         <div
           class="mt-3"
