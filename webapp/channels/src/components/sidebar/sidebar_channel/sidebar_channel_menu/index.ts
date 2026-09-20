@@ -7,6 +7,7 @@ import type {ConnectedProps} from 'react-redux';
 import type {Channel} from '@mattermost/types/channels';
 
 import {favoriteChannel, unfavoriteChannel, readMultipleChannels} from 'mattermost-redux/actions/channels';
+import {deletePreferences} from 'mattermost-redux/actions/preferences';
 import Permissions from 'mattermost-redux/constants/permissions';
 import {isFavoriteChannel} from 'mattermost-redux/selectors/entities/channels';
 import {getMyChannelMemberships, getCurrentUserId} from 'mattermost-redux/selectors/entities/common';
@@ -24,12 +25,15 @@ import type {GlobalState} from 'types/store';
 
 import SidebarChannelMenu from './sidebar_channel_menu';
 
+import {getChannelEmojiName} from '../channel_emoji';
+
 export type OwnProps = {
     channel: Channel;
     channelLink: string;
     isUnread: boolean;
     channelLeaveHandler?: (callback: () => void) => void;
     onMenuToggle: (open: boolean) => void;
+    onOpenChannelEmojiPicker?: () => void;
 }
 
 function mapStateToProps(state: GlobalState, ownProps: OwnProps) {
@@ -49,6 +53,7 @@ function mapStateToProps(state: GlobalState, ownProps: OwnProps) {
         isFavorite: isFavoriteChannel(state, ownProps.channel.id),
         isMuted: isChannelMuted(member),
         channelLink: `${getSiteURL()}${ownProps.channelLink}`,
+        channelEmojiName: getChannelEmojiName(state, ownProps.channel.id),
         managePublicChannelMembers,
         managePrivateChannelMembers,
     };
@@ -62,6 +67,7 @@ const mapDispatchToProps = {
     muteChannel,
     unmuteChannel,
     openModal,
+    deletePreferences,
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);

@@ -1,0 +1,15 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+.ChannelEmoji {
+    display: flex;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+
+    // The label wrapper lays children out with an 8px flex gap; pull the
+    // marker back so it sits 4px after the truncated channel name.
+    margin-left: -4px;
+}

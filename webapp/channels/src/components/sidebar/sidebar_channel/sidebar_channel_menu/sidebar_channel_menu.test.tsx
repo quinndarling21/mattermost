@@ -43,6 +43,7 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_menu', () => {
         isUnread: false,
         isFavorite: false,
         isMuted: false,
+        channelEmojiName: '',
         managePublicChannelMembers: true,
         managePrivateChannelMembers: true,
         closeHandler: jest.fn(),
@@ -60,6 +61,8 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_menu', () => {
         createCategory: jest.fn(),
         addChannelsInSidebar: jest.fn(),
         onMenuToggle: jest.fn(),
+        onOpenChannelEmojiPicker: jest.fn(),
+        deletePreferences: jest.fn(),
     };
 
     const openMenu = async () => {
@@ -293,6 +296,128 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_menu', () => {
 
         await openMenu();
         expect(document.body).toMatchSnapshot();
+    });
+
+    describe('channel emoji menu items', () => {
+        test('should show Set Channel Emoji when no emoji is assigned', async () => {
+            renderWithContext(
+                <SidebarChannelMenu {...baseProps}/>,
+            );
+
+            await openMenu();
+            expect(screen.getByRole('menuitem', {name: 'Set Channel Emoji'})).toBeInTheDocument();
+            expect(screen.queryByRole('menuitem', {name: 'Change Channel Emoji'})).not.toBeInTheDocument();
+            expect(screen.queryByRole('menuitem', {name: 'Remove Channel Emoji'})).not.toBeInTheDocument();
+        });
+
+        test('should show Change and Remove Channel Emoji when an emoji is assigned', async () => {
+            const props = {
+                ...baseProps,
+                channelEmojiName: 'smile',
+            };
+
+            renderWithContext(
+                <SidebarChannelMenu {...props}/>,
+            );
+
+            await openMenu();
+            expect(screen.queryByRole('menuitem', {name: 'Set Channel Emoji'})).not.toBeInTheDocument();
+            expect(screen.getByRole('menuitem', {name: 'Change Channel Emoji'})).toBeInTheDocument();
+            expect(screen.getByRole('menuitem', {name: 'Remove Channel Emoji'})).toBeInTheDocument();
+        });
+
+        test('should show the emoji items for private channels', async () => {
+            const props = {
+                ...baseProps,
+                channel: {
+                    ...baseProps.channel,
+                    type: 'P' as ChannelType,
+                },
+            };
+
+            renderWithContext(
+                <SidebarChannelMenu {...props}/>,
+            );
+
+            await openMenu();
+            expect(screen.getByRole('menuitem', {name: 'Set Channel Emoji'})).toBeInTheDocument();
+        });
+
+        test('should not show any emoji items for DMs', async () => {
+            const props = {
+                ...baseProps,
+                channelEmojiName: 'smile',
+                channel: {
+                    ...baseProps.channel,
+                    type: 'D' as ChannelType,
+                },
+            };
+
+            renderWithContext(
+                <SidebarChannelMenu {...props}/>,
+            );
+
+            await openMenu();
+            expect(screen.queryByRole('menuitem', {name: 'Set Channel Emoji'})).not.toBeInTheDocument();
+            expect(screen.queryByRole('menuitem', {name: 'Change Channel Emoji'})).not.toBeInTheDocument();
+            expect(screen.queryByRole('menuitem', {name: 'Remove Channel Emoji'})).not.toBeInTheDocument();
+        });
+
+        test('should not show any emoji items for GMs', async () => {
+            const props = {
+                ...baseProps,
+                channel: {
+                    ...baseProps.channel,
+                    type: 'G' as ChannelType,
+                },
+            };
+
+            renderWithContext(
+                <SidebarChannelMenu {...props}/>,
+            );
+
+            await openMenu();
+            expect(screen.queryByRole('menuitem', {name: 'Set Channel Emoji'})).not.toBeInTheDocument();
+        });
+
+        test('should call onOpenChannelEmojiPicker when Set Channel Emoji is clicked', async () => {
+            const user = userEvent.setup();
+
+            renderWithContext(
+                <SidebarChannelMenu {...baseProps}/>,
+            );
+
+            await openMenu();
+            await user.click(screen.getByRole('menuitem', {name: 'Set Channel Emoji'}));
+
+            await waitFor(() => {
+                expect(baseProps.onOpenChannelEmojiPicker).toHaveBeenCalled();
+            });
+        });
+
+        test('should delete the channel emoji preference when Remove Channel Emoji is clicked', async () => {
+            const user = userEvent.setup();
+            const props = {
+                ...baseProps,
+                channelEmojiName: 'smile',
+            };
+
+            renderWithContext(
+                <SidebarChannelMenu {...props}/>,
+            );
+
+            await openMenu();
+            await user.click(screen.getByRole('menuitem', {name: 'Remove Channel Emoji'}));
+
+            await waitFor(() => {
+                expect(baseProps.deletePreferences).toHaveBeenCalledWith('user_id', [{
+                    user_id: 'user_id',
+                    category: 'channel_emoji',
+                    name: testChannel.id,
+                    value: '',
+                }]);
+            });
+        });
     });
 
     test('should not show Open in new window when popout is not available', async () => {

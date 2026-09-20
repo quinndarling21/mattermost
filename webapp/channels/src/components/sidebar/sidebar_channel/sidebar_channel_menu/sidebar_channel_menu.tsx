@@ -15,6 +15,8 @@ import {
     AccountPlusOutlineIcon,
     DotsVerticalIcon,
     ExitToAppIcon,
+    EmoticonOutlineIcon,
+    TrashCanOutlineIcon,
 } from '@mattermost/compass-icons/components';
 import {WithTooltip} from '@mattermost/shared/components/tooltip';
 
@@ -31,6 +33,8 @@ import {copyToClipboard} from 'utils/utils';
 
 import type {GlobalState} from 'types/store';
 
+import {makeChannelEmojiPreference} from '../channel_emoji';
+
 import type {PropsFromRedux, OwnProps} from './index';
 
 type Props = PropsFromRedux & OwnProps;
@@ -38,7 +42,9 @@ type Props = PropsFromRedux & OwnProps;
 const SidebarChannelMenu = ({
     channel,
     channelLink,
+    channelEmojiName,
     currentUserId,
+    deletePreferences,
     favoriteChannel,
     isFavorite,
     isMuted,
@@ -49,6 +55,7 @@ const SidebarChannelMenu = ({
     markMostRecentPostInChannelAsUnread,
     muteChannel,
     onMenuToggle,
+    onOpenChannelEmojiPicker,
     openModal,
     unfavoriteChannel,
     unmuteChannel,
@@ -213,6 +220,50 @@ const SidebarChannelMenu = ({
         );
     }
 
+    let setChannelEmojiMenuItem: JSX.Element | null = null;
+    let removeChannelEmojiMenuItem: JSX.Element | null = null;
+    if ((channel.type === Constants.OPEN_CHANNEL || channel.type === Constants.PRIVATE_CHANNEL) && onOpenChannelEmojiPicker) {
+        setChannelEmojiMenuItem = (
+            <Menu.Item
+                id={`setChannelEmoji-${channel.id}`}
+                onClick={onOpenChannelEmojiPicker}
+                aria-haspopup='true'
+                leadingElement={<EmoticonOutlineIcon size={18}/>}
+                labels={channelEmojiName ? (
+                    <FormattedMessage
+                        id='sidebar_left.sidebar_channel_menu.changeChannelEmoji'
+                        defaultMessage='Change Channel Emoji'
+                    />
+                ) : (
+                    <FormattedMessage
+                        id='sidebar_left.sidebar_channel_menu.setChannelEmoji'
+                        defaultMessage='Set Channel Emoji'
+                    />
+                )}
+            />
+        );
+
+        if (channelEmojiName) {
+            function handleRemoveChannelEmoji() {
+                deletePreferences(currentUserId, [makeChannelEmojiPreference(currentUserId, channel.id)]);
+            }
+
+            removeChannelEmojiMenuItem = (
+                <Menu.Item
+                    id={`removeChannelEmoji-${channel.id}`}
+                    onClick={handleRemoveChannelEmoji}
+                    leadingElement={<TrashCanOutlineIcon size={18}/>}
+                    labels={(
+                        <FormattedMessage
+                            id='sidebar_left.sidebar_channel_menu.removeChannelEmoji'
+                            defaultMessage='Remove Channel Emoji'
+                        />
+                    )}
+                />
+            );
+        }
+    }
+
     let copyLinkMenuItem: JSX.Element | null = null;
     if (channel.type === Constants.OPEN_CHANNEL || channel.type === Constants.PRIVATE_CHANNEL) {
         function handleCopyLink() {
@@ -327,6 +378,8 @@ const SidebarChannelMenu = ({
             {markAsReadUnreadMenuItem}
             {favoriteUnfavoriteMenuItem}
             {muteUnmuteChannelMenuItem}
+            {setChannelEmojiMenuItem}
+            {removeChannelEmojiMenuItem}
             <Menu.Separator/>
             <ChannelMoveToSubmenu channel={channel}/>
             {(copyLinkMenuItem || addMembersMenuItem) && <Menu.Separator/>}
