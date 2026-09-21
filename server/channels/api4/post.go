@@ -42,6 +42,9 @@ func (api *API) InitPost() {
 	api.BaseRoutes.Post.Handle("/restore/{restore_version_id:[A-Za-z0-9]+}", api.APISessionRequired(restorePostVersion)).Methods(http.MethodPost)
 	api.BaseRoutes.PostForUser.Handle("/set_unread", api.APISessionRequired(setPostUnread)).Methods(http.MethodPost)
 	api.BaseRoutes.PostForUser.Handle("/reminder", api.APISessionRequired(setPostReminder)).Methods(http.MethodPost)
+	api.BaseRoutes.PostForUser.Handle("/reminder", api.APISessionRequired(deletePostReminder)).Methods(http.MethodDelete)
+	api.BaseRoutes.PostsForUser.Handle("/reminders", api.APISessionRequired(getPostRemindersForUser)).Methods(http.MethodGet)
+	api.BaseRoutes.Post.Handle("/reminder/dismiss", api.APISessionRequired(dismissPostReminder)).Methods(http.MethodPost)
 
 	api.BaseRoutes.Post.Handle("/pin", api.APISessionRequired(pinPost)).Methods(http.MethodPost)
 	api.BaseRoutes.Post.Handle("/unpin", api.APISessionRequired(unpinPost)).Methods(http.MethodPost)
@@ -1302,6 +1305,63 @@ func setPostReminder(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	appErr := c.App.SetPostReminder(c.AppContext, c.Params.PostId, c.Params.UserId, reminder.TargetTime)
+	if appErr != nil {
+		c.Err = appErr
+		return
+	}
+
+	ReturnStatusOK(w)
+}
+
+func getPostRemindersForUser(c *Context, w http.ResponseWriter, r *http.Request) {
+	c.RequireUserId()
+	if c.Err != nil {
+		return
+	}
+
+	if c.AppContext.Session().UserId != c.Params.UserId && !c.App.SessionHasPermissionToUser(*c.AppContext.Session(), c.Params.UserId) {
+		c.SetPermissionError(model.PermissionEditOtherUsers)
+		return
+	}
+
+	reminders, appErr := c.App.GetPostRemindersForUser(c.AppContext, c.Params.UserId)
+	if appErr != nil {
+		c.Err = appErr
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(reminders); err != nil {
+		c.Logger.Warn("Error while writing response", mlog.Err(err))
+	}
+}
+
+func deletePostReminder(c *Context, w http.ResponseWriter, r *http.Request) {
+	c.RequirePostId().RequireUserId()
+	if c.Err != nil {
+		return
+	}
+
+	if c.AppContext.Session().UserId != c.Params.UserId && !c.App.SessionHasPermissionToUser(*c.AppContext.Session(), c.Params.UserId) {
+		c.SetPermissionError(model.PermissionEditOtherUsers)
+		return
+	}
+
+	appErr := c.App.DeletePostReminder(c.AppContext, c.Params.UserId, c.Params.PostId)
+	if appErr != nil {
+		c.Err = appErr
+		return
+	}
+
+	ReturnStatusOK(w)
+}
+
+func dismissPostReminder(c *Context, w http.ResponseWriter, r *http.Request) {
+	c.RequirePostId()
+	if c.Err != nil {
+		return
+	}
+
+	appErr := c.App.DismissPostReminder(c.AppContext, c.AppContext.Session().UserId, c.Params.PostId)
 	if appErr != nil {
 		c.Err = appErr
 		return

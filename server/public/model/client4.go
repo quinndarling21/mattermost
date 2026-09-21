@@ -3552,6 +3552,36 @@ func (c *Client4) SetPostReminder(ctx context.Context, reminder *PostReminder) (
 	return BuildResponse(r), nil
 }
 
+// GetPostRemindersForUser returns the pending post reminders for a user.
+func (c *Client4) GetPostRemindersForUser(ctx context.Context, userId string) ([]*PostReminderListItem, *Response, error) {
+	r, err := c.doAPIGet(ctx, c.userRoute(userId).Join("posts", "reminders"), "")
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	defer closeBody(r)
+	return DecodeJSONFromResponse[[]*PostReminderListItem](r)
+}
+
+// DeletePostReminder cancels a pending post reminder for the given post.
+func (c *Client4) DeletePostReminder(ctx context.Context, userId, postId string) (*Response, error) {
+	r, err := c.doAPIDelete(ctx, c.userRoute(userId).Join(c.postRoute(postId), "reminder"))
+	if err != nil {
+		return BuildResponse(r), err
+	}
+	defer closeBody(r)
+	return BuildResponse(r), nil
+}
+
+// DismissPostReminder deletes a reminder DM that was sent by the system bot.
+func (c *Client4) DismissPostReminder(ctx context.Context, postId string) (*Response, error) {
+	r, err := c.doAPIPost(ctx, c.postRoute(postId).Join("reminder", "dismiss"), "")
+	if err != nil {
+		return BuildResponse(r), err
+	}
+	defer closeBody(r)
+	return BuildResponse(r), nil
+}
+
 // PinPost pin a post based on provided post id string.
 func (c *Client4) PinPost(ctx context.Context, postId string) (*Response, error) {
 	r, err := c.doAPIPost(ctx, c.postRoute(postId).Join("pin"), "")

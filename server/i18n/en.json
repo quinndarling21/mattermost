@@ -8053,6 +8053,14 @@
     "translation": "An error occurred getting the team."
   },
   {
+    "id": "app.post.delete_post_reminder.not_found.app_error",
+    "translation": "No pending reminder was found for this message."
+  },
+  {
+    "id": "app.post.dismiss_post_reminder.not_reminder.app_error",
+    "translation": "This message is not a reminder that can be dismissed."
+  },
+  {
     "id": "app.post.get.app_error",
     "translation": "Unable to get the post."
   },
