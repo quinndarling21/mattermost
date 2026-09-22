@@ -149,6 +149,6 @@ Notes:
   export PATH="$NVM_DIR/versions/node/v24.11.1/bin:$HOME/go/bin:$PATH"
   ```
 
-- Team Edition dev works without the sibling `enterprise` checkout. If the install hook fails on enterprise verification, set `CLOUD_AGENT_SKIP_ENTERPRISE=true` (runtime still uses `server/enterprise` source-available code).
+- Team Edition dev works without the sibling `enterprise` checkout. The install hook warns and continues when it is missing (runtime still uses `server/enterprise` source-available code). Set `CLOUD_AGENT_SKIP_ENTERPRISE=true` to skip the check entirely.
 - Use tmux for long-running `make run` / `make run-server` sessions so the stack survives beyond a single shell command.
 - Quick verification commands after startup: `curl http://127.0.0.1:8065/api/v4/system/ping`, `cd server && make validate-go-version vet`, `cd server && make test-public`, `cd webapp && npm run test --workspace platform/client`.

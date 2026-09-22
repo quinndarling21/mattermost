@@ -104,8 +104,13 @@ verify_enterprise_checkout() {
 
   local target
   if ! target="$(find_enterprise_checkout)"; then
-    log "Enterprise checkout not found. Ensure the Cursor multi-repo environment includes github.com/mattermost/enterprise."
-    return 1
+    # Team Edition works without the private sibling checkout; server/Makefile
+    # falls back to BUILD_ENTERPRISE_READY=false when ../../enterprise is absent.
+    # Hard-failing here breaks Cloud snapshots whenever Cursor cannot provision
+    # github.com/mattermost/enterprise (private / no multi-repo access).
+    log "Enterprise checkout not found; continuing with Team Edition (server/enterprise source-available code)."
+    log "To require the private sibling checkout, ensure repositoryDependencies includes github.com/mattermost/enterprise and the agent can access it."
+    return 0
   fi
 
   log "Enterprise checkout ready at $target."
