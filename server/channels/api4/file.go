@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mattermost/mattermost/server/public/model"
@@ -959,11 +960,15 @@ func searchFiles(c *Context, w http.ResponseWriter, r *http.Request, teamID stri
 		return
 	}
 
-	if params.Terms == nil || *params.Terms == "" {
+	if params.Terms == nil {
 		c.SetInvalidParam("terms")
 		return
 	}
-	terms := *params.Terms
+	terms := strings.TrimSpace(*params.Terms)
+	if terms == "" {
+		c.SetInvalidParam("terms")
+		return
+	}
 
 	timeZoneOffset := 0
 	if params.TimeZoneOffset != nil {

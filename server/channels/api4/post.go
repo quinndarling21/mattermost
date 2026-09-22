@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -942,11 +943,15 @@ func searchPosts(c *Context, w http.ResponseWriter, r *http.Request, teamId stri
 		return
 	}
 
-	if params.Terms == nil || *params.Terms == "" {
+	if params.Terms == nil {
 		c.SetInvalidParam("terms")
 		return
 	}
-	terms := *params.Terms
+	terms := strings.TrimSpace(*params.Terms)
+	if terms == "" {
+		c.SetInvalidParam("terms")
+		return
+	}
 
 	timeZoneOffset := 0
 	if params.TimeZoneOffset != nil {

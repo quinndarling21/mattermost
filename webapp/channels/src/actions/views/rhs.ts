@@ -208,7 +208,7 @@ function updateSearchResultsType(searchType: string) {
 
 export function performSearch(terms: string, teamId: string, isMentionSearch?: boolean): ThunkActionFunc<unknown> {
     return (dispatch, getState) => {
-        let searchTerms = terms;
+        let searchTerms = terms.trim();
         const extensionsFilters = getFilesSearchExtFilter(getState());
 
         const extensions = extensionsFilters?.map((ext) => `ext:${ext}`).join(' ');
@@ -247,9 +247,14 @@ export function showSearchResults(isMentionSearch = false): ThunkActionFunc<unkn
     return (dispatch, getState) => {
         const state = getState();
 
-        const searchTerms = getSearchTerms(state);
+        const rawSearchTerms = getSearchTerms(state);
+        const searchTerms = rawSearchTerms.trim();
         let teamId = getSearchTeam(state);
         const searchType = getSearchType(state);
+
+        if (searchTerms !== rawSearchTerms) {
+            dispatch(updateSearchTerms(searchTerms));
+        }
 
         if (isMentionSearch) {
             dispatch(updateRhsState(RHSStates.MENTION));

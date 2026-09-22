@@ -230,6 +230,18 @@ describe('rhs view actions', () => {
             expect(store.getActions()).toEqual(compareStore.getActions());
         });
 
+        test('it trims leading and trailing whitespace from search terms', () => {
+            const terms = '  @here test search  ';
+            const trimmedTerms = '@here test search';
+            store.dispatch(performSearch(terms, currentTeamId, false));
+
+            const compareStore = mockStore(initialState);
+            compareStore.dispatch(SearchActions.searchPostsWithParams(currentTeamId, {include_deleted_channels: true, terms: trimmedTerms, is_or_search: false, time_zone_offset: timeZoneOffset, page: 0, per_page: 20}));
+            compareStore.dispatch(SearchActions.searchFilesWithParams(currentTeamId, {include_deleted_channels: true, terms: trimmedTerms, is_or_search: false, time_zone_offset: timeZoneOffset, page: 0, per_page: 20}));
+
+            expect(store.getActions()).toEqual(compareStore.getActions());
+        });
+
         test('it dispatches searchFiles correctly', () => {
             store = mockStore({
                 ...initialState,
@@ -287,6 +299,37 @@ describe('rhs view actions', () => {
             store.dispatch(showSearchResults());
 
             const compareStore = mockStore(testInitialState);
+            compareStore.dispatch(updateRhsState(RHSStates.SEARCH));
+            compareStore.dispatch({
+                type: ActionTypes.UPDATE_RHS_SEARCH_RESULTS_TERMS,
+                terms,
+            });
+            compareStore.dispatch({
+                type: ActionTypes.UPDATE_RHS_SEARCH_RESULTS_TYPE,
+                searchType: 'messages',
+            });
+            compareStore.dispatch(performSearch(terms, currentTeamId));
+
+            expect(store.getActions()).toEqual(compareStore.getActions());
+        });
+
+        test('it trims leading and trailing whitespace from search terms', () => {
+            const paddedTerms = '  @here test search  ';
+            const paddedState = {
+                ...testInitialState,
+                views: {
+                    rhs: {
+                        ...testInitialState.views.rhs,
+                        searchTerms: paddedTerms,
+                    },
+                },
+            } as GlobalState;
+
+            store = mockStore(paddedState);
+            store.dispatch(showSearchResults());
+
+            const compareStore = mockStore(paddedState);
+            compareStore.dispatch(updateSearchTerms(terms));
             compareStore.dispatch(updateRhsState(RHSStates.SEARCH));
             compareStore.dispatch({
                 type: ActionTypes.UPDATE_RHS_SEARCH_RESULTS_TERMS,

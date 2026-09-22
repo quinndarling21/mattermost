@@ -91,6 +91,17 @@ describe('components/new_search/NewSearch', () => {
         expect(mockDispatch).toHaveBeenCalledTimes(4);
     });
 
+    test('should trim leading and trailing whitespace from search terms before querying', async () => {
+        mockDispatch.mockClear();
+        renderWithContext(<NewSearch/>);
+
+        await userEvent.click(screen.getByText('Search'));
+        await userEvent.type(screen.getByPlaceholderText('Search messages'), '  deployment  {enter}');
+
+        expect(mockDispatch).toHaveBeenCalledWith({terms: 'deployment', type: 'UPDATE_RHS_SEARCH_TERMS'});
+        expect(mockDispatch).not.toHaveBeenCalledWith({terms: '  deployment  ', type: 'UPDATE_RHS_SEARCH_TERMS'});
+    });
+
     test('should open the search ctrl+shift+f is press on web app', async () => {
         renderWithContext(<div><NewSearch/>{'Outside'}</div>);
 
