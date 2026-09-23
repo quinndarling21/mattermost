@@ -430,6 +430,7 @@ func (o *Channel) PreUpdate() {
 	o.UpdateAt = GetMillis()
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = normalizeChannelEmoji(o.Emoji)
 }
 
 func (o *Channel) IsGroupOrDirect() bool {

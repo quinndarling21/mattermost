@@ -167,6 +167,12 @@ func TestChannelPreSaveNormalizesEmoji(t *testing.T) {
 	require.Equal(t, "tada", o.Emoji)
 }
 
+func TestChannelPreUpdateNormalizesEmoji(t *testing.T) {
+	o := Channel{Name: "test", Emoji: " :tada: "}
+	o.PreUpdate()
+	require.Equal(t, "tada", o.Emoji)
+}
+
 func TestChannelIsValid(t *testing.T) {
 	o := Channel{}
 
