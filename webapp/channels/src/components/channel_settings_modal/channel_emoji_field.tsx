@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {FormattedMessage} from 'react-intl';
 
 import {EmoticonPlusOutlineIcon} from '@mattermost/compass-icons/components';
@@ -25,14 +25,11 @@ type Props = {
 
 export default function ChannelEmojiField({value, onChange, disabled}: Props) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const pickerButtonRef = useRef<HTMLButtonElement | null>(null);
 
     const handleEmojiClick = useCallback((emoji: Emoji) => {
         setShowEmojiPicker(false);
         onChange(getEmojiName(emoji));
-    }, [onChange]);
-
-    const handleRemove = useCallback(() => {
-        onChange('');
     }, [onChange]);
 
     const {emojiPicker, getReferenceProps, setReference} = useEmojiPicker({
@@ -41,8 +38,23 @@ export default function ChannelEmojiField({value, onChange, disabled}: Props) {
         onEmojiClick: handleEmojiClick,
     });
 
+    const setPickerButtonRef = useCallback((node: HTMLButtonElement | null) => {
+        pickerButtonRef.current = node;
+        setReference(node);
+    }, [setReference]);
+
+    // The remove button unmounts once the emoji is cleared, so focus moves to the picker button instead of being lost.
+    const handleRemove = useCallback(() => {
+        onChange('');
+        pickerButtonRef.current?.focus();
+    }, [onChange]);
+
     return (
-        <div className='ChannelEmojiField'>
+        <div
+            className='ChannelEmojiField'
+            role='group'
+            aria-labelledby='channelEmojiFieldLabel'
+        >
             <span
                 id='channelEmojiFieldLabel'
                 className='ChannelEmojiField__label'
@@ -54,20 +66,21 @@ export default function ChannelEmojiField({value, onChange, disabled}: Props) {
             </span>
             <div className='ChannelEmojiField__controls'>
                 <Button
-                    ref={setReference}
+                    ref={setPickerButtonRef}
                     type='button'
                     emphasis='tertiary'
-                    className='ChannelEmojiField__pickerButton'
-                    aria-describedby='channelEmojiFieldLabel'
+                    aria-describedby='channelEmojiFieldHelp'
                     data-testid='channelEmojiPickerButton'
                     disabled={disabled}
                     {...getReferenceProps()}
                 >
                     {value ? (
-                        <RenderEmoji
-                            emojiName={value}
-                            size={20}
-                        />
+                        <span aria-hidden='true'>
+                            <RenderEmoji
+                                emojiName={value}
+                                size={18}
+                            />
+                        </span>
                     ) : (
                         <EmoticonPlusOutlineIcon size={18}/>
                     )}
@@ -97,14 +110,15 @@ export default function ChannelEmojiField({value, onChange, disabled}: Props) {
                     </Button>
                 )}
             </div>
-            <div className='Input___customMessage Input___info'>
-                <span>
-                    <FormattedMessage
-                        id='channel_settings.emoji.help'
-                        defaultMessage='Appears next to the channel name in the sidebar for all channel members.'
-                    />
-                </span>
-            </div>
+            <span
+                id='channelEmojiFieldHelp'
+                className='ChannelEmojiField__help'
+            >
+                <FormattedMessage
+                    id='channel_settings.emoji.help'
+                    defaultMessage='Appears next to the channel name in the sidebar for all channel members.'
+                />
+            </span>
             {emojiPicker}
         </div>
     );

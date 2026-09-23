@@ -14,14 +14,11 @@
     &__controls {
         display: flex;
         align-items: center;
-        gap: 8px;
     }
 
-    &__pickerButton {
-        gap: 8px;
-    }
-
-    .Input___customMessage {
-        margin-top: 0;
+    &__help {
+        color: rgba(var(--center-channel-color-rgb), 0.75);
+        font-size: 12px;
+        line-height: 16px;
     }
 }

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useState} from 'react';
 
 import type {Emoji} from '@mattermost/types/emojis';
 
@@ -65,9 +65,21 @@ describe('ChannelEmojiField', () => {
             />,
         );
 
-        expect(screen.getByRole('button', {name: /Change emoji/})).toBeInTheDocument();
+        expect(screen.getByRole('button', {name: 'Change emoji'})).toBeInTheDocument();
         expect(screen.getByRole('button', {name: 'Remove emoji'})).toBeInTheDocument();
         expect(container.querySelector('[data-emoticon="rocket"]')).toBeInTheDocument();
+    });
+
+    it('should label the field as a group and describe the picker button with the help text', () => {
+        renderWithContext(
+            <ChannelEmojiField
+                value='rocket'
+                onChange={jest.fn()}
+            />,
+        );
+
+        expect(screen.getByRole('group', {name: 'Channel emoji (optional)'})).toBeInTheDocument();
+        expect(screen.getByRole('button', {name: 'Change emoji'})).toHaveAccessibleDescription('Appears next to the channel name in the sidebar for all channel members.');
     });
 
     it('should emit the bare system emoji name and close the picker when an emoji is picked', async () => {
@@ -115,6 +127,24 @@ describe('ChannelEmojiField', () => {
         expect(onChange).toHaveBeenCalledWith('');
     });
 
+    it('should move focus to the picker button after the emoji is removed', async () => {
+        function StatefulField() {
+            const [value, setValue] = useState('rocket');
+            return (
+                <ChannelEmojiField
+                    value={value}
+                    onChange={setValue}
+                />
+            );
+        }
+        renderWithContext(<StatefulField/>);
+
+        await userEvent.click(screen.getByRole('button', {name: 'Remove emoji'}));
+
+        expect(screen.queryByRole('button', {name: 'Remove emoji'})).not.toBeInTheDocument();
+        expect(screen.getByRole('button', {name: 'Choose emoji'})).toHaveFocus();
+    });
+
     it('should not allow changes when disabled', () => {
         renderWithContext(
             <ChannelEmojiField
@@ -124,7 +154,7 @@ describe('ChannelEmojiField', () => {
             />,
         );
 
-        expect(screen.getByRole('button', {name: /Change emoji/})).toBeDisabled();
+        expect(screen.getByRole('button', {name: 'Change emoji'})).toBeDisabled();
         expect(screen.queryByRole('button', {name: 'Remove emoji'})).not.toBeInTheDocument();
     });
 });
