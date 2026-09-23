@@ -232,6 +232,20 @@ func testChannelStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.True(t, *savedChannel.BannerInfo.Enabled)
 	require.Equal(t, "banner text", *savedChannel.BannerInfo.Text)
 	require.Equal(t, "#000000", *savedChannel.BannerInfo.BackgroundColor)
+
+	emojiChannel := model.Channel{
+		TeamId:      teamID,
+		DisplayName: "Emoji",
+		Name:        NewTestID(),
+		Type:        model.ChannelTypeOpen,
+		Emoji:       "rocket",
+	}
+	_, nErr = ss.Channel().Save(rctx, &emojiChannel, -1)
+	require.NoError(t, nErr)
+
+	fetchedChannel, nErr := ss.Channel().Get(emojiChannel.Id, false)
+	require.NoError(t, nErr)
+	require.Equal(t, "rocket", fetchedChannel.Emoji)
 }
 
 func testChannelStoreSaveDirectChannel(t *testing.T, rctx request.CTX, ss store.Store, s SqlStore) {
@@ -496,6 +510,24 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.NotNil(t, updatedChannel.BannerInfo)
 	require.Equal(t, "updated text", *updatedChannel.BannerInfo.Text)
 	require.Equal(t, "#FFFFFF", *updatedChannel.BannerInfo.BackgroundColor)
+
+	channel.Emoji = "tada"
+	_, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err)
+	fetchedChannel, err := ss.Channel().Get(channel.Id, false)
+	require.NoError(t, err)
+	require.Equal(t, "tada", fetchedChannel.Emoji)
+
+	channel.Emoji = ""
+	_, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err)
+	fetchedChannel, err = ss.Channel().Get(channel.Id, false)
+	require.NoError(t, err)
+	require.Empty(t, fetchedChannel.Emoji)
+
+	channel.Emoji = "not a valid emoji"
+	_, err = ss.Channel().Update(rctx, &channel)
+	require.Error(t, err, "update should have failed because of an invalid emoji name")
 }
 
 func testGetChannelUnread(t *testing.T, rctx request.CTX, ss store.Store) {
