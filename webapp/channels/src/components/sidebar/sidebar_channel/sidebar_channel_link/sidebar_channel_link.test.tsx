@@ -4,7 +4,7 @@
 import React from 'react';
 
 import {isDesktopApp} from '@mattermost/shared/utils/user_agent';
-import type {ChannelType} from '@mattermost/types/channels';
+import type {Channel, ChannelType} from '@mattermost/types/channels';
 
 import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_channel_link/sidebar_channel_link';
 
@@ -106,6 +106,23 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
         const {container} = renderLink(props);
 
         expect(container).toMatchSnapshot();
+    });
+
+    test('should render the channel emoji immediately before the channel name', () => {
+        const channelWithEmoji: Channel = {...baseChannel, emoji: 'rocket'};
+        const {container} = renderLink({channel: channelWithEmoji});
+
+        const emoji = container.querySelector('.SidebarChannelLinkLabel_wrapper > [data-emoticon="rocket"]');
+        expect(emoji).toBeInTheDocument();
+        expect(emoji).toHaveStyle({width: '16px', height: '16px'});
+        expect(emoji?.nextElementSibling).toHaveClass('SidebarChannelLinkLabel');
+        expect(emoji?.nextElementSibling).toHaveTextContent('channel_label');
+    });
+
+    test('should not render an emoji when the channel has none', () => {
+        const {container} = renderLink();
+
+        expect(container.querySelector('.SidebarChannelLinkLabel_wrapper [data-emoticon]')).not.toBeInTheDocument();
     });
 
     test('should enable tooltip when needed', () => {

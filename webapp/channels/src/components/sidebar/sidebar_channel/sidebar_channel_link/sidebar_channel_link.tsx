@@ -12,6 +12,7 @@ import type {Channel} from '@mattermost/types/channels';
 import {mark} from 'actions/telemetry_actions';
 
 import CustomStatusEmoji from 'components/custom_status/custom_status_emoji';
+import RenderEmoji from 'components/emoji/render_emoji';
 import SharedChannelIndicator from 'components/shared_channel_indicator';
 import {ChannelsAndDirectMessagesTour} from 'components/tours/onboarding_tour';
 
@@ -34,6 +35,8 @@ const messages = defineMessages({
         defaultMessage: 'You have an urgent mention',
     },
 });
+
+const channelEmojiStyle: React.CSSProperties = {alignSelf: 'center'};
 
 type Props = WrappedComponentProps & {
     channel: Channel;
@@ -261,6 +264,13 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
                 <div
                     className='SidebarChannelLinkLabel_wrapper'
                 >
+                    {channel.emoji && (
+                        <RenderEmoji
+                            emojiName={channel.emoji}
+                            size={16}
+                            emojiStyle={channelEmojiStyle}
+                        />
+                    )}
                     {labelElement}
                     {customStatus}
                     <Pluggable

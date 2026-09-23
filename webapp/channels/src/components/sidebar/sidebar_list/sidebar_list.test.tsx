@@ -163,8 +163,13 @@ describe('SidebarList', () => {
             markAllInTeamAsRead: jest.fn(),
             setMarkAllAsReadWithoutConfirm: jest.fn(),
             openModal: jest.fn(),
+            loadCustomEmojisIfNeeded: jest.fn(),
         },
     };
+
+    beforeEach(() => {
+        baseProps.actions.loadCustomEmojisIfNeeded.mockClear();
+    });
 
     test('should match snapshot', () => {
         const {container} = renderWithContext(
@@ -393,5 +398,54 @@ describe('SidebarList', () => {
 
         instance.onDragEnd(channelResult);
         expect(baseProps.actions.moveChannelsInSidebar).toHaveBeenCalledWith(channelResult.destination!.droppableId, channelResult.destination!.index, channelResult.draggableId);
+    });
+
+    describe('channel emojis', () => {
+        test('should not load emojis when no displayed channel has one', () => {
+            renderWithContext(
+                <SidebarListComponent
+                    {...baseProps}
+                    intl={intl}
+                />,
+            );
+
+            expect(baseProps.actions.loadCustomEmojisIfNeeded).not.toHaveBeenCalled();
+        });
+
+        test('should load each channel emoji once in a single batch on mount', () => {
+            renderWithContext(
+                <SidebarListComponent
+                    {...baseProps}
+                    intl={intl}
+                    displayedChannels={[
+                        {...currentChannel, emoji: 'rocket'},
+                        {...unreadChannel, emoji: 'custom-team-emoji'},
+                        {...unreadChannel, id: 'channel_id_3', emoji: 'rocket'},
+                    ]}
+                />,
+            );
+
+            expect(baseProps.actions.loadCustomEmojisIfNeeded).toHaveBeenCalledTimes(1);
+            expect(baseProps.actions.loadCustomEmojisIfNeeded).toHaveBeenCalledWith(['rocket', 'custom-team-emoji']);
+        });
+
+        test('should load emojis again when the displayed channels change', () => {
+            const {rerender} = renderWithContext(
+                <SidebarListComponent
+                    {...baseProps}
+                    intl={intl}
+                />,
+            );
+
+            rerender(
+                <SidebarListComponent
+                    {...baseProps}
+                    intl={intl}
+                    displayedChannels={[currentChannel, {...unreadChannel, emoji: 'custom-team-emoji'}]}
+                />,
+            );
+
+            expect(baseProps.actions.loadCustomEmojisIfNeeded).toHaveBeenCalledWith(['custom-team-emoji']);
+        });
     });
 });

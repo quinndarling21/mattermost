@@ -74,6 +74,7 @@ type Props = WrappedComponentProps & {
         markAllInTeamAsRead: (userId: string, teamId: string) => void;
         setMarkAllAsReadWithoutConfirm: (userId: string, value: boolean) => void;
         openModal: <P>(modalData: ModalData<P>) => void;
+        loadCustomEmojisIfNeeded: (emojiNames: string[]) => void;
     };
 };
 
@@ -120,6 +121,8 @@ export class SidebarList extends React.PureComponent<Props, State> {
         if (this.props.markAllAsReadShortcutEnabled) {
             document.addEventListener('keydown', this.markAllChannelsAsReadShortcut);
         }
+
+        this.loadChannelEmojis();
     }
 
     componentWillUnmount() {
@@ -131,6 +134,10 @@ export class SidebarList extends React.PureComponent<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props) {
+        if (this.props.displayedChannels !== prevProps.displayedChannels) {
+            this.loadChannelEmojis();
+        }
+
         if (!this.props.currentChannelId || !prevProps.currentChannelId) {
             return;
         }
@@ -157,6 +164,20 @@ export class SidebarList extends React.PureComponent<Props, State> {
 
     getDisplayedChannelIds = () => {
         return this.props.displayedChannels.map((channel) => channel.id);
+    };
+
+    // Channel emojis are loaded for the whole list at once so custom emojis cost one request instead of one per row.
+    loadChannelEmojis = () => {
+        const emojiNames = new Set<string>();
+        for (const channel of this.props.displayedChannels) {
+            if (channel.emoji) {
+                emojiNames.add(channel.emoji);
+            }
+        }
+
+        if (emojiNames.size > 0) {
+            this.props.actions.loadCustomEmojisIfNeeded(Array.from(emojiNames));
+        }
     };
 
     getDisplayedStaticPageIds = () => {
