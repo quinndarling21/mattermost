@@ -226,6 +226,12 @@ components:
           format: int64
         creator_id:
           type: string
+        emoji:
+          description: >
+            Name of the system or custom emoji shown next to the channel in the
+            sidebar, without surrounding colons. Empty when no emoji is set.
+            Always empty for direct and group message channels.
+          type: string
     ChannelStats:
       type: object
       properties:

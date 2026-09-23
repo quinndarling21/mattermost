@@ -619,19 +619,19 @@
         fields must be provided.
 
         **Public and private channels:** Can update `name`, `display_name`,
-        `purpose`, `header`, `group_constrained`, `autotranslation`, and
+        `purpose`, `header`, `emoji`, `group_constrained`, `autotranslation`, and
         `banner_info` (subject to permissions and channel type).
 
         **Direct and group message channels:** Only `header` and (when not
         restricted by config) `autotranslation` can be updated; the caller
-        must be a channel member. Updating `name`, `display_name`, or `purpose`
-        is not allowed.
+        must be a channel member. Updating `name`, `display_name`, `purpose`,
+        or `emoji` is not allowed.
 
         The default channel (e.g. Town Square) cannot have its `name` changed.
 
         ##### Permissions
 
-        - **Public channel:** For property updates (name, display_name, purpose, header, group_constrained),
+        - **Public channel:** For property updates (name, display_name, purpose, header, emoji, group_constrained),
         `manage_public_channel_properties` is required. For `autotranslation`, `manage_public_channel_auto_translation`
         is required. For `banner_info`, `manage_public_channel_banner` is required (Channel Banner feature and
         Enterprise license required).
@@ -671,6 +671,12 @@
                   type: string
                   description: Markdown-formatted text to display in the header of the
                     channel
+                emoji:
+                  type: string
+                  description: Name of a system or custom emoji to show next to the
+                    channel in the sidebar, such as `rocket`. Surrounding colons are
+                    removed. Set to an empty string to clear. Cannot be updated for
+                    direct or group message channels.
                 group_constrained:
                   type: boolean
                   description: When true, only members of the linked LDAP groups can join
