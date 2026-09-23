@@ -40,6 +40,43 @@ export default class ChannelsSidebarLeft {
     }
 
     /**
+     * Returns the sidebar item for the channel with the given name (the channel's URL name, not its display name).
+     */
+    getChannelItem(channelName: string): Locator {
+        return this.container.locator(`#sidebarItem_${channelName}`);
+    }
+
+    /**
+     * Returns the channel emoji rendered next to the channel name in the sidebar item.
+     */
+    getChannelEmoji(channelName: string): Locator {
+        return this.getChannelItem(channelName).locator('.SidebarChannelLinkLabel_wrapper > .emoticon');
+    }
+
+    /**
+     * Verifies that the channel's sidebar item shows the given emoji immediately before the channel name.
+     */
+    async toHaveChannelEmoji(channelName: string, emojiName: string) {
+        const channelItem = this.getChannelItem(channelName);
+        await expect(channelItem).toBeVisible();
+
+        const elementBeforeLabel = channelItem
+            .locator('.SidebarChannelLinkLabel_wrapper > .SidebarChannelLinkLabel')
+            .locator('xpath=preceding-sibling::*[1]');
+        await expect(elementBeforeLabel).toBeVisible();
+        await expect(elementBeforeLabel).toHaveClass(/\bemoticon\b/);
+        await expect(elementBeforeLabel).toHaveAttribute('data-emoticon', emojiName);
+    }
+
+    /**
+     * Verifies that the channel's sidebar item does not show a channel emoji.
+     */
+    async toHaveNoChannelEmoji(channelName: string) {
+        await expect(this.getChannelItem(channelName)).toBeVisible();
+        await expect(this.getChannelEmoji(channelName)).toHaveCount(0);
+    }
+
+    /**
      * Verifies 'Drafts' as a sidebar link exists in LHS.
      */
     async draftsVisible() {

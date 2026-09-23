@@ -6,6 +6,7 @@ import {Locator, expect} from '@playwright/test';
 export default class EmojiGifPicker {
     readonly container: Locator;
 
+    readonly emojiSearchInput: Locator;
     readonly gifTab: Locator;
     readonly gifSearchInput: Locator;
     readonly gifPickerItems: Locator;
@@ -13,6 +14,7 @@ export default class EmojiGifPicker {
     constructor(container: Locator) {
         this.container = container;
 
+        this.emojiSearchInput = container.getByTestId('emojiInputSearch');
         this.gifTab = container.getByText('GIFs');
         this.gifSearchInput = container.getByPlaceholder('Search GIPHY');
         this.gifPickerItems = container.locator('.gif-picker__items');
@@ -28,6 +30,22 @@ export default class EmojiGifPicker {
 
     async clickEmoji(emojiName: string) {
         await this.container.getByRole('button', {name: `${emojiName} emoji`}).click();
+    }
+
+    async searchEmoji(name: string) {
+        await expect(this.emojiSearchInput).toBeVisible();
+        await this.emojiSearchInput.fill(name);
+        await expect(this.emojiSearchInput).toHaveValue(name);
+    }
+
+    /**
+     * Clicks the emoji whose label exactly matches `${emojiName} emoji`. Unlike clickEmoji, this does not go through
+     * the accessibility tree, so it also works when the picker's portal is aria-hidden behind an open modal.
+     */
+    async selectEmoji(emojiName: string) {
+        const emojiItem = this.container.locator(`[data-testid="emojiItem"][aria-label="${emojiName} emoji"]`);
+        await expect(emojiItem).toBeVisible();
+        await emojiItem.click();
     }
 
     async openGifTab() {
