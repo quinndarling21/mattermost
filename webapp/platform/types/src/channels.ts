@@ -93,6 +93,12 @@ export type Channel = {
     managed_category_name?: string;
     autotranslation?: boolean;
     discoverable?: boolean;
+
+    /**
+     * Name of the system or custom emoji shown next to the channel in the sidebar, without surrounding colons.
+     * Empty or undefined when no emoji is set. Never set for DM or GM channels.
+     */
+    emoji?: string;
 };
 
 export type ServerChannel = Channel & {
