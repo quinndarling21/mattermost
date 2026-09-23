@@ -1701,6 +1701,40 @@ func TestPatchChannel(t *testing.T) {
 	})
 }
 
+func TestCreateChannelEmoji(t *testing.T) {
+	mainHelper.Parallel(t)
+	th := Setup(t).InitBasic(t)
+	client := th.Client
+
+	newChannel := func(emoji string) *model.Channel {
+		return &model.Channel{
+			DisplayName: "Emoji Channel",
+			Name:        GenerateTestChannelName(),
+			Type:        model.ChannelTypeOpen,
+			TeamId:      th.BasicTeam.Id,
+			Emoji:       emoji,
+		}
+	}
+
+	t.Run("creates a channel with a normalized emoji", func(t *testing.T) {
+		created, resp, err := client.CreateChannel(context.Background(), newChannel(":rocket:"))
+		require.NoError(t, err)
+		CheckCreatedStatus(t, resp)
+		require.Equal(t, "rocket", created.Emoji)
+
+		fetched, _, err := client.GetChannel(context.Background(), created.Id)
+		require.NoError(t, err)
+		require.Equal(t, "rocket", fetched.Emoji)
+	})
+
+	t.Run("rejects a malformed emoji name", func(t *testing.T) {
+		_, resp, err := client.CreateChannel(context.Background(), newChannel("rocket ship"))
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+		CheckErrorID(t, err, "model.channel.is_valid.emoji.app_error")
+	})
+}
+
 func TestPatchChannelEmoji(t *testing.T) {
 	mainHelper.Parallel(t)
 	th := Setup(t).InitBasic(t)
