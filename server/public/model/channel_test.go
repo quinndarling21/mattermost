@@ -93,6 +93,86 @@ func TestChannelIsValidDiscoverable(t *testing.T) {
 	})
 }
 
+func TestChannelPatchEmoji(t *testing.T) {
+	t.Run("stores the emoji name without surrounding colons or whitespace", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(&ChannelPatch{Emoji: new(" :rocket: ")})
+		require.Equal(t, "rocket", o.Emoji)
+	})
+
+	t.Run("empty string clears the emoji", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, Emoji: "rocket"}
+		o.Patch(&ChannelPatch{Emoji: new("")})
+		require.Empty(t, o.Emoji)
+	})
+
+	t.Run("nil emoji leaves channel untouched", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, Emoji: "rocket"}
+		o.Patch(&ChannelPatch{Header: new("new header")})
+		require.Equal(t, "rocket", o.Emoji)
+	})
+}
+
+func TestChannelIsValidEmoji(t *testing.T) {
+	base := Channel{
+		Id:          NewId(),
+		CreateAt:    GetMillis(),
+		UpdateAt:    GetMillis(),
+		DisplayName: "x",
+		Name:        "valid-name",
+		Type:        ChannelTypeOpen,
+	}
+
+	t.Run("empty emoji is valid", func(t *testing.T) {
+		c := base
+		require.Nil(t, c.IsValid())
+	})
+
+	t.Run("system and custom emoji names are valid on public and private channels", func(t *testing.T) {
+		for _, name := range []string{"rocket", "+1", "thumbsup", "my-custom_emoji"} {
+			c := base
+			c.Emoji = name
+			require.Nil(t, c.IsValid(), name)
+
+			c.Type = ChannelTypePrivate
+			require.Nil(t, c.IsValid(), name)
+		}
+	})
+
+	t.Run("rejects malformed emoji names", func(t *testing.T) {
+		for _, name := range []string{":rocket:", "rocket ship", "🚀", "<script>", strings.Repeat("a", EmojiNameMaxLength+1)} {
+			c := base
+			c.Emoji = name
+			appErr := c.IsValid()
+			require.NotNil(t, appErr, name)
+			require.Equal(t, "model.channel.is_valid.emoji.app_error", appErr.Id)
+		}
+	})
+
+	t.Run("rejects emoji on direct and group message channels", func(t *testing.T) {
+		for _, channelType := range []ChannelType{ChannelTypeDirect, ChannelTypeGroup} {
+			c := base
+			c.Type = channelType
+			c.Emoji = "rocket"
+			appErr := c.IsValid()
+			require.NotNil(t, appErr)
+			require.Equal(t, "model.channel.is_valid.emoji.channel_type.app_error", appErr.Id)
+		}
+	})
+}
+
+func TestChannelPreSaveNormalizesEmoji(t *testing.T) {
+	o := Channel{Name: "test", Emoji: ":tada:"}
+	o.PreSave()
+	require.Equal(t, "tada", o.Emoji)
+}
+
+func TestChannelPreUpdateNormalizesEmoji(t *testing.T) {
+	o := Channel{Name: "test", Emoji: " :tada: "}
+	o.PreUpdate()
+	require.Equal(t, "tada", o.Emoji)
+}
+
 func TestChannelIsValid(t *testing.T) {
 	o := Channel{}
 

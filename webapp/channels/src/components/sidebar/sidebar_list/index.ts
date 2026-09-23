@@ -19,6 +19,7 @@ import {getCurrentTeam} from 'mattermost-redux/selectors/entities/teams';
 import {getThreadCountsInCurrentTeam} from 'mattermost-redux/selectors/entities/threads';
 import {getCurrentUserId} from 'mattermost-redux/selectors/entities/users';
 
+import {loadCustomEmojisIfNeeded} from 'actions/emoji_actions';
 import {switchToChannelById} from 'actions/views/channel';
 import {
     moveChannelsInSidebar,
@@ -97,6 +98,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
             markAllInTeamAsRead,
             setMarkAllAsReadWithoutConfirm,
             openModal,
+            loadCustomEmojisIfNeeded,
         }, dispatch),
     };
 }

@@ -118,6 +118,7 @@ type Channel struct {
 	DefaultCategoryName string          `json:"default_category_name"`
 	ManagedCategoryName string          `json:"managed_category_name"`
 	Discoverable        bool            `json:"discoverable"`
+	Emoji               string          `json:"emoji"`
 }
 
 // HasPolicyAction reports whether the channel's policy declares the given
@@ -192,6 +193,7 @@ type ChannelPatch struct {
 	ManagedCategoryName *string            `json:"managed_category_name"`
 	DefaultCategoryName *string            `json:"default_category_name"`
 	Discoverable        *bool              `json:"discoverable"`
+	Emoji               *string            `json:"emoji"`
 }
 
 func (c *ChannelPatch) Auditable() map[string]any {
@@ -202,6 +204,7 @@ func (c *ChannelPatch) Auditable() map[string]any {
 		"default_category_name": c.DefaultCategoryName,
 		"managed_category_name": c.ManagedCategoryName,
 		"discoverable":          c.Discoverable,
+		"emoji":                 c.Emoji,
 	}
 }
 
@@ -376,6 +379,16 @@ func (o *Channel) IsValid() *AppError {
 		return NewAppError("Channel.IsValid", "model.channel.is_valid.discoverable.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if o.Emoji != "" {
+		if o.IsGroupOrDirect() {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.channel_type.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+		}
+
+		if len(o.Emoji) > EmojiNameMaxLength || !IsValidAlphaNumHyphenUnderscorePlus(o.Emoji) {
+			return NewAppError("Channel.IsValid", "model.channel.is_valid.emoji.app_error", nil, "id="+o.Id, http.StatusBadRequest)
+		}
+	}
+
 	return nil
 }
 
@@ -405,6 +418,7 @@ func (o *Channel) PreSave() {
 
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = normalizeChannelEmoji(o.Emoji)
 	if o.CreateAt == 0 {
 		o.CreateAt = GetMillis()
 	}
@@ -416,6 +430,7 @@ func (o *Channel) PreUpdate() {
 	o.UpdateAt = GetMillis()
 	o.Name = SanitizeUnicode(o.Name)
 	o.DisplayName = SanitizeUnicode(o.DisplayName)
+	o.Emoji = normalizeChannelEmoji(o.Emoji)
 }
 
 func (o *Channel) IsGroupOrDirect() bool {
@@ -500,6 +515,16 @@ func (o *Channel) Patch(patch *ChannelPatch) {
 	if patch.Discoverable != nil {
 		o.Discoverable = *patch.Discoverable
 	}
+
+	if patch.Emoji != nil {
+		o.Emoji = normalizeChannelEmoji(*patch.Emoji)
+	}
+}
+
+// normalizeChannelEmoji accepts both "rocket" and ":rocket:" so that clients can pass
+// the emoji name in either form; the stored value never includes the colons.
+func normalizeChannelEmoji(emoji string) string {
+	return strings.Trim(strings.TrimSpace(emoji), ":")
 }
 
 func (o *Channel) MakeNonNil() {
