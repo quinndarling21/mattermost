@@ -1772,6 +1772,7 @@ func TestPatchChannelEmoji(t *testing.T) {
 				_, resp, err := client.PatchChannel(context.Background(), channel.Id, &model.ChannelPatch{Emoji: new(emoji)})
 				require.Error(t, err)
 				CheckBadRequestStatus(t, resp)
+				CheckErrorID(t, err, "model.channel.is_valid.emoji.channel_type.app_error")
 			}
 		}
 	})
