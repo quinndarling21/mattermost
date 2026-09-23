@@ -10,6 +10,7 @@ import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_chann
 
 import mergeObjects from 'packages/mattermost-redux/test/merge_objects';
 import {renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
+import {TestHelper} from 'utils/test_helper';
 
 const isDesktopAppMock = jest.mocked(isDesktopApp);
 jest.mock('@mattermost/shared/utils/user_agent', () => ({
@@ -123,6 +124,41 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
         const {container} = renderLink();
 
         expect(container.querySelector('.SidebarChannelLinkLabel_wrapper [data-emoticon]')).not.toBeInTheDocument();
+    });
+
+    describe('custom channel emojis', () => {
+        const customEmojiState = {
+            entities: {
+                general: {config: {EnableCustomEmoji: 'true'}},
+                emojis: {
+                    customEmoji: {
+                        team_logo_id: TestHelper.getCustomEmojiMock({id: 'team_logo_id', name: 'team-logo'}),
+                    },
+                },
+            },
+        };
+
+        test('should render a custom emoji that is loaded', () => {
+            const channelWithEmoji: Channel = {...baseChannel, emoji: 'team-logo'};
+            const {container} = renderWithContext(
+                <SidebarChannelLink {...mergeObjects(baseProps, {channel: channelWithEmoji})}/>,
+                customEmojiState,
+            );
+
+            expect(container.querySelector('.SidebarChannelLinkLabel_wrapper > [data-emoticon="team-logo"]')).toBeInTheDocument();
+        });
+
+        test('should render the channel without an emoji when its custom emoji no longer exists', () => {
+            const channelWithEmoji: Channel = {...baseChannel, emoji: 'deleted-emoji'};
+            const {container} = renderWithContext(
+                <SidebarChannelLink {...mergeObjects(baseProps, {channel: channelWithEmoji})}/>,
+                customEmojiState,
+            );
+
+            expect(container.querySelector('.SidebarChannelLinkLabel_wrapper [data-emoticon]')).not.toBeInTheDocument();
+            expect(screen.getByRole('link')).toHaveAttribute('href', '/team/channels/town-square');
+            expect(container.querySelector('.SidebarChannelLinkLabel')).toHaveTextContent('channel_label');
+        });
     });
 
     test('should enable tooltip when needed', () => {
