@@ -9,6 +9,7 @@ import type {UserProfile} from '@mattermost/types/users';
 
 import Constants from 'utils/constants';
 
+import AboutAreaActivity from './about_area_activity';
 import AboutAreaChannel from './about_area_channel';
 import AboutAreaDM from './about_area_dm';
 import AboutAreaGM from './about_area_gm';
@@ -70,6 +71,7 @@ const AboutArea = ({channel, dmUser, gmUsers, canEditChannelProperties, actions}
                     actions={actions}
                 />
             )}
+            <AboutAreaActivity channel={channel}/>
         </Container>
     );
 };
