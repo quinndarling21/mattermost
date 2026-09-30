@@ -24,6 +24,7 @@ export default defineTool({
       cloud: {
         repos: [{ url: REPO_URL, prUrl }],
         autoCreatePR: false,
+        workOnCurrentBranch: true,
       },
     });
     return { prUrl, model: MODEL_LABEL, ...launched };
