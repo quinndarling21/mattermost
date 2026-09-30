@@ -46,16 +46,17 @@ describe('components/threading/global_threads/thread_list/virtualized_thread_lis
             type: '',
             create_at: 1610486901110,
         });
-        const thread = {
+        const thread: UserThread = {
             id,
             reply_count: 2,
             last_reply_at: 1610486901110,
+            last_viewed_at: 0,
             participants: [{id: author.id}],
             unread_replies: 0,
             unread_mentions: 0,
             is_following: true,
             post,
-        } as UserThread;
+        };
 
         return mergeObjects(initialState, {
             entities: {
