@@ -81,7 +81,7 @@ jobs:
           npm run check-types
 
   test-platform:
-    if: github.repository_owner == 'mattermost'
+    if: (github.repository_owner == 'mattermost' || github.repository == 'quinndarling21/mattermost')
     needs: check-lint
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -113,7 +113,7 @@ jobs:
           retention-days: 1
 
   test-mattermost-redux:
-    if: github.repository_owner == 'mattermost'
+    if: (github.repository_owner == 'mattermost' || github.repository == 'quinndarling21/mattermost')
     needs: check-lint
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -142,7 +142,7 @@ jobs:
           retention-days: 1
 
   test-channels:
-    if: github.repository_owner == 'mattermost'
+    if: (github.repository_owner == 'mattermost' || github.repository == 'quinndarling21/mattermost')
     needs: check-lint
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -177,7 +177,7 @@ jobs:
   upload-coverage:
     runs-on: ubuntu-24.04
     needs: [test-platform, test-mattermost-redux, test-channels]
-    if: ${{ github.repository_owner == 'mattermost' && (github.event_name != 'pull_request' || !startsWith(github.event.pull_request.base.ref, 'release-')) }}
+    if: ${{ (github.repository_owner == 'mattermost' || github.repository == 'quinndarling21/mattermost') && (github.event_name != 'pull_request' || !startsWith(github.event.pull_request.base.ref, 'release-')) }}
     defaults:
       run:
         working-directory: webapp/channels
