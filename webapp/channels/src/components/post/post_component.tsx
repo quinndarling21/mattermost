@@ -37,6 +37,8 @@ import PostMessageContainer from 'components/post_view/post_message_view';
 import PostPreHeader from 'components/post_view/post_pre_header';
 import PostTime from 'components/post_view/post_time';
 import ReactionList from 'components/post_view/reaction_list';
+import ReadingTime from 'components/post_view/reading_time';
+import {readingMinutesForPost} from 'components/post_view/reading_time/estimate';
 import RedactedFilesPlaceholder from 'components/post_view/redacted_files_placeholder';
 import ThreadFooter from 'components/threading/channel_threads/thread_footer';
 import type {Props as TimestampProps} from 'components/timestamp/timestamp';
@@ -651,6 +653,14 @@ function PostComponent(props: Props) {
         return idPrefix + `_${post.id}`;
     };
 
+    const headerCollapsed = Boolean(props.isConsecutivePost) && (!props.compactDisplay || props.location === Locations.RHS_COMMENT);
+    const timestampVisible = ((!hideProfilePicture && props.location === Locations.CENTER) || hover || props.location !== Locations.CENTER);
+    const readingMinutes = readingMinutesForPost(post, {
+        location: props.location,
+        timestampVisible,
+        headerCollapsed,
+    });
+
     let priority;
     if (post.metadata?.priority && props.isPostPriorityEnabled && post.state !== Posts.POST_DELETED) {
         priority = <span className='d-flex'><PriorityLabel priority={post.metadata.priority.priority}/></span>;
@@ -811,6 +821,9 @@ function PostComponent(props: Props) {
                                         timestampProps={{...props.timestampProps, style: props.isConsecutivePost && !props.compactDisplay ? 'narrow' : undefined}}
                                     />
                                 }
+                                {readingMinutes > 0 && (
+                                    <ReadingTime minutes={readingMinutes}/>
+                                )}
                                 {priority}
                                 {burnOnReadBadge}
                                 {burnOnReadTimerChip}

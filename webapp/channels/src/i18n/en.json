@@ -6140,6 +6140,8 @@
   "post.error.access": "The post you're requesting is private or does not exist.",
   "post.error.title": "Post Not Found",
   "post.message_attachment.action_failed": "Action failed to execute",
+  "post.reading_time.label": "· {minutes} min read",
+  "post.reading_time.tooltip": "About {minutes} minutes to read",
   "post.redacted_files.subtitle": "Access to files is restricted based on attributes",
   "post.redacted_files.title": "Files not available",
   "post.reminder.acknowledgement": "You will be reminded at {reminderTime}, {reminderDate} about this message from {username}: {permaLink}",
