@@ -5,6 +5,8 @@
 
 import * as util from 'node:util';
 
+import Adapter from '@cfaester/enzyme-adapter-react-18';
+import {configure} from 'enzyme';
 import nodeFetch from 'node-fetch';
 
 import '@testing-library/jest-dom';
@@ -15,6 +17,8 @@ import './react-intl_mock';
 import './react-router-dom_mock';
 import './react-tippy_mock';
 import './react_virtualized_auto_sizer_mock';
+
+configure({adapter: new Adapter()});
 
 module.exports = async () => {
     // eslint-disable-next-line no-process-env

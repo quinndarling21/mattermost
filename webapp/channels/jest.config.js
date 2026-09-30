@@ -39,6 +39,7 @@ const config = {
     transform: {
         '^.+\\.(js|jsx|ts|tsx|mjs)$': 'babel-jest',
     },
+    snapshotSerializers: ['enzyme-to-json/serializer'],
     setupFiles: ['jest-canvas-mock'],
     setupFilesAfterEnv: ['<rootDir>/src/tests/setup_jest.ts'],
     testEnvironment: 'jsdom',
