@@ -723,4 +723,97 @@ describe('PostComponent', () => {
             expect(screen.getByLabelText('Message posted by @aibot')).toBeInTheDocument();
         });
     });
+
+    describe('reading time', () => {
+        const longMessage = Array.from({length: 200}, () => 'word').join(' ');
+
+        test('shows a reading-time label on a long root post', () => {
+            const props = {
+                ...baseProps,
+                post: TestHelper.getPostMock({channel_id: channel.id, message: longMessage, type: ''}),
+            };
+            renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.getByTestId('post-reading-time')).toHaveTextContent('· 1 min read');
+        });
+
+        test('hides the label on a short post', () => {
+            const props = {
+                ...baseProps,
+                post: TestHelper.getPostMock({channel_id: channel.id, message: 'short chat', type: ''}),
+            };
+            renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+        });
+
+        test('removes the label when an edit drops the post under the threshold', () => {
+            const props = {
+                ...baseProps,
+                post: TestHelper.getPostMock({channel_id: channel.id, message: longMessage, type: ''}),
+            };
+            const {rerender} = renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.getByTestId('post-reading-time')).toBeInTheDocument();
+
+            rerender(
+                <PostComponent
+                    {...props}
+                    post={{...props.post, message: 'now short', edit_at: 5}}
+                />,
+            );
+
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+        });
+
+        test('hides the label on deleted, ephemeral, and reply posts', () => {
+            const deleted = {
+                ...baseProps,
+                post: TestHelper.getPostMock({
+                    channel_id: channel.id,
+                    message: longMessage,
+                    type: '',
+                    state: Posts.POST_DELETED as 'DELETED',
+                }),
+            };
+            const {rerender} = renderWithContext(<PostComponent {...deleted}/>);
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+
+            rerender(
+                <PostComponent
+                    {...baseProps}
+                    post={TestHelper.getPostMock({
+                        channel_id: channel.id,
+                        message: longMessage,
+                        type: Posts.POST_TYPES.EPHEMERAL,
+                    })}
+                />,
+            );
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+
+            rerender(
+                <PostComponent
+                    {...baseProps}
+                    post={TestHelper.getPostMock({
+                        channel_id: channel.id,
+                        message: longMessage,
+                        root_id: 'root-post',
+                        type: '',
+                    })}
+                />,
+            );
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+        });
+
+        test('does not show an orphan label when the consecutive header is collapsed', () => {
+            const props = {
+                ...baseProps,
+                isConsecutivePost: true,
+                post: TestHelper.getPostMock({channel_id: channel.id, message: longMessage, type: ''}),
+            };
+            renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+        });
+    });
 });
