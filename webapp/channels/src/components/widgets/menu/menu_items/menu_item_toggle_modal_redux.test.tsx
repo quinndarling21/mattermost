@@ -7,7 +7,7 @@ import {renderWithContext, screen, userEvent} from 'tests/react_testing_utils';
 
 import {MenuItemToggleModalReduxImpl} from './menu_item_toggle_modal_redux';
 
-const TestModal = () => <div>{'Test modal'}</div>;
+const TestModal = () => null;
 
 describe('components/MenuItemToggleModalRedux', () => {
     const baseProps = {
