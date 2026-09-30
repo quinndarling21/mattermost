@@ -1,81 +1,101 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {shallow} from 'enzyme';
 import React from 'react';
+
+import {render, screen, userEvent} from 'tests/react_testing_utils';
 
 import MarkdownImageExpand from './markdown_image_expand';
 
 describe('components/MarkdownImageExpand', () => {
-    it('should match snapshot for collapsed embeds', () => {
-        const toggleHandler = jest.fn();
-        const imageCollapseHandler = jest.fn();
-        const wrapper = shallow(
+    const altText = 'Some alt text';
+    const imageContent = 'An image to expand';
+    const baseProps = {
+        alt: altText,
+        postId: 'abc',
+        imageKey: '1',
+    };
+
+    function renderExpand(isExpanded: boolean) {
+        const onToggle = jest.fn();
+        const toggleInlineImageVisibility = jest.fn();
+
+        const view = render(
             <MarkdownImageExpand
-                alt={'Some alt text'}
-                postId={'abc'}
-                isExpanded={false}
-                imageKey={'1'}
-                onToggle={toggleHandler}
-                toggleInlineImageVisibility={imageCollapseHandler}
-            >{'An image to expand'}</MarkdownImageExpand>,
+                {...baseProps}
+                isExpanded={isExpanded}
+                onToggle={onToggle}
+                toggleInlineImageVisibility={toggleInlineImageVisibility}
+            >
+                {imageContent}
+            </MarkdownImageExpand>,
         );
 
-        expect(wrapper).toMatchSnapshot();
+        return {onToggle, toggleInlineImageVisibility, ...view};
+    }
+
+    it('should show a collapsed embed with alt text and an expand button', () => {
+        const {onToggle, toggleInlineImageVisibility} = renderExpand(false);
+
+        const expandButton = screen.getByRole('button', {name: altText});
+        expect(expandButton).toBeVisible();
+        expect(expandButton).toHaveAttribute('type', 'button');
+        expect(expandButton).toHaveClass('markdown-image-expand__expand-button');
+        expect(expandButton.parentElement).toHaveClass('markdown-image-expand');
+        expect(expandButton.parentElement).not.toHaveClass('markdown-image-expand--expanded');
+
+        expect(expandButton.querySelector('.markdown-image-expand__expand-icon')).toHaveClass(
+            'icon',
+            'icon-menu-right',
+            'markdown-image-expand__expand-icon',
+        );
+        expect(screen.getByText(altText)).toHaveClass('markdown-image-expand__alt-text');
+        expect(screen.getByText(altText)).toBeVisible();
+        expect(screen.queryByText(imageContent)).not.toBeInTheDocument();
+        expect(screen.getAllByRole('button')).toHaveLength(1);
+
+        expect(onToggle).toHaveBeenCalledWith(false);
+        expect(toggleInlineImageVisibility).not.toHaveBeenCalled();
     });
 
-    it('should match snapshot for expanded embeds', () => {
-        const toggleHandler = jest.fn();
-        const imageCollapseHandler = jest.fn();
-        const wrapper = shallow(
-            <MarkdownImageExpand
-                alt={'Some alt text'}
-                postId={'abc'}
-                isExpanded={true}
-                imageKey={'1'}
-                onToggle={toggleHandler}
-                toggleInlineImageVisibility={imageCollapseHandler}
-            >{'An image to expand'}</MarkdownImageExpand>,
-        );
+    it('should show an expanded embed with image content and a collapse button', () => {
+        const {onToggle, toggleInlineImageVisibility} = renderExpand(true);
 
-        expect(wrapper).toMatchSnapshot();
+        const collapseButton = screen.getByRole('button');
+        expect(collapseButton).toBeVisible();
+        expect(collapseButton).toHaveAttribute('type', 'button');
+        expect(collapseButton).toHaveClass('markdown-image-expand__collapse-button');
+        expect(collapseButton.parentElement).toHaveClass('markdown-image-expand', 'markdown-image-expand--expanded');
+
+        expect(collapseButton.querySelector('.icon')).toHaveClass('icon', 'icon-menu-down');
+        expect(collapseButton.querySelector('.markdown-image-expand__expand-icon')).toBeNull();
+        expect(screen.getByText(imageContent)).toBeVisible();
+        expect(screen.queryByText(altText)).not.toBeInTheDocument();
+        expect(screen.getAllByRole('button')).toHaveLength(1);
+
+        expect(onToggle).toHaveBeenCalledWith(true);
+        expect(toggleInlineImageVisibility).not.toHaveBeenCalled();
     });
 
-    it('should emit toggle action on collapse button click', () => {
-        const toggleHandler = jest.fn();
-        const imageCollapseHandler = jest.fn();
-        const wrapper = shallow(
-            <MarkdownImageExpand
-                alt={'Some alt text'}
-                postId={'abc'}
-                isExpanded={true}
-                imageKey={'1'}
-                onToggle={toggleHandler}
-                toggleInlineImageVisibility={imageCollapseHandler}
-            >{'An image to expand'}</MarkdownImageExpand>,
-        );
+    it('should emit toggle action on collapse button click', async () => {
+        const {onToggle, toggleInlineImageVisibility} = renderExpand(true);
 
-        wrapper.find('.markdown-image-expand__collapse-button').simulate('click');
+        await userEvent.click(screen.getByRole('button'));
 
-        expect(imageCollapseHandler).toHaveBeenCalled();
+        expect(toggleInlineImageVisibility).toHaveBeenCalledTimes(1);
+        expect(toggleInlineImageVisibility).toHaveBeenCalledWith('abc', '1');
+        expect(onToggle).toHaveBeenCalledTimes(1);
+        expect(onToggle).toHaveBeenCalledWith(true);
     });
 
-    it('should emit toggle action on expand button click', () => {
-        const toggleHandler = jest.fn();
-        const imageCollapseHandler = jest.fn();
-        const wrapper = shallow(
-            <MarkdownImageExpand
-                alt={'Some alt text'}
-                postId={'abc'}
-                isExpanded={false}
-                imageKey={'1'}
-                onToggle={toggleHandler}
-                toggleInlineImageVisibility={imageCollapseHandler}
-            >{'An image to expand'}</MarkdownImageExpand>,
-        );
+    it('should emit toggle action on expand button click', async () => {
+        const {onToggle, toggleInlineImageVisibility} = renderExpand(false);
 
-        wrapper.find('.markdown-image-expand__expand-button').simulate('click');
+        await userEvent.click(screen.getByRole('button', {name: altText}));
 
-        expect(imageCollapseHandler).toHaveBeenCalled();
+        expect(toggleInlineImageVisibility).toHaveBeenCalledTimes(1);
+        expect(toggleInlineImageVisibility).toHaveBeenCalledWith('abc', '1');
+        expect(onToggle).toHaveBeenCalledTimes(1);
+        expect(onToggle).toHaveBeenCalledWith(false);
     });
 });
