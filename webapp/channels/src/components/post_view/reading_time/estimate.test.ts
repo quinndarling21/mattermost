@@ -98,7 +98,7 @@ describe('readingMinutesForPost', () => {
         expect(readingMinutesForPost(TestHelper.getPostMock({message: words(400), type: '', root_id: 'root'}), visible)).toBe(0);
         expect(readingMinutesForPost(TestHelper.getPostMock({message: words(400), type: 'system_join_channel'}), visible)).toBe(0);
         expect(readingMinutesForPost(TestHelper.getPostMock({message: words(400), type: Posts.POST_TYPES.EPHEMERAL}), visible)).toBe(0);
-        expect(readingMinutesForPost(TestHelper.getPostMock({message: words(400), type: '', state: Posts.POST_DELETED}), visible)).toBe(0);
+        expect(readingMinutesForPost(TestHelper.getPostMock({message: words(400), type: '', state: Posts.POST_DELETED as 'DELETED'}), visible)).toBe(0);
         expect(readingMinutesForPost(TestHelper.getPostMock({message: words(400), type: '', id: 'pending', pending_post_id: 'pending'}), visible)).toBe(0);
         expect(readingMinutesForPost(TestHelper.getPostMock({message: words(400), type: '', failed: true}), visible)).toBe(0);
     });
