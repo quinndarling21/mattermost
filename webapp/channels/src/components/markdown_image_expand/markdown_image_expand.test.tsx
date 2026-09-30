@@ -14,6 +14,7 @@ describe('components/MarkdownImageExpand', () => {
         imageKey: '1',
         onToggle: jest.fn(),
         toggleInlineImageVisibility: jest.fn(),
+        children: 'An image to expand',
     };
 
     test('should show the expand button with alt text and hide the image when collapsed', () => {
@@ -21,9 +22,7 @@ describe('components/MarkdownImageExpand', () => {
             <MarkdownImageExpand
                 {...baseProps}
                 isExpanded={false}
-            >
-                {'An image to expand'}
-            </MarkdownImageExpand>,
+            />,
         );
 
         expect(screen.getByRole('button', {name: 'Some alt text'})).toBeVisible();
@@ -36,9 +35,7 @@ describe('components/MarkdownImageExpand', () => {
             <MarkdownImageExpand
                 {...baseProps}
                 isExpanded={true}
-            >
-                {'An image to expand'}
-            </MarkdownImageExpand>,
+            />,
         );
 
         expect(screen.getByRole('button')).toBeVisible();
@@ -52,9 +49,7 @@ describe('components/MarkdownImageExpand', () => {
             <MarkdownImageExpand
                 {...baseProps}
                 isExpanded={true}
-            >
-                {'An image to expand'}
-            </MarkdownImageExpand>,
+            />,
         );
 
         await userEvent.click(screen.getByRole('button'));
@@ -68,9 +63,7 @@ describe('components/MarkdownImageExpand', () => {
             <MarkdownImageExpand
                 {...baseProps}
                 isExpanded={false}
-            >
-                {'An image to expand'}
-            </MarkdownImageExpand>,
+            />,
         );
 
         await userEvent.click(screen.getByRole('button', {name: 'Some alt text'}));
@@ -84,9 +77,7 @@ describe('components/MarkdownImageExpand', () => {
             <MarkdownImageExpand
                 {...baseProps}
                 isExpanded={false}
-            >
-                {'An image to expand'}
-            </MarkdownImageExpand>,
+            />,
         );
 
         expect(baseProps.onToggle).toHaveBeenCalledTimes(1);
@@ -96,9 +87,7 @@ describe('components/MarkdownImageExpand', () => {
             <MarkdownImageExpand
                 {...baseProps}
                 isExpanded={true}
-            >
-                {'An image to expand'}
-            </MarkdownImageExpand>,
+            />,
         );
 
         expect(baseProps.onToggle).toHaveBeenCalledTimes(2);
