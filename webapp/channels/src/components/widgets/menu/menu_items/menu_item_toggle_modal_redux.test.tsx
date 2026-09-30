@@ -1,55 +1,60 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {shallow} from 'enzyme';
 import React from 'react';
+
+import {renderWithContext, screen, userEvent} from 'tests/react_testing_utils';
 
 import {MenuItemToggleModalReduxImpl} from './menu_item_toggle_modal_redux';
 
-describe('components/MenuItemToggleModalRedux', () => {
-    test('should match snapshot', () => {
-        const wrapper = shallow(
-            <MenuItemToggleModalReduxImpl
-                modalId='test'
-                dialogType={jest.fn()}
-                dialogProps={{test: 'test'}}
-                text='Whatever'
-            />,
-        );
+const TestModal = () => <div>{'Test modal'}</div>;
 
-        expect(wrapper).toMatchInlineSnapshot(`
-            <Fragment>
-              <ToggleModalButton
-                className=""
-                dialogProps={
-                  Object {
-                    "test": "test",
-                  }
-                }
-                dialogType={[MockFunction]}
-                modalId="test"
-              >
-                <span
-                  className="MenuItem__primary-text"
-                >
-                  Whatever
-                </span>
-              </ToggleModalButton>
-            </Fragment>
-        `);
+describe('components/MenuItemToggleModalRedux', () => {
+    const baseProps = {
+        modalId: 'test',
+        dialogType: TestModal,
+        dialogProps: {test: 'test'},
+        text: 'Whatever',
+    };
+
+    test('should render a button with the primary text', () => {
+        renderWithContext(<MenuItemToggleModalReduxImpl {...baseProps}/>);
+
+        const button = screen.getByRole('button', {name: 'Whatever'});
+        expect(button).toBeVisible();
+        expect(button).not.toHaveClass('MenuItem__with-help');
+
+        expect(screen.getByText('Whatever')).toHaveClass('MenuItem__primary-text');
+        expect(screen.queryByText('Extra text')).not.toBeInTheDocument();
     });
 
-    test('should match snapshot with extra text', () => {
-        const wrapper = shallow(
+    test('should render extra text as help text', () => {
+        renderWithContext(
             <MenuItemToggleModalReduxImpl
-                modalId='test'
-                dialogType={jest.fn()}
-                dialogProps={{test: 'test'}}
-                text='Whatever'
+                {...baseProps}
                 extraText='Extra text'
             />,
         );
 
-        expect(wrapper).toMatchSnapshot();
+        const button = screen.getByRole('button', {name: /Whatever/});
+        expect(button).toHaveClass('MenuItem__with-help');
+
+        expect(screen.getByText('Whatever')).toHaveClass('MenuItem__primary-text');
+
+        const extraText = screen.getByText('Extra text');
+        expect(extraText).toBeVisible();
+        expect(extraText).toHaveClass('MenuItem__help-text');
+    });
+
+    test('should open the modal when clicked', async () => {
+        const {store} = renderWithContext(<MenuItemToggleModalReduxImpl {...baseProps}/>);
+
+        await userEvent.click(screen.getByRole('button', {name: 'Whatever'}));
+
+        expect(store.getState().views.modals.modalState.test).toEqual({
+            open: true,
+            dialogType: TestModal,
+            dialogProps: {test: 'test'},
+        });
     });
 });
