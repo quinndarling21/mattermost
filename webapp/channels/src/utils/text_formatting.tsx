@@ -668,7 +668,7 @@ export function highlightCurrentMentions(
         }
 
         let flags = 'g';
-        if (!mention.caseSensitive) {
+        if (mention.caseSensitive) {
             flags += 'i';
         }
 
