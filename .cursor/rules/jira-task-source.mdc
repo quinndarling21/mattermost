@@ -1,8 +1,11 @@
 ---
-description: Use the Mattermost Jira board as the source of truth for engineering tasks
+description: Use Jira project MM on quinnsworkspace-610b13be.atlassian.net as the single source of truth for engineering tasks, and Confluence space MM for project docs
 alwaysApply: true
 ---
 
 # Jira
 
-- When the user mentions Jira in this repository, look in the `Mattermost` project (`MAT`) on `fe-anysphere-demo.atlassian.net`.
+- When the user mentions Jira, a task, a ticket, or a work item in this repository, look in Jira project `MM` on `https://quinnsworkspace-610b13be.atlassian.net`.
+- Project URL: https://quinnsworkspace-610b13be.atlassian.net/jira/software/projects/MM
+- Jira project `MM` is the single source of truth for tasks, bugs, feature requests, and the board; do not look for these in any other tracker.
+- Project documentation lives in Confluence space `MM`: https://quinnsworkspace-610b13be.atlassian.net/wiki/spaces/MM/overview. Write or look up Confluence docs there.

@@ -1,9 +1,9 @@
 ---
-description: Resolve references to the project sprint to the Mattermost Jira sprint board
+description: Resolve references to the project sprint or the board to Jira project MM board 1 on quinnsworkspace-610b13be.atlassian.net
 alwaysApply: true
 ---
 
 # Jira Sprint
 
-- When the user refers to the project sprint (or "the sprint") in this repository, they mean the active sprint on board `841` in the `Mattermost` project (`MAT`) on `fe-anysphere-demo.atlassian.net`.
-- Board URL: https://fe-anysphere-demo.atlassian.net/jira/software/projects/MAT/boards/841?sprintStarted=true
+- When the user refers to the project sprint (or "the sprint") or "the board" in this repository, they mean the active sprint on board `1` in Jira project `MM` on `https://quinnsworkspace-610b13be.atlassian.net`.
+- Board URL: https://quinnsworkspace-610b13be.atlassian.net/jira/software/projects/MM/boards/1

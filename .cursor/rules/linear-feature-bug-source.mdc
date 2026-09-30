@@ -1,10 +1,11 @@
 ---
-description: 
+description: Use Jira project MM on quinnsworkspace-610b13be.atlassian.net as the single source of truth for feature requests and bugs
 alwaysApply: true
 ---
 
-# Linear
+# Feature requests and bugs
 
-- For anything related to feature requests or bugs in this repository, treat Linear as the source of truth.
-- Use the Mattermost Factory `MAT` project: https://linear.app/mattermost-factory/team/MAT/overview.
-- When the user references a feature request, bug, issue, ticket, or work item without naming another tracker, check or refer to this Linear project first.
+- For anything related to feature requests or bugs in this repository, treat Jira project `MM` on `https://quinnsworkspace-610b13be.atlassian.net` as the single source of truth.
+- Project URL: https://quinnsworkspace-610b13be.atlassian.net/jira/software/projects/MM
+- When the user references a feature request, bug, issue, ticket, or work item without naming another tracker, check or refer to this Jira project first.
+- Supporting documentation for features and bugs lives in Confluence space `MM`: https://quinnsworkspace-610b13be.atlassian.net/wiki/spaces/MM/overview
