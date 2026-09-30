@@ -23,8 +23,10 @@ export default defineTool({
       model: GROK_47_HIGH_FAST,
       cloud: {
         repos: [{ url: REPO_URL, prUrl }],
-        autoCreatePR: false,
+        // Push fix commits to the PR's own head branch instead of a new
+        // cursor/ branch, and don't open a second PR.
         workOnCurrentBranch: true,
+        autoCreatePR: false,
       },
     });
     return { prUrl, model: MODEL_LABEL, ...launched };
