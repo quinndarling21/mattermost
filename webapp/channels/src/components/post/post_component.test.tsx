@@ -815,5 +815,38 @@ describe('PostComponent', () => {
 
             expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
         });
+
+        test('shows the label on a compact consecutive post only while the timestamp is hovered', async () => {
+            const props = {
+                ...baseProps,
+                compactDisplay: true,
+                isConsecutivePost: true,
+                post: TestHelper.getPostMock({channel_id: channel.id, message: longMessage, type: ''}),
+            };
+            renderWithContext(<PostComponent {...props}/>);
+
+            const post = screen.getByTestId('postView');
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+
+            await userEvent.hover(post);
+            expect(screen.getByTestId('post-reading-time')).toHaveTextContent('· 1 min read');
+
+            await userEvent.unhover(post);
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+        });
+
+        test('keeps the label hidden when hover reveals the timestamp on a collapsed header', async () => {
+            const props = {
+                ...baseProps,
+                compactDisplay: false,
+                isConsecutivePost: true,
+                post: TestHelper.getPostMock({channel_id: channel.id, message: longMessage, type: ''}),
+            };
+            renderWithContext(<PostComponent {...props}/>);
+
+            await userEvent.hover(screen.getByTestId('postView'));
+
+            expect(screen.queryByTestId('post-reading-time')).not.toBeInTheDocument();
+        });
     });
 });

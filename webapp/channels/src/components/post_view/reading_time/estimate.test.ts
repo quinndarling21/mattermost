@@ -20,6 +20,11 @@ function words(count: number, word = 'word'): string {
 }
 
 describe('reading time estimate', () => {
+    test('ignores punctuation and emoji that are not words', () => {
+        expect(countWords('hello ... 🎉 world')).toBe(2);
+        expect(estimateReadingMinutes(`${words(WORDS_PER_MINUTE - 1)} ...`)).toBe(0);
+    });
+
     test('returns 0 below 200 words', () => {
         expect(countWords(words(0))).toBe(0);
         expect(countWords('   ')).toBe(0);

@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import {renderWithContext, screen} from 'tests/react_testing_utils';
+import {act, renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
 
 import ReadingTime from './reading_time';
 
@@ -20,5 +20,22 @@ describe('ReadingTime', () => {
         renderWithContext(<ReadingTime minutes={12}/>);
 
         expect(screen.getByTestId('post-reading-time')).toHaveTextContent('· 12 min read');
+    });
+
+    test.each([1, 12])('shows the reading-time tooltip for %s minutes', async (minutes) => {
+        jest.useFakeTimers();
+
+        renderWithContext(<ReadingTime minutes={minutes}/>);
+
+        await userEvent.hover(screen.getByTestId('post-reading-time'), {advanceTimers: jest.advanceTimersByTime});
+        await act(async () => {
+            jest.advanceTimersByTime(1000);
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText(`About ${minutes} minutes to read`)).toBeInTheDocument();
+        });
+
+        jest.useRealTimers();
     });
 });
