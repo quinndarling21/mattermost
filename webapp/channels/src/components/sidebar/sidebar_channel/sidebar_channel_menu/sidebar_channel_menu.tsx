@@ -2,8 +2,9 @@
 // See LICENSE.txt for license information.
 
 import React, {useRef, memo} from 'react';
+import type {KeyboardEvent, MouseEvent} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
 import {
     MarkAsUnreadIcon,
@@ -15,6 +16,8 @@ import {
     AccountPlusOutlineIcon,
     DotsVerticalIcon,
     ExitToAppIcon,
+    EmoticonOutlineIcon,
+    MinusCircleOutlineIcon,
 } from '@mattermost/compass-icons/components';
 import {WithTooltip} from '@mattermost/shared/components/tooltip';
 
@@ -30,6 +33,8 @@ import {canPopout, isChannelPopoutWindow} from 'utils/popouts/popout_windows';
 import {copyToClipboard} from 'utils/utils';
 
 import type {GlobalState} from 'types/store';
+
+import {getChannelEmojiName, removeChannelEmoji} from '../channel_emoji';
 
 import type {PropsFromRedux, OwnProps} from './index';
 
@@ -53,9 +58,12 @@ const SidebarChannelMenu = ({
     unfavoriteChannel,
     unmuteChannel,
     channelLeaveHandler,
+    onOpenChannelEmojiPicker,
 }: Props) => {
     const isLeaving = useRef(false);
+    const dispatch = useDispatch();
     const isInManagedCategory = useSelector((state: GlobalState) => isChannelInManagedCategory(state, channel.id));
+    const channelEmojiName = useSelector((state: GlobalState) => getChannelEmojiName(state, channel.id));
 
     const {formatMessage} = useIntl();
 
@@ -213,6 +221,58 @@ const SidebarChannelMenu = ({
         );
     }
 
+    let setChannelEmojiMenuItem: JSX.Element | null = null;
+    let removeChannelEmojiMenuItem: JSX.Element | null = null;
+    if (channel.type === Constants.OPEN_CHANNEL || channel.type === Constants.PRIVATE_CHANNEL) {
+        function handleOpenChannelEmojiPicker(event: MouseEvent<HTMLLIElement> | KeyboardEvent<HTMLLIElement>) {
+            event.preventDefault();
+            event.stopPropagation();
+            onOpenChannelEmojiPicker?.();
+        }
+
+        setChannelEmojiMenuItem = (
+            <Menu.Item
+                id={`setChannelEmoji-${channel.id}`}
+                onClick={handleOpenChannelEmojiPicker}
+                aria-haspopup='dialog'
+                leadingElement={<EmoticonOutlineIcon size={18}/>}
+                labels={channelEmojiName ? (
+                    <FormattedMessage
+                        id='sidebar_left.sidebar_channel_menu.changeChannelEmoji'
+                        defaultMessage='Change channel emoji'
+                    />
+                ) : (
+                    <FormattedMessage
+                        id='sidebar_left.sidebar_channel_menu.setChannelEmoji'
+                        defaultMessage='Set channel emoji'
+                    />
+                )}
+            />
+        );
+
+        if (channelEmojiName) {
+            function handleRemoveChannelEmoji(event: MouseEvent<HTMLLIElement> | KeyboardEvent<HTMLLIElement>) {
+                event.preventDefault();
+                event.stopPropagation();
+                dispatch(removeChannelEmoji(channel.id));
+            }
+
+            removeChannelEmojiMenuItem = (
+                <Menu.Item
+                    id={`removeChannelEmoji-${channel.id}`}
+                    onClick={handleRemoveChannelEmoji}
+                    leadingElement={<MinusCircleOutlineIcon size={18}/>}
+                    labels={(
+                        <FormattedMessage
+                            id='sidebar_left.sidebar_channel_menu.removeChannelEmoji'
+                            defaultMessage='Remove channel emoji'
+                        />
+                    )}
+                />
+            );
+        }
+    }
+
     let copyLinkMenuItem: JSX.Element | null = null;
     if (channel.type === Constants.OPEN_CHANNEL || channel.type === Constants.PRIVATE_CHANNEL) {
         function handleCopyLink() {
@@ -327,6 +387,8 @@ const SidebarChannelMenu = ({
             {markAsReadUnreadMenuItem}
             {favoriteUnfavoriteMenuItem}
             {muteUnmuteChannelMenuItem}
+            {setChannelEmojiMenuItem}
+            {removeChannelEmojiMenuItem}
             <Menu.Separator/>
             <ChannelMoveToSubmenu channel={channel}/>
             {(copyLinkMenuItem || addMembersMenuItem) && <Menu.Separator/>}

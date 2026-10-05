@@ -5,18 +5,51 @@ import React from 'react';
 
 import {isDesktopApp} from '@mattermost/shared/utils/user_agent';
 import type {ChannelType} from '@mattermost/types/channels';
+import type {SystemEmoji} from '@mattermost/types/emojis';
+import type {DeepPartial} from '@mattermost/types/utilities';
+
+import {Client4} from 'mattermost-redux/client';
+import {Preferences} from 'mattermost-redux/constants';
 
 import SidebarChannelLink from 'components/sidebar/sidebar_channel/sidebar_channel_link/sidebar_channel_link';
 
 import mergeObjects from 'packages/mattermost-redux/test/merge_objects';
-import {renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
+import {act, renderWithContext, screen, userEvent, waitFor} from 'tests/react_testing_utils';
+
+import type {GlobalState} from 'types/store';
 
 const isDesktopAppMock = jest.mocked(isDesktopApp);
 jest.mock('@mattermost/shared/utils/user_agent', () => ({
     isDesktopApp: jest.fn(),
 }));
 
+const mockEmojiPicker = {
+    options: null as null | {
+        onEmojiClick: (emoji: SystemEmoji) => void;
+        setShowEmojiPicker: (show: boolean) => void;
+    },
+};
+
+jest.mock('components/emoji_picker/use_emoji_picker', () => {
+    const React = require('react');
+    return {
+        __esModule: true,
+        default: (options: NonNullable<typeof mockEmojiPicker.options>) => {
+            mockEmojiPicker.options = options;
+            return {
+                emojiPicker: React.createElement('div', {'data-testid': 'emoji-picker'}),
+                getReferenceProps: () => ({}),
+                setReference: jest.fn(),
+            };
+        },
+    };
+});
+
 describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     const baseChannel = {
         id: 'channel_id',
         display_name: 'channel_display_name',
@@ -61,9 +94,9 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
         },
     };
 
-    const renderLink = (props: Partial<typeof baseProps> = {}) => {
+    const renderLink = (props: Partial<typeof baseProps> = {}, initialState: DeepPartial<GlobalState> = {}) => {
         const merged = mergeObjects(baseProps, props);
-        return renderWithContext(<SidebarChannelLink {...merged}/>);
+        return renderWithContext(<SidebarChannelLink {...merged}/>, initialState);
     };
 
     test('should match snapshot', () => {
@@ -210,6 +243,114 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
         });
 
         expect(screen.getByRole('link')).not.toHaveAccessibleName(/including an urgent mention/i);
+    });
+
+    test('shows a personal emoji after the channel name and keeps the link name unchanged', () => {
+        renderLink({}, {
+            entities: {
+                preferences: {
+                    myPreferences: {
+                        [`${Preferences.CATEGORY_CHANNEL_EMOJI}--channel_id`]: {
+                            user_id: 'user_id',
+                            category: Preferences.CATEGORY_CHANNEL_EMOJI,
+                            name: 'channel_id',
+                            value: 'smile',
+                        },
+                    },
+                },
+            },
+        });
+
+        const link = screen.getByRole('link', {name: /channel_label/i});
+        const label = link.querySelector('.SidebarChannelLinkLabel');
+        expect(label?.nextElementSibling).toHaveClass('ChannelEmoji');
+        expect(label?.nextElementSibling?.querySelector('[data-emoticon="smile"]')).toBeInTheDocument();
+        expect(link).not.toHaveAccessibleName(/smile/i);
+    });
+
+    test('does not render a broken marker for an unknown emoji', () => {
+        const {container} = renderLink({}, {
+            entities: {
+                preferences: {
+                    myPreferences: {
+                        [`${Preferences.CATEGORY_CHANNEL_EMOJI}--channel_id`]: {
+                            user_id: 'user_id',
+                            category: Preferences.CATEGORY_CHANNEL_EMOJI,
+                            name: 'channel_id',
+                            value: 'missing-emoji',
+                        },
+                    },
+                },
+            },
+        });
+
+        expect(container.querySelector('.ChannelEmoji')).not.toBeInTheDocument();
+        expect(container).not.toHaveTextContent('missing-emoji');
+    });
+
+    test('sets a channel emoji from the row menu and shows it after the name', async () => {
+        jest.spyOn(Client4, 'savePreferences').mockResolvedValue({status: 'OK'});
+        jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+            callback(0);
+            return 1;
+        });
+        const {store} = renderLink({}, {
+            entities: {users: {currentUserId: 'user_id'}},
+        });
+
+        const user = userEvent.setup();
+        await user.click(screen.getByRole('button', {name: /channel options/i}));
+        await user.click(await screen.findByRole('menuitem', {name: 'Set channel emoji'}));
+
+        await waitFor(() => {
+            expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
+        });
+
+        const emoji = {
+            name: 'smile',
+            short_name: 'smile',
+            short_names: ['smile'],
+            category: 'smileys-emotion',
+            unified: '1f642',
+        } as SystemEmoji;
+
+        act(() => {
+            mockEmojiPicker.options?.onEmojiClick(emoji);
+        });
+
+        const preference = store.getState().entities.preferences.myPreferences[`${Preferences.CATEGORY_CHANNEL_EMOJI}--channel_id`];
+        expect(preference.value).toBe('smile');
+        const label = screen.getByRole('link').querySelector('.SidebarChannelLinkLabel');
+        expect(label?.nextElementSibling).toHaveClass('ChannelEmoji');
+        expect(screen.queryByTestId('emoji-picker')).not.toBeInTheDocument();
+    });
+
+    test('dismissing the emoji picker does not save a preference', async () => {
+        const savePreferences = jest.spyOn(Client4, 'savePreferences').mockResolvedValue({status: 'OK'});
+        const {store} = renderLink({}, {
+            entities: {users: {currentUserId: 'user_id'}},
+        });
+
+        const user = userEvent.setup();
+        await user.click(screen.getByRole('button', {name: /channel options/i}));
+        await user.click(await screen.findByRole('menuitem', {name: 'Set channel emoji'}));
+        await screen.findByTestId('emoji-picker');
+
+        act(() => {
+            mockEmojiPicker.options?.setShowEmojiPicker(false);
+        });
+
+        expect(screen.queryByTestId('emoji-picker')).not.toBeInTheDocument();
+        expect(savePreferences).not.toHaveBeenCalled();
+        expect(store.getState().entities.preferences.myPreferences[`${Preferences.CATEGORY_CHANNEL_EMOJI}--channel_id`]).toBeUndefined();
+    });
+
+    test('clicking channel options does not select the channel', async () => {
+        renderLink();
+
+        await userEvent.click(screen.getByRole('button', {name: /channel options/i}));
+
+        expect(baseProps.actions.clearChannelSelection).not.toHaveBeenCalled();
     });
 
     test('should refetch when channel changes', () => {

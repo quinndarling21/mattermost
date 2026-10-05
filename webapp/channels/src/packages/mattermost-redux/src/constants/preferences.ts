@@ -43,6 +43,7 @@ const Preferences = {
     CUSTOM_STATUS_MODAL_VIEWED: 'custom_status_modal_viewed',
 
     CATEGORY_SIDEBAR_SETTINGS: 'sidebar_settings',
+    CATEGORY_CHANNEL_EMOJI: 'channel_emoji',
     CHANNEL_SIDEBAR_ORGANIZATION: 'channel_sidebar_organization',
     LIMIT_VISIBLE_DMS_GMS: 'limit_visible_dms_gms',
     SHOW_UNREAD_SECTION: 'show_unread_section',
