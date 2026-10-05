@@ -30,6 +30,7 @@ export type OwnProps = {
     isUnread: boolean;
     channelLeaveHandler?: (callback: () => void) => void;
     onMenuToggle: (open: boolean) => void;
+    onOpenChannelEmojiPicker?: () => void;
 }
 
 function mapStateToProps(state: GlobalState, ownProps: OwnProps) {

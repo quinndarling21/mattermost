@@ -1,0 +1,25 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+.ChannelEmoji {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    align-items: center;
+    align-self: center;
+    justify-content: center;
+
+    // The label wrapper uses an 8px flex gap. Pull the marker back so it sits
+    // 4px after the truncated channel name without changing the gap used by
+    // shared-channel and plugin indicators.
+    margin-inline-start: -4px;
+}
+
+.SidebarChannelLinkLabel_wrapper:has(.ChannelEmoji) > .SidebarChannelLinkLabel {
+    // Do not grow. A grown label would park the marker at the end of the row
+    // instead of 4px after the channel name. min-width: 0 still lets a long
+    // name ellipsize.
+    min-width: 0;
+    flex: 0 1 auto;
+}

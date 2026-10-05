@@ -5,6 +5,8 @@ import React from 'react';
 
 import type {ChannelType} from '@mattermost/types/channels';
 
+import {Client4} from 'mattermost-redux/client';
+import {Preferences} from 'mattermost-redux/constants';
 import {CategoryTypes} from 'mattermost-redux/constants/channel_categories';
 
 import {renderWithContext, screen, userEvent, waitFor, within} from 'tests/react_testing_utils';
@@ -89,6 +91,7 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_menu', () => {
         await openMenu();
 
         expect(screen.getByRole('menuitem', {name: 'Favorite'})).toBeInTheDocument();
+        expect(screen.getByRole('menuitem', {name: 'Set channel emoji'})).toBeInTheDocument();
         expect(screen.getByRole('menuitem', {name: 'Mute Channel'})).toBeInTheDocument();
         expect(screen.getByRole('menuitem', {name: 'Copy Link'})).toBeInTheDocument();
         expect(screen.getByRole('menuitem', {name: 'Add Members'})).toBeInTheDocument();
@@ -197,6 +200,7 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_menu', () => {
         await openMenu();
         expect(screen.queryByRole('menuitem', {name: 'Copy Link'})).not.toBeInTheDocument();
         expect(screen.queryByRole('menuitem', {name: 'Add Members'})).not.toBeInTheDocument();
+        expect(screen.queryByRole('menuitem', {name: 'Set channel emoji'})).not.toBeInTheDocument();
 
         expect(baseElement).toMatchSnapshot();
     });
@@ -305,5 +309,79 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_menu', () => {
 
         await openMenu();
         expect(screen.queryByRole('menuitem', {name: 'Open in new window'})).not.toBeInTheDocument();
+    });
+
+    test('shows change and remove when a channel emoji is saved', async () => {
+        renderWithContext(
+            <SidebarChannelMenu {...baseProps}/>,
+            {
+                entities: {
+                    preferences: {
+                        myPreferences: {
+                            [`${Preferences.CATEGORY_CHANNEL_EMOJI}--${testChannel.id}`]: {
+                                user_id: 'user_id',
+                                category: Preferences.CATEGORY_CHANNEL_EMOJI,
+                                name: testChannel.id,
+                                value: 'smile',
+                            },
+                        },
+                    },
+                },
+            },
+        );
+
+        await openMenu();
+        expect(screen.getByRole('menuitem', {name: 'Change channel emoji'})).toBeInTheDocument();
+        expect(screen.getByRole('menuitem', {name: 'Remove channel emoji'})).toBeInTheDocument();
+        expect(screen.queryByRole('menuitem', {name: 'Set channel emoji'})).not.toBeInTheDocument();
+    });
+
+    test('opens the emoji picker from the menu without using the channel link', async () => {
+        const onOpenChannelEmojiPicker = jest.fn();
+        renderWithContext(
+            <SidebarChannelMenu
+                {...baseProps}
+                onOpenChannelEmojiPicker={onOpenChannelEmojiPicker}
+            />,
+        );
+
+        await openMenu();
+        const user = userEvent.setup();
+        await user.click(screen.getByRole('menuitem', {name: 'Set channel emoji'}));
+
+        await waitFor(() => {
+            expect(onOpenChannelEmojiPicker).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    test('removes the saved channel emoji', async () => {
+        jest.spyOn(Client4, 'deletePreferences').mockResolvedValue({status: 'OK'});
+        const {store} = renderWithContext(
+            <SidebarChannelMenu {...baseProps}/>,
+            {
+                entities: {
+                    users: {currentUserId: 'user_id'},
+                    preferences: {
+                        myPreferences: {
+                            [`${Preferences.CATEGORY_CHANNEL_EMOJI}--${testChannel.id}`]: {
+                                user_id: 'user_id',
+                                category: Preferences.CATEGORY_CHANNEL_EMOJI,
+                                name: testChannel.id,
+                                value: 'smile',
+                            },
+                        },
+                    },
+                },
+            },
+        );
+
+        await openMenu();
+        const user = userEvent.setup();
+        await user.click(screen.getByRole('menuitem', {name: 'Remove channel emoji'}));
+
+        await waitFor(() => {
+            expect(store.getState().entities.preferences.myPreferences[`${Preferences.CATEGORY_CHANNEL_EMOJI}--${testChannel.id}`]).toBeUndefined();
+        });
+        jest.restoreAllMocks();
     });
 });
