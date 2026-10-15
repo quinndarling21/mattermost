@@ -46,6 +46,15 @@ test(
             {...testArgs, locator: settingsModal.content},
         );
 
+        // # Press Tab to move focus to search
+        await page.keyboard.press('Tab');
+        // * Verify focus is on the settings search field
+        await pw.toBeFocusedWithFocusVisible(settingsModal.searchInput);
+        await pw.matchSnapshot(
+            {...testInfo, title: `${testInfo.title} search`},
+            {...testArgs, locator: settingsModal.content},
+        );
+
         // # Press Tab to move focus to Notifications tab
         await page.keyboard.press('Tab');
         // * Verify focus is on Notifications tab and Notifications Settings panel is visible

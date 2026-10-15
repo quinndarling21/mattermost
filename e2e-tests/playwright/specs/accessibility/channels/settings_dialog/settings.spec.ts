@@ -73,8 +73,10 @@ test('navigates between settings tabs using arrow keys', {tag: ['@accessibility'
     await expect(settingsModal.container).toBeVisible();
     await pw.toBeFocusedWithFocusVisible(settingsModal.container);
 
-    // # Press Tab twice and verify focus is on Notifications tab and Notifications Settings panel is visible
+    // # Press Tab past Close and search to reach the Notifications tab
     await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await pw.toBeFocusedWithFocusVisible(settingsModal.searchInput);
     await page.keyboard.press('Tab');
     await expect(settingsModal.notificationsTab).toBeVisible();
     await pw.toBeFocusedWithFocusVisible(settingsModal.notificationsTab);

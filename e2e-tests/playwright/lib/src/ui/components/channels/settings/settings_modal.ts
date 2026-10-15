@@ -13,6 +13,8 @@ export default class SettingsModal {
 
     readonly content;
     readonly closeButton;
+    readonly searchInput;
+    readonly searchEmpty;
 
     readonly notificationsTab;
     readonly displayTab;
@@ -29,6 +31,8 @@ export default class SettingsModal {
 
         this.content = container.locator('.modal-content');
         this.closeButton = container.getByRole('button', {name: 'Close'});
+        this.searchInput = container.getByRole('searchbox', {name: 'Find settings'});
+        this.searchEmpty = container.getByTestId('userSettingsSearchEmpty');
 
         this.notificationsTab = container.getByRole('tab', {name: 'notifications'});
         this.displayTab = container.getByRole('tab', {name: 'display'});
@@ -91,5 +95,14 @@ export default class SettingsModal {
         await this.container.getByLabel('Close').click();
 
         await expect(this.container).not.toBeVisible();
+    }
+
+    async searchFor(query: string) {
+        await expect(this.searchInput).toBeVisible();
+        await this.searchInput.fill(query);
+    }
+
+    async clearSearch() {
+        await this.searchInput.fill('');
     }
 }

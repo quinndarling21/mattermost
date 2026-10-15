@@ -8,10 +8,12 @@ import React from 'react';
 import type {DeepPartial} from '@mattermost/types/utilities';
 
 import mergeObjects from 'packages/mattermost-redux/test/merge_objects';
-import {renderWithContext} from 'tests/react_testing_utils';
+import {renderWithContext, userEvent} from 'tests/react_testing_utils';
 import {TestHelper} from 'utils/test_helper';
 
 import type {GlobalState} from 'types/store';
+
+import {UserSettingsModal as UserSettingsModalClass} from './user_settings_modal';
 
 import UserSettingsModal from './index';
 
@@ -27,7 +29,7 @@ const baseState: DeepPartial<GlobalState> = {
         users: {
             currentUserId: 'id',
             profiles: {
-                id: TestHelper.getUserMock({id: 'id'}),
+                id: TestHelper.getUserMock({id: 'id', locale: 'en'}),
             },
         },
     },
@@ -252,5 +254,87 @@ describe('plugin tabs use the correct icon', () => {
         expect(element).toBeInTheDocument();
         expect(element!.nodeName).toBe('I');
         expect(element?.className).toBe('icon icon-phone-in-talk');
+    });
+});
+
+describe('settings search', () => {
+    const getSearchInput = () => screen.getByRole('searchbox', {name: 'Find settings'});
+
+    it('renders a labeled search field that is not focused on open', () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        const searchInput = getSearchInput();
+        expect(searchInput).toBeInTheDocument();
+        expect(searchInput).not.toHaveFocus();
+    });
+
+    it('hides non-matching tabs when searching for theme', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        await userEvent.type(getSearchInput(), 'theme');
+
+        expect(screen.queryByTestId('display-tab-button')).toBeInTheDocument();
+        expect(screen.queryByTestId('notifications-tab-button')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('sidebar-tab-button')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('advanced-tab-button')).not.toBeInTheDocument();
+        expect(screen.getByTestId('display-tab-button')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('shows an empty state for unknown queries and restores tabs when cleared', async () => {
+        renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+        await userEvent.type(getSearchInput(), 'zzzz');
+
+        expect(screen.getByTestId('userSettingsSearchEmpty')).toBeInTheDocument();
+        expect(screen.getAllByText('No settings match "zzzz"').length).toBeGreaterThan(0);
+        expect(screen.queryByTestId('notifications-tab-button')).not.toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole('button', {name: 'Clear search'}));
+
+        expect(screen.queryByTestId('userSettingsSearchEmpty')).not.toBeInTheDocument();
+        expect(screen.getByTestId('notifications-tab-button')).toBeInTheDocument();
+        expect(screen.getByTestId('display-tab-button')).toBeInTheDocument();
+        expect(getSearchInput()).toHaveValue('');
+    });
+
+    it('matches plugin tabs by uiName', async () => {
+        const state: DeepPartial<GlobalState> = {
+            plugins: {
+                userSettings: {
+                    plugin_a: {
+                        id: 'plugin_a',
+                        sections: [],
+                        uiName: 'Sample Plugin',
+                    },
+                },
+            },
+        };
+
+        renderWithContext(<UserSettingsModal {...baseProps}/>, mergeObjects(baseState, state));
+
+        await userEvent.type(getSearchInput(), 'sample plugin');
+
+        expect(screen.getByText('Sample Plugin')).toBeInTheDocument();
+        expect(screen.queryByTestId('notifications-tab-button')).not.toBeInTheDocument();
+    });
+
+    it('shows the discard-changes modal when search would switch tabs with unsaved changes', async () => {
+        const didMount = UserSettingsModalClass.prototype.componentDidMount;
+        UserSettingsModalClass.prototype.componentDidMount = function componentDidMountWithUnsaved() {
+            didMount.call(this);
+            this.requireConfirm = true;
+        };
+
+        try {
+            renderWithContext(<UserSettingsModal {...baseProps}/>, baseState);
+
+            await userEvent.type(getSearchInput(), 'theme');
+
+            expect(screen.getByText('Discard Changes?')).toBeInTheDocument();
+            expect(screen.getByTestId('notifications-tab-button')).toBeInTheDocument();
+            expect(screen.getByTestId('notifications-tab-button')).toHaveAttribute('aria-selected', 'true');
+        } finally {
+            UserSettingsModalClass.prototype.componentDidMount = didMount;
+        }
     });
 });

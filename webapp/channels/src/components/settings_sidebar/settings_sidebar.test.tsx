@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {screen} from '@testing-library/react';
+import {fireEvent, screen} from '@testing-library/react';
 import type {ComponentProps} from 'react';
 import React from 'react';
 
@@ -118,5 +118,94 @@ describe('tabs are properly rendered', () => {
 
         expect(screen.queryByText(uiName1)).toBeInTheDocument();
         expect(screen.queryByText(uiName2)).toBeInTheDocument();
+    });
+});
+
+describe('display:false tabs are omitted from the tablist and keyboard wrap', () => {
+    it('does not render tabs with display false', () => {
+        const props: Props = {
+            ...baseProps,
+            tabs: [
+                {
+                    icon: 'icon',
+                    iconTitle: 'visible',
+                    name: 'visible',
+                    uiName: 'Visible Tab',
+                },
+                {
+                    icon: 'icon',
+                    iconTitle: 'hidden',
+                    name: 'hidden',
+                    uiName: 'Hidden Tab',
+                    display: false,
+                },
+            ],
+        };
+
+        renderWithContext(<SettingsSidebar {...props}/>);
+
+        expect(screen.getByRole('tab', {name: 'visible tab'})).toBeInTheDocument();
+        expect(screen.queryByRole('tab', {name: 'hidden tab'})).not.toBeInTheDocument();
+    });
+
+    it('does not render plugin tabs with display false or the plugin heading when none are visible', () => {
+        const props: Props = {
+            ...baseProps,
+            pluginTabs: [
+                {
+                    icon: 'icon',
+                    iconTitle: 'hidden plugin',
+                    name: 'hidden-plugin',
+                    uiName: 'Hidden Plugin',
+                    display: false,
+                },
+            ],
+        };
+
+        renderWithContext(<SettingsSidebar {...props}/>);
+
+        expect(screen.queryByText('PLUGIN PREFERENCES')).not.toBeInTheDocument();
+        expect(screen.queryByText('Hidden Plugin')).not.toBeInTheDocument();
+    });
+
+    it('wraps arrow keys among visible tabs only', () => {
+        const updateTab = jest.fn();
+        const props: Props = {
+            ...baseProps,
+            updateTab,
+            activeTab: 'first',
+            tabs: [
+                {
+                    icon: 'icon',
+                    iconTitle: 'first',
+                    name: 'first',
+                    uiName: 'First',
+                },
+                {
+                    icon: 'icon',
+                    iconTitle: 'hidden',
+                    name: 'hidden',
+                    uiName: 'Hidden',
+                    display: false,
+                },
+                {
+                    icon: 'icon',
+                    iconTitle: 'third',
+                    name: 'third',
+                    uiName: 'Third',
+                },
+            ],
+        };
+
+        renderWithContext(<SettingsSidebar {...props}/>);
+
+        fireEvent.keyDown(screen.getByRole('tab', {name: 'first'}), {
+            key: 'ArrowDown',
+            keyCode: 40,
+            which: 40,
+        });
+
+        expect(updateTab).toHaveBeenCalledWith('third');
+        expect(updateTab).not.toHaveBeenCalledWith('hidden');
     });
 });
