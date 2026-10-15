@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useRef, memo} from 'react';
+import React, {useRef, useState, memo} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useSelector} from 'react-redux';
 
@@ -14,7 +14,10 @@ import {
     LinkVariantIcon,
     AccountPlusOutlineIcon,
     DotsVerticalIcon,
+    EmoticonOutlineIcon,
+    EmoticonPlusOutlineIcon,
     ExitToAppIcon,
+    TrashCanOutlineIcon,
 } from '@mattermost/compass-icons/components';
 import {WithTooltip} from '@mattermost/shared/components/tooltip';
 
@@ -31,14 +34,19 @@ import {copyToClipboard} from 'utils/utils';
 
 import type {GlobalState} from 'types/store';
 
+import ChannelEmojiPicker from '../channel_emoji/channel_emoji_picker';
+import {makeChannelEmojiPreference} from '../channel_emoji/utils';
+
 import type {PropsFromRedux, OwnProps} from './index';
 
 type Props = PropsFromRedux & OwnProps;
 
 const SidebarChannelMenu = ({
     channel,
+    channelEmoji,
     channelLink,
     currentUserId,
+    deletePreferences,
     favoriteChannel,
     isFavorite,
     isMuted,
@@ -55,6 +63,7 @@ const SidebarChannelMenu = ({
     channelLeaveHandler,
 }: Props) => {
     const isLeaving = useRef(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const isInManagedCategory = useSelector((state: GlobalState) => isChannelInManagedCategory(state, channel.id));
 
     const {formatMessage} = useIntl();
@@ -234,6 +243,54 @@ const SidebarChannelMenu = ({
         );
     }
 
+    let setChannelEmojiMenuItem: JSX.Element | null = null;
+    let removeChannelEmojiMenuItem: JSX.Element | null = null;
+    if (channel.type === Constants.OPEN_CHANNEL || channel.type === Constants.PRIVATE_CHANNEL) {
+        function handleOpenEmojiPicker() {
+            setShowEmojiPicker(true);
+        }
+
+        setChannelEmojiMenuItem = (
+            <Menu.Item
+                id={`setChannelEmoji-${channel.id}`}
+                onClick={handleOpenEmojiPicker}
+                aria-haspopup='dialog'
+                leadingElement={channelEmoji ? <EmoticonOutlineIcon size={18}/> : <EmoticonPlusOutlineIcon size={18}/>}
+                labels={channelEmoji ? (
+                    <FormattedMessage
+                        id='sidebar_left.sidebar_channel_menu.changeChannelEmoji'
+                        defaultMessage='Change Channel Emoji'
+                    />
+                ) : (
+                    <FormattedMessage
+                        id='sidebar_left.sidebar_channel_menu.setChannelEmoji'
+                        defaultMessage='Set Channel Emoji'
+                    />
+                )}
+            />
+        );
+
+        if (channelEmoji) {
+            function handleRemoveChannelEmoji() {
+                deletePreferences(currentUserId, [makeChannelEmojiPreference(currentUserId, channel.id)]);
+            }
+
+            removeChannelEmojiMenuItem = (
+                <Menu.Item
+                    id={`removeChannelEmoji-${channel.id}`}
+                    onClick={handleRemoveChannelEmoji}
+                    leadingElement={<TrashCanOutlineIcon size={18}/>}
+                    labels={(
+                        <FormattedMessage
+                            id='sidebar_left.sidebar_channel_menu.removeChannelEmoji'
+                            defaultMessage='Remove Channel Emoji'
+                        />
+                    )}
+                />
+            );
+        }
+    }
+
     let addMembersMenuItem: JSX.Element | null = null;
     if ((channel.type === Constants.PRIVATE_CHANNEL && managePrivateChannelMembers) || (channel.type === Constants.OPEN_CHANNEL && managePublicChannelMembers)) {
         function handleAddMembers() {
@@ -301,40 +358,50 @@ const SidebarChannelMenu = ({
     }
 
     return (
-        <Menu.Container
-            menuButton={{
-                id: `SidebarChannelMenu-Button-${channel.id}`,
-                class: 'SidebarMenu_menuButton',
-                'aria-label': formatMessage({
-                    id: 'sidebar_left.sidebar_channel_menu.editChannel.ariaLabel',
-                    defaultMessage: 'Channel options for {channelName}',
-                }, {channelName: channel.name}),
-                children: <DotsVerticalIcon size={16}/>,
-            }}
-            menuButtonTooltip={{
-                class: 'hidden-xs',
-                text: formatMessage({id: 'sidebar_left.sidebar_channel_menu.editChannel', defaultMessage: 'Channel options'}),
-            }}
-            menu={{
-                id: `SidebarChannelMenu-MenuList-${channel.id}`,
-                'aria-label': formatMessage({id: 'sidebar_left.sidebar_channel_menu.dropdownAriaLabel', defaultMessage: 'Edit channel menu'}),
-                onToggle: onMenuToggle,
-            }}
-        >
-            {canPopout() && !isChannelPopoutWindow() && (
-                <MenuItemOpenInNewWindow channel={channel}/>
-            )}
-            {markAsReadUnreadMenuItem}
-            {favoriteUnfavoriteMenuItem}
-            {muteUnmuteChannelMenuItem}
-            <Menu.Separator/>
-            <ChannelMoveToSubmenu channel={channel}/>
-            {(copyLinkMenuItem || addMembersMenuItem) && <Menu.Separator/>}
-            {copyLinkMenuItem}
-            {addMembersMenuItem}
-            {leaveChannelMenuItem && <Menu.Separator/>}
-            {leaveChannelMenuItem}
-        </Menu.Container>
+        <>
+            <Menu.Container
+                menuButton={{
+                    id: `SidebarChannelMenu-Button-${channel.id}`,
+                    class: 'SidebarMenu_menuButton',
+                    'aria-label': formatMessage({
+                        id: 'sidebar_left.sidebar_channel_menu.editChannel.ariaLabel',
+                        defaultMessage: 'Channel options for {channelName}',
+                    }, {channelName: channel.name}),
+                    children: <DotsVerticalIcon size={16}/>,
+                }}
+                menuButtonTooltip={{
+                    class: 'hidden-xs',
+                    text: formatMessage({id: 'sidebar_left.sidebar_channel_menu.editChannel', defaultMessage: 'Channel options'}),
+                }}
+                menu={{
+                    id: `SidebarChannelMenu-MenuList-${channel.id}`,
+                    'aria-label': formatMessage({id: 'sidebar_left.sidebar_channel_menu.dropdownAriaLabel', defaultMessage: 'Edit channel menu'}),
+                    onToggle: onMenuToggle,
+                }}
+            >
+                {canPopout() && !isChannelPopoutWindow() && (
+                    <MenuItemOpenInNewWindow channel={channel}/>
+                )}
+                {markAsReadUnreadMenuItem}
+                {favoriteUnfavoriteMenuItem}
+                {muteUnmuteChannelMenuItem}
+                <Menu.Separator/>
+                <ChannelMoveToSubmenu channel={channel}/>
+                {(copyLinkMenuItem || addMembersMenuItem) && <Menu.Separator/>}
+                {copyLinkMenuItem}
+                {setChannelEmojiMenuItem}
+                {removeChannelEmojiMenuItem}
+                {addMembersMenuItem}
+                {leaveChannelMenuItem && <Menu.Separator/>}
+                {leaveChannelMenuItem}
+            </Menu.Container>
+            <ChannelEmojiPicker
+                channelId={channel.id}
+                anchorId={`sidebarItem_${channel.name}`}
+                show={showEmojiPicker}
+                setShow={setShowEmojiPicker}
+            />
+        </>
     );
 };
 

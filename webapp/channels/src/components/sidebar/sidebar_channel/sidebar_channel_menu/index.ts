@@ -7,6 +7,7 @@ import type {ConnectedProps} from 'react-redux';
 import type {Channel} from '@mattermost/types/channels';
 
 import {favoriteChannel, unfavoriteChannel, readMultipleChannels} from 'mattermost-redux/actions/channels';
+import {deletePreferences} from 'mattermost-redux/actions/preferences';
 import Permissions from 'mattermost-redux/constants/permissions';
 import {isFavoriteChannel} from 'mattermost-redux/selectors/entities/channels';
 import {getMyChannelMemberships, getCurrentUserId} from 'mattermost-redux/selectors/entities/common';
@@ -23,6 +24,8 @@ import {getSiteURL} from 'utils/url';
 import type {GlobalState} from 'types/store';
 
 import SidebarChannelMenu from './sidebar_channel_menu';
+
+import {getChannelEmoji} from '../channel_emoji/utils';
 
 export type OwnProps = {
     channel: Channel;
@@ -45,6 +48,7 @@ function mapStateToProps(state: GlobalState, ownProps: OwnProps) {
     }
 
     return {
+        channelEmoji: getChannelEmoji(state, ownProps.channel.id),
         currentUserId: getCurrentUserId(state),
         isFavorite: isFavoriteChannel(state, ownProps.channel.id),
         isMuted: isChannelMuted(member),
@@ -55,6 +59,7 @@ function mapStateToProps(state: GlobalState, ownProps: OwnProps) {
 }
 
 const mapDispatchToProps = {
+    deletePreferences,
     readMultipleChannels,
     markMostRecentPostInChannelAsUnread,
     favoriteChannel,
