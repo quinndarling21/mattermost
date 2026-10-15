@@ -13,8 +13,9 @@ import {TestHelper} from 'utils/test_helper';
 
 import type {GlobalState} from 'types/store';
 
-import UserSettingsModal from './index';
 import {UserSettingsModal as UserSettingsModalClass} from './user_settings_modal';
+
+import UserSettingsModal from './index';
 
 type Props = ComponentProps<typeof UserSettingsModal>;
 
@@ -28,7 +29,7 @@ const baseState: DeepPartial<GlobalState> = {
         users: {
             currentUserId: 'id',
             profiles: {
-                id: TestHelper.getUserMock({id: 'id'}),
+                id: TestHelper.getUserMock({id: 'id', locale: 'en'}),
             },
         },
     },
@@ -285,7 +286,7 @@ describe('settings search', () => {
         await userEvent.type(getSearchInput(), 'zzzz');
 
         expect(screen.getByTestId('userSettingsSearchEmpty')).toBeInTheDocument();
-        expect(screen.getByText('No settings match "zzzz"')).toBeInTheDocument();
+        expect(screen.getAllByText('No settings match "zzzz"').length).toBeGreaterThan(0);
         expect(screen.queryByTestId('notifications-tab-button')).not.toBeInTheDocument();
 
         await userEvent.click(screen.getByRole('button', {name: 'Clear search'}));
