@@ -23,6 +23,7 @@ import {Mark} from 'utils/performance_telemetry';
 
 import type {RhsState} from 'types/store/rhs';
 
+import ChannelEmoji from '../channel_emoji/channel_emoji';
 import ChannelMentionBadge from '../channel_mention_badge';
 import ChannelPencilIcon from '../channel_pencil_icon';
 import SidebarChannelIcon from '../sidebar_channel_icon';
@@ -262,6 +263,7 @@ export class SidebarChannelLink extends React.PureComponent<Props, State> {
                     className='SidebarChannelLinkLabel_wrapper'
                 >
                     {labelElement}
+                    <ChannelEmoji channelId={channel.id}/>
                     {customStatus}
                     <Pluggable
                         pluggableName='SidebarChannelLinkLabel'

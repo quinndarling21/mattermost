@@ -230,4 +230,23 @@ describe('components/sidebar/sidebar_channel/sidebar_channel_link', () => {
 
         expect(baseProps.actions.fetchChannelRemotes).toHaveBeenCalledWith('new_channel_id');
     });
+
+    test('should show the assigned channel emoji right after the label without changing the accessible name', () => {
+        renderWithContext(
+            <SidebarChannelLink {...baseProps}/>,
+            {
+                entities: {
+                    preferences: {
+                        myPreferences: {
+                            'channel_emoji--channel_id': {user_id: 'user_id', category: 'channel_emoji', name: 'channel_id', value: 'rocket'},
+                        },
+                    },
+                },
+            },
+        );
+
+        const marker = screen.getByTestId('channelEmoji');
+        expect(marker.previousElementSibling).toHaveClass('SidebarChannelLinkLabel');
+        expect(screen.getByRole('link')).toHaveAccessibleName('channel_label');
+    });
 });
