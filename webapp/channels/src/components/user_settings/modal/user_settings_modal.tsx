@@ -7,14 +7,18 @@ import {FormattedMessage, injectIntl} from 'react-intl';
 import type {IntlShape} from 'react-intl';
 
 import {GenericModal} from '@mattermost/components';
+import {Button} from '@mattermost/shared/components/button';
 import type {PreferencesType} from '@mattermost/types/preferences';
 import type {UserProfile} from '@mattermost/types/users';
 
 import type {ActionResult} from 'mattermost-redux/types/actions';
 
 import ConfirmModal from 'components/confirm_modal';
+import QuickInput from 'components/quick_input';
 import SettingsSidebar from 'components/settings_sidebar';
+import type {Tab} from 'components/settings_sidebar/settings_sidebar';
 import UserSettings from 'components/user_settings';
+import SearchIcon from 'components/widgets/icons/search_icon';
 import LoadingSpinner from 'components/widgets/loading/loading_spinner';
 import SmartLoader from 'components/widgets/smart_loader';
 
@@ -26,6 +30,8 @@ import {isValidUrl} from 'utils/url';
 import {getDisplayName} from 'utils/utils';
 
 import type {PluginConfiguration} from 'types/plugins/user_settings';
+
+import {matchSettings} from './settings_search_catalog';
 
 import './user_settings_modal.scss';
 
@@ -58,9 +64,10 @@ type State = {
     show: boolean;
     resendStatus: string;
     loading: boolean;
+    searchQuery: string;
 };
 
-class UserSettingsModal extends React.PureComponent<Props, State> {
+export class UserSettingsModal extends React.PureComponent<Props, State> {
     private requireConfirm: boolean;
     private customConfirmAction: ((handleConfirm: () => void) => void) | null;
     private afterConfirm: (() => void) | null;
@@ -77,6 +84,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             show: true,
             resendStatus: '',
             loading: false,
+            searchQuery: '',
         };
 
         this.requireConfirm = false;
@@ -164,6 +172,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         this.setState({
             active_tab: this.props.isContentProductSettings ? 'notifications' : 'profile',
             active_section: '',
+            searchQuery: '',
         });
         if (this.props.focusOriginElement) {
             focusElement(this.props.focusOriginElement, true);
@@ -249,6 +258,65 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         }
     };
 
+    handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setSearchQuery(e.target.value);
+    };
+
+    handleClearSearch = () => {
+        this.setSearchQuery('');
+    };
+
+    setSearchQuery = (searchQuery: string) => {
+        this.setState({searchQuery}, this.syncActiveTabWithSearch);
+    };
+
+    getSidebarTabs = () => {
+        const tabs = this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab();
+        const pluginTabs = this.props.isContentProductSettings ? this.getPluginsSettingsTab() : [];
+        return {tabs, pluginTabs};
+    };
+
+    getSearchMatch = () => {
+        const {tabs, pluginTabs} = this.getSidebarTabs();
+        const tabIds = [...tabs, ...pluginTabs].map((tab) => tab.name);
+        return matchSettings(this.state.searchQuery, this.props.intl, tabIds, this.props.pluginSettings);
+    };
+
+    applySearchDisplay = (tabs: Tab[]): Tab[] => {
+        const query = this.state.searchQuery.trim();
+        if (!query) {
+            return tabs;
+        }
+
+        const {tabs: matchedTabs} = this.getSearchMatch();
+        if (matchedTabs.length === 0) {
+            return tabs.map((tab) => ({...tab, display: false}));
+        }
+
+        const matchSet = new Set(matchedTabs);
+        if (this.state.active_tab) {
+            matchSet.add(this.state.active_tab);
+        }
+
+        return tabs.map((tab) => ({...tab, display: matchSet.has(tab.name)}));
+    };
+
+    syncActiveTabWithSearch = () => {
+        const query = this.state.searchQuery.trim();
+        if (!query) {
+            return;
+        }
+
+        const {tabs} = this.getSearchMatch();
+        if (tabs.length === 0) {
+            return;
+        }
+
+        if (!this.state.active_tab || !tabs.includes(this.state.active_tab)) {
+            this.updateTab(tabs[0]);
+        }
+    };
+
     updateSection = (section?: string, skipConfirm?: boolean) => {
         if (!skipConfirm && this.requireConfirm) {
             this.showConfirmModal(() => this.updateSection(section, true));
@@ -318,8 +386,51 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         });
     };
 
+    hasSearchMatches = () => {
+        if (!this.state.searchQuery.trim()) {
+            return true;
+        }
+        return this.getSearchMatch().tabs.length > 0;
+    };
+
+    renderSearchEmptyState = () => {
+        if (this.hasSearchMatches()) {
+            return null;
+        }
+
+        const query = this.state.searchQuery.trim();
+        return (
+            <div
+                className='UserSettingsModal__searchEmpty'
+                data-testid='userSettingsSearchEmpty'
+            >
+                <p>
+                    <FormattedMessage
+                        id='user.settings.modal.searchEmpty'
+                        defaultMessage='No settings match "{query}"'
+                        values={{query}}
+                    />
+                </p>
+                <Button
+                    type='button'
+                    emphasis='tertiary'
+                    size='sm'
+                    onClick={this.handleClearSearch}
+                >
+                    <FormattedMessage
+                        id='user.settings.modal.searchEmptyClear'
+                        defaultMessage='Clear search'
+                    />
+                </Button>
+            </div>
+        );
+    };
+
     render() {
         const {formatMessage} = this.props.intl;
+        const {tabs, pluginTabs} = this.getSidebarTabs();
+        const noSearchMatches = !this.hasSearchMatches();
+        const searchEmptyQuery = this.state.searchQuery.trim();
 
         let modalTitle: string;
         if (this.props.adminMode && this.props.user) {
@@ -389,30 +500,64 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                         <>
                             <div className='settings-table'>
                                 <div className='settings-links'>
-                                    <SettingsSidebar
-                                        tabs={this.props.isContentProductSettings ? this.getUserSettingsTabs() : this.getProfileSettingsTab()}
-                                        pluginTabs={this.props.isContentProductSettings ? this.getPluginsSettingsTab() : []}
-                                        activeTab={this.state.active_tab}
-                                        updateTab={this.updateTab}
-                                    />
+                                    <div className='UserSettingsModal__search'>
+                                        <SearchIcon
+                                            className='search__icon'
+                                            aria-hidden='true'
+                                        />
+                                        <QuickInput
+                                            id='userSettingsSearch'
+                                            className={this.state.searchQuery ? 'active' : ''}
+                                            type='search'
+                                            value={this.state.searchQuery}
+                                            onChange={this.handleSearchChange}
+                                            placeholder={formatMessage({id: 'user.settings.modal.search', defaultMessage: 'Find settings'})}
+                                            aria-label={formatMessage({id: 'user.settings.modal.searchAriaLabel', defaultMessage: 'Find settings'})}
+                                            clearable={true}
+                                            onClear={this.handleClearSearch}
+                                            autoComplete='off'
+                                        />
+                                    </div>
+                                    {this.renderSearchEmptyState() || (
+                                        <SettingsSidebar
+                                            tabs={this.applySearchDisplay(tabs)}
+                                            pluginTabs={this.applySearchDisplay(pluginTabs)}
+                                            activeTab={this.state.active_tab}
+                                            updateTab={this.updateTab}
+                                        />
+                                    )}
                                 </div>
                                 <div className='settings-content minimize-settings'>
-                                    <UserSettings
-                                        activeTab={this.state.active_tab}
-                                        activeSection={this.state.active_section}
-                                        updateSection={this.updateSection}
-                                        updateTab={this.updateTab}
-                                        closeModal={this.closeModal}
-                                        collapseModal={this.collapseModal}
-                                        setRequireConfirm={(requireConfirm?: boolean, customConfirmAction?: () => () => void) => {
-                                            this.requireConfirm = requireConfirm || false;
-                                            this.customConfirmAction = customConfirmAction || null;
-                                        }}
-                                        pluginSettings={this.props.pluginSettings}
-                                        user={this.props.user}
-                                        adminMode={this.props.adminMode}
-                                        userPreferences={this.props.userPreferences}
-                                    />
+                                    <div className={noSearchMatches ? 'UserSettingsModal__contentHidden' : undefined}>
+                                        <UserSettings
+                                            activeTab={this.state.active_tab}
+                                            activeSection={this.state.active_section}
+                                            updateSection={this.updateSection}
+                                            updateTab={this.updateTab}
+                                            closeModal={this.closeModal}
+                                            collapseModal={this.collapseModal}
+                                            setRequireConfirm={(requireConfirm?: boolean, customConfirmAction?: () => () => void) => {
+                                                this.requireConfirm = requireConfirm || false;
+                                                this.customConfirmAction = customConfirmAction || null;
+                                            }}
+                                            pluginSettings={this.props.pluginSettings}
+                                            user={this.props.user}
+                                            adminMode={this.props.adminMode}
+                                            userPreferences={this.props.userPreferences}
+                                        />
+                                    </div>
+                                    {noSearchMatches && (
+                                        <div
+                                            className='UserSettingsModal__emptyContent'
+                                            data-testid='userSettingsSearchEmptyContent'
+                                        >
+                                            <FormattedMessage
+                                                id='user.settings.modal.searchEmpty'
+                                                defaultMessage='No settings match "{query}"'
+                                                values={{query: searchEmptyQuery}}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </>
