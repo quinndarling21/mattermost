@@ -693,6 +693,13 @@
                   description: Default sidebar category name for members when joining this channel.
                     Set to an empty string to clear. Requires `EnableChannelCategorySorting`
                     to be enabled on the server.
+                emoji:
+                  type: string
+                  description: Name of a system or custom emoji to show next to the channel in
+                    the sidebar, such as `rocket`. Surrounding colons are removed. Set to an
+                    empty string to clear. Only supported on public and private channels.
+                    Requires the `manage_public_channel_properties` or
+                    `manage_private_channel_properties` permission.
         description: Channel patch object; include only the fields to update. At least
           one field must be provided.
         required: true

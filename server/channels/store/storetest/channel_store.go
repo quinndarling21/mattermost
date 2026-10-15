@@ -496,6 +496,22 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 	require.NotNil(t, updatedChannel.BannerInfo)
 	require.Equal(t, "updated text", *updatedChannel.BannerInfo.Text)
 	require.Equal(t, "#FFFFFF", *updatedChannel.BannerInfo.BackgroundColor)
+
+	channel.Emoji = "rocket"
+	_, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err)
+
+	fetchedChannel, err := ss.Channel().Get(channel.Id, false)
+	require.NoError(t, err)
+	require.Equal(t, "rocket", fetchedChannel.Emoji)
+
+	channel.Emoji = ""
+	_, err = ss.Channel().Update(rctx, &channel)
+	require.NoError(t, err)
+
+	fetchedChannel, err = ss.Channel().Get(channel.Id, false)
+	require.NoError(t, err)
+	require.Equal(t, "", fetchedChannel.Emoji)
 }
 
 func testGetChannelUnread(t *testing.T, rctx request.CTX, ss store.Store) {
