@@ -1,0 +1,26 @@
+.ChannelSettingsEmojiField {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &__label {
+        color: var(--center-channel-color);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+    }
+
+    &__controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .btn {
+            gap: 8px;
+        }
+    }
+
+    .Input___customMessage {
+        margin-top: 0;
+    }
+}
