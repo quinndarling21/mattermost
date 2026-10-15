@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useLayoutEffect} from 'react';
 import type {MouseEvent} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
@@ -58,7 +58,7 @@ export default function ChannelEmojiPicker({channelId, anchorId, show, setShow}:
         onEmojiClick: handleEmojiClick,
     });
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (show) {
             setReference(document.getElementById(anchorId));
         }
