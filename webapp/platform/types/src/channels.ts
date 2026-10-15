@@ -93,6 +93,7 @@ export type Channel = {
     managed_category_name?: string;
     autotranslation?: boolean;
     discoverable?: boolean;
+    emoji?: string;
 };
 
 export type ServerChannel = Channel & {

@@ -85,6 +85,20 @@ jest.mock('components/advanced_text_editor/show_formatting/show_formatting', () 
     ))
 ));
 
+jest.mock('components/emoji_picker/use_emoji_picker', () => {
+    const React = require('react');
+
+    return ({showEmojiPicker, onEmojiClick}: {showEmojiPicker: boolean; onEmojiClick: (emoji: {short_name: string}) => void}) => ({
+        emojiPicker: showEmojiPicker ? (
+            <button onClick={() => onEmojiClick({short_name: 'rocket'})}>
+                {'Pick rocket'}
+            </button>
+        ) : null,
+        getReferenceProps: () => ({}),
+        setReference: jest.fn(),
+    });
+});
+
 // Create a mock channel member
 const mockChannelMember = TestHelper.getChannelMembershipMock({
     roles: 'channel_user system_admin',
@@ -240,6 +254,60 @@ describe('ChannelSettingsInfoTab', () => {
             header: 'Updated DM header',
         });
         expect(screen.queryByText('Channel name is required')).not.toBeInTheDocument();
+    });
+
+    it('should save a newly picked channel emoji', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: 'rocket'}});
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        await userEvent.click(screen.getByRole('button', {name: 'Add emoji'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Pick rocket'}));
+
+        expect(screen.getByRole('button', {name: /Change emoji/})).toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: 'rocket'});
+    });
+
+    it('should clear the channel emoji when Remove emoji is clicked', async () => {
+        const {patchChannel} = require('mattermost-redux/actions/channels');
+        patchChannel.mockReturnValue({type: 'MOCK_ACTION', data: {emoji: ''}});
+
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                {...baseProps}
+                channel={{...mockChannel, emoji: 'rocket'}}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole('button', {name: 'Remove emoji'}));
+        expect(screen.getByRole('button', {name: 'Add emoji'})).toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole('button', {name: 'Save'}));
+
+        expect(patchChannel).toHaveBeenCalledWith('channel1', {emoji: ''});
+    });
+
+    it('should disable the channel emoji picker without manage properties permission', () => {
+        mockChannelPropertiesPermission = false;
+
+        renderWithContext(<ChannelSettingsInfoTab {...baseProps}/>);
+
+        expect(screen.getByRole('button', {name: 'Add emoji'})).toBeDisabled();
+    });
+
+    it('should not show the channel emoji field for direct messages', () => {
+        renderWithContext(
+            <ChannelSettingsInfoTab
+                channel={mockDirectMessageChannel}
+                setAreThereUnsavedChanges={jest.fn()}
+            />,
+        );
+
+        expect(screen.queryByRole('button', {name: 'Add emoji'})).not.toBeInTheDocument();
     });
 
     it('should trim whitespace from channel fields when saving', async () => {

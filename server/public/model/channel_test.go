@@ -93,6 +93,73 @@ func TestChannelIsValidDiscoverable(t *testing.T) {
 	})
 }
 
+func TestChannelPatchEmoji(t *testing.T) {
+	t.Run("applies emoji when set", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(&ChannelPatch{Emoji: NewPointer("rocket")})
+		require.Equal(t, "rocket", o.Emoji)
+	})
+
+	t.Run("strips surrounding colons and whitespace", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen}
+		o.Patch(&ChannelPatch{Emoji: NewPointer(" :+1: ")})
+		require.Equal(t, "+1", o.Emoji)
+	})
+
+	t.Run("clears emoji when set to empty", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, Emoji: "rocket"}
+		o.Patch(&ChannelPatch{Emoji: NewPointer("")})
+		require.Equal(t, "", o.Emoji)
+	})
+
+	t.Run("nil emoji leaves channel untouched", func(t *testing.T) {
+		o := Channel{Id: NewId(), Name: NewId(), Type: ChannelTypeOpen, Emoji: "rocket"}
+		o.Patch(&ChannelPatch{})
+		require.Equal(t, "rocket", o.Emoji)
+	})
+}
+
+func TestChannelIsValidEmoji(t *testing.T) {
+	base := Channel{
+		Id:          NewId(),
+		CreateAt:    GetMillis(),
+		UpdateAt:    GetMillis(),
+		DisplayName: "x",
+		Name:        "valid-name",
+		Type:        ChannelTypeOpen,
+	}
+
+	t.Run("accepts system and custom emoji names", func(t *testing.T) {
+		for _, name := range []string{"rocket", "+1", "-1", "white_check_mark", "my-custom_emoji"} {
+			c := base
+			c.Emoji = name
+			require.Nil(t, c.IsValid(), name)
+		}
+	})
+
+	t.Run("rejects malformed names", func(t *testing.T) {
+		for _, name := range []string{"has space", ":rocket:", "<script>", strings.Repeat("a", EmojiNameMaxLength+1)} {
+			c := base
+			c.Emoji = name
+			require.NotNil(t, c.IsValid(), name)
+		}
+	})
+
+	t.Run("only allowed on public and private channels", func(t *testing.T) {
+		c := base
+		c.Emoji = "rocket"
+
+		c.Type = ChannelTypePrivate
+		require.Nil(t, c.IsValid())
+
+		c.Type = ChannelTypeDirect
+		require.NotNil(t, c.IsValid())
+
+		c.Type = ChannelTypeGroup
+		require.NotNil(t, c.IsValid())
+	})
+}
+
 func TestChannelIsValid(t *testing.T) {
 	o := Channel{}
 

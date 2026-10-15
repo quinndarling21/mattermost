@@ -1,0 +1,11 @@
+.SidebarChannelEmoji {
+    display: flex;
+
+    // Matches the compass icon glyph box (1em plus 0.2em side margins) so labels stay aligned.
+    width: 1.4em;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    margin: 0 6px 0 -2px;
+    font-size: 18px;
+}
