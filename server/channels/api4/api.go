@@ -350,6 +350,7 @@ func Init(srv *app.Server) (*API, error) {
 	api.InitBot()
 	api.InitTeam()
 	api.InitChannel()
+	api.InitChannelExport()
 	api.InitPost()
 	api.InitFile()
 	api.InitUpload()

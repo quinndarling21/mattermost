@@ -78,6 +78,19 @@ exports[`components/ChannelHeader should match snapshot with last active display
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -159,6 +172,19 @@ exports[`components/ChannelHeader should match snapshot with no last active disp
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -253,6 +279,19 @@ exports[`components/ChannelHeader should render active channel files 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -347,6 +386,19 @@ exports[`components/ChannelHeader should render active flagged posts 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -441,6 +493,19 @@ exports[`components/ChannelHeader should render active mentions posts 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -535,6 +600,19 @@ exports[`components/ChannelHeader should render active pinned posts 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -629,6 +707,19 @@ exports[`components/ChannelHeader should render archived view 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -733,6 +824,19 @@ exports[`components/ChannelHeader should render correct menu when muted 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -827,6 +931,19 @@ exports[`components/ChannelHeader should render not active channel files 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -919,6 +1036,19 @@ exports[`components/ChannelHeader should render properly when custom status is e
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -1014,6 +1144,19 @@ exports[`components/ChannelHeader should render properly when custom status is s
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -1108,6 +1251,19 @@ exports[`components/ChannelHeader should render properly when empty 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -1202,6 +1358,19 @@ exports[`components/ChannelHeader should render properly when populated 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -1296,6 +1465,19 @@ exports[`components/ChannelHeader should render properly when populated with cha
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -1390,6 +1572,19 @@ exports[`components/ChannelHeader should render shared view 1`] = `
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"
@@ -1500,6 +1695,19 @@ exports[`components/ChannelHeader should render the pinned icon with the pinned 
           class="icon icon-dock-window"
         />
       </button>
+      <div
+        class="channel-message-export"
+      >
+        <button
+          aria-label="Export messages"
+          class="channel-header__icon"
+          id="channel-message-export-btn"
+        >
+          <i
+            class="icon icon-download-outline"
+          />
+        </button>
+      </div>
       <button
         aria-label="View Info"
         class="channel-header__icon"

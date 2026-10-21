@@ -19,6 +19,29 @@ export type ChannelStats = {
     files_count: number;
 };
 
+export type ChannelExportRequest = {
+    page?: number;
+    per_page?: number;
+    include_deleted?: boolean;
+    file_name?: string;
+    callback_url?: string;
+    since?: number;
+};
+
+export type ChannelExportStatus = 'pending' | 'running' | 'ready' | 'failed';
+
+export type ChannelExportJob = {
+    id: string;
+    channel_id: string;
+    status: ChannelExportStatus;
+    file_path: string;
+    post_count: number;
+    summary_html: string;
+    signature: string;
+    progress: number;
+    create_at: number;
+};
+
 export type ChannelNotifyProps = {
     desktop_threads: 'default' | 'all' | 'mention' | 'none';
     desktop: 'default' | 'all' | 'mention' | 'none';

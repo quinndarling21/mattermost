@@ -5855,6 +5855,14 @@
     "translation": "Unable to determine if the user belongs to a list of channels."
   },
   {
+    "id": "app.channel_export.not_found.app_error",
+    "translation": "Unable to find the channel export."
+  },
+  {
+    "id": "app.channel_export.query.app_error",
+    "translation": "Unable to load posts for the channel export."
+  },
+  {
     "id": "app.channel_guard.invalid_channel.app_error",
     "translation": "Channel ID is not a valid channel identifier."
   },
