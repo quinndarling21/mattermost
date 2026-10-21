@@ -48,6 +48,7 @@ const (
 // Channel Bookmarks
 const (
 	AuditEventCreateChannelBookmark          = "createChannelBookmark"          // create bookmark in channels
+	AuditEventCreateChannelExport            = "createChannelExport"            // export channel messages
 	AuditEventDeleteChannelBookmark          = "deleteChannelBookmark"          // delete bookmark
 	AuditEventUpdateChannelBookmark          = "updateChannelBookmark"          // update bookmark
 	AuditEventUpdateChannelBookmarkSortOrder = "updateChannelBookmarkSortOrder" // update display order of bookmarks
