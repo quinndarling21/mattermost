@@ -1,0 +1,124 @@
+.channel-message-export {
+    position: relative;
+    display: inline-flex;
+
+    &__panel {
+        position: absolute;
+        z-index: 20;
+        top: calc(100% + 4px);
+        right: 0;
+        display: flex;
+        width: 320px;
+        flex-direction: column;
+        padding: 12px;
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+        background: var(--center-channel-bg);
+        border-radius: 4px;
+        box-shadow: var(--elevation-4);
+        gap: 8px;
+        text-align: left;
+    }
+
+    &__title {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    &__row {
+        display: flex;
+        gap: 8px;
+
+        label {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            font-size: 12px;
+            font-weight: 600;
+            gap: 2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 4px 6px;
+            border: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+            background: var(--center-channel-bg);
+            border-radius: 4px;
+            color: var(--center-channel-color);
+            font-size: 12px;
+            font-weight: 400;
+        }
+    }
+
+    label.channel-message-export__row {
+        flex-direction: column;
+        font-size: 12px;
+        font-weight: 600;
+        gap: 2px;
+    }
+
+    &__checkbox {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 400;
+        gap: 6px;
+
+        input {
+            margin: 0;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    &__error {
+        color: var(--error-text);
+        font-size: 12px;
+    }
+
+    &__status {
+        display: flex;
+        flex-direction: column;
+        padding-top: 8px;
+        border-top: 1px solid rgba(var(--center-channel-color-rgb), 0.08);
+        font-size: 12px;
+        gap: 4px;
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__badge {
+        padding: 1px 6px;
+        border-radius: 10px;
+        background: rgba(var(--center-channel-color-rgb), 0.08);
+        font-weight: 600;
+        text-transform: uppercase;
+
+        &--ready {
+            background: rgba(var(--online-indicator-rgb), 0.16);
+            color: var(--online-indicator);
+        }
+
+        &--failed {
+            background: rgba(var(--error-text-color-rgb), 0.16);
+            color: var(--error-text);
+        }
+    }
+
+    &__summary p {
+        margin: 0;
+    }
+
+    &__path,
+    &__signature {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

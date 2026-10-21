@@ -14,6 +14,8 @@ import type {ChannelBookmark, ChannelBookmarkCreate, ChannelBookmarkPatch, Updat
 import type {ChannelCategory, OrderedChannelCategories} from '@mattermost/types/channel_categories';
 import type {
     Channel,
+    ChannelExportJob,
+    ChannelExportRequest,
     ChannelMemberCountsByGroup,
     ChannelMembership,
     ChannelModeration,
@@ -1972,6 +1974,20 @@ export default class Client4 {
         const param = includeFileCount ? '' : '?exclude_files_count=true';
         return this.doFetch<ChannelStats>(
             `${this.getChannelRoute(channelId)}/stats${param}`,
+            {method: 'get'},
+        );
+    };
+
+    createChannelExport = (channelId: string, request: ChannelExportRequest = {}) => {
+        return this.doFetch<ChannelExportJob>(
+            `${this.getChannelRoute(channelId)}/exports`,
+            {method: 'post', body: JSON.stringify(request)},
+        );
+    };
+
+    getChannelExport = (channelId: string, exportId: string) => {
+        return this.doFetch<ChannelExportJob>(
+            `${this.getChannelRoute(channelId)}/exports/${exportId}`,
             {method: 'get'},
         );
     };
