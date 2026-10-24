@@ -62,7 +62,7 @@ export function migrationBrief(m: MigrationModule): string {
   const jestPath = m.dir.replace(/^webapp\/channels\//, "");
   const files = m.testFiles.map((f) => `- \`${m.dir}/${f}\``).join("\n");
   const snaps = m.snapshots.map((f) => `- \`${m.dir}/${f}\``).join("\n");
-  return `You are one worker in the Enzyme -> React Testing Library migration factory (a BDK bot). Your module: **${m.title}**.
+  return `You are one worker in the Enzyme -> React Testing Library migration factory (an Agent SDK bot). Your module: **${m.title}**.
 
 ## Goal
 Migrate exactly these Enzyme tests (they use \`shallow\`/\`mount\` from \`enzyme\`) to React Testing Library, on a new branch from \`${BASE_BRANCH}\`, and open ONE pull request against \`${BASE_BRANCH}\`:
@@ -93,6 +93,6 @@ All tests in the module must pass and eslint must be clean. Fix anything that fa
 ## Pull request
 - Base \`${BASE_BRANCH}\`. Suggested branch: \`${m.branchHint}\` (any \`cursor/\` prefix is fine).
 - Title: \`test: migrate ${m.title} tests from Enzyme to React Testing Library\`
-- Body: a short summary of what each test now asserts, the exact Jest command you ran with its pass counts, and a line saying this PR was produced by the BDK migration-factory bot (module \`${m.id}\`). Include the standard \`release-note\` block with \`NONE\`.
+- Body: a short summary of what each test now asserts, the exact Jest command you ran with its pass counts, and a line saying this PR was produced by the Agent SDK migration-factory bot (module \`${m.id}\`). Include the standard \`release-note\` block with \`NONE\`.
 - Do not modify \`.github/\`, \`package.json\`, or lockfiles.`;
 }

@@ -4,7 +4,7 @@ import { BASE_BRANCH } from "./repo.js";
  * Factory preflight: make webapp CI on PRs into master actually run the Jest
  * jobs. Same change as commit 7217e5d on branch migration/enzyme-to-rtl.
  */
-export const ENABLE_JEST_CI_BRIEF = `You are the preflight worker of the Enzyme -> React Testing Library migration factory (a BDK bot).
+export const ENABLE_JEST_CI_BRIEF = `You are the preflight worker of the Enzyme -> React Testing Library migration factory (an Agent SDK bot).
 
 ## Problem
 In \`.github/workflows/webapp-ci.yml\` on \`${BASE_BRANCH}\`, the Jest jobs \`test-platform\` ("test (platform)"), \`test-mattermost-redux\` ("test (mattermost-redux)"), \`test-channels\` ("test (channels shard N/4)") and \`upload-coverage\` are gated on \`github.repository_owner == 'mattermost'\`, so on this fork (quinndarling21/mattermost) every PR into \`${BASE_BRANCH}\` skips Jest. The migration PRs need Jest to run.
@@ -23,11 +23,11 @@ Create a new branch from \`${BASE_BRANCH}\` (suggested: \`migration-factory/enab
 This is the same four-line change as commit 7217e5d58a3f300c5d25350f803b92a1512abe9a on branch \`migration/enzyme-to-rtl\`; you can compare with \`git show 7217e5d\` if that commit is fetchable. Do not change any other line or file. Validate the YAML still parses (e.g. \`python3 -c "import yaml,sys; yaml.safe_load(open('.github/workflows/webapp-ci.yml'))"\`).
 
 ## Pull request
-Open one PR against \`${BASE_BRANCH}\` titled \`ci: run webapp Jest jobs on the quinndarling21 fork\`. Body: what was skipped and why, the four \`if:\` lines changed, and a line saying it was opened by the BDK migration-factory bot as the factory's Jest-gate preflight. Include a \`release-note\` block with \`NONE\`.`;
+Open one PR against \`${BASE_BRANCH}\` titled \`ci: run webapp Jest jobs on the quinndarling21 fork\`. Body: what was skipped and why, the four \`if:\` lines changed, and a line saying it was opened by the Agent SDK migration-factory bot as the factory's Jest-gate preflight. Include a \`release-note\` block with \`NONE\`.`;
 
 /** The factory's CI-fix loop: a fresh cloud agent repairs a failing PR on its own branch. */
 export function ciFixBrief(prUrl: string, failure: string): string {
-  return `You are the CI-fix worker of the Enzyme -> React Testing Library migration factory (a BDK bot).
+  return `You are the CI-fix worker of the Enzyme -> React Testing Library migration factory (an Agent SDK bot).
 
 Pull request ${prUrl} has failing CI. Work directly on that PR's existing branch: push fix commits to it. Do not open a new PR, do not force-push, and do not change the PR's base.
 

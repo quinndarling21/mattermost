@@ -2,7 +2,7 @@ import type { ModelSetting } from "@cursor/bdk";
 
 /**
  * Every agent in the factory (the orchestrator turn and every cloud agent it
- * launches) runs Grok 4.7, High effort, Fast. BDK takes effort/speed as
+ * launches) runs Grok 4.7, High effort, Fast. The Agent SDK takes effort/speed as
  * params, not id suffixes. There is deliberately no `modelFallbacks`: if this
  * model is refused, the run fails loudly instead of switching models.
  */

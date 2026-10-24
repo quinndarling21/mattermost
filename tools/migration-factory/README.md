@@ -1,10 +1,10 @@
-# migration-factory (BDK bot)
+# migration-factory (Agent SDK bot)
 
-A [Grok Bot Development Kit](https://www.npmjs.com/package/@cursor/bdk) (`@cursor/bdk` 0.2.14)
+An [Agent SDK](https://cursor.com/docs/agent-sdk) (`@cursor/bdk` 0.2.14)
 project: agents defined as code, a folder of Markdown and TypeScript.
 
 It takes the Enzyme -> React Testing Library migration, splits it into modules,
-and hands each module to its **own Cursor Cloud Agent** through BDK's
+and hands each module to its **own Cursor Cloud Agent** through the Agent SDK's
 `cursor-cloud-agents` extension. Each cloud agent opens its own PR against
 `master`, which then goes through Bugbot, the Security Reviewer, webapp CI
 (Jest), the approval agent, and auto-merge.

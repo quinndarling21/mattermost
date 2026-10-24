@@ -1,4 +1,4 @@
-// BDK's Cursor Cloud Agents extension. Mounted as `cloud`, it contributes
+// The Agent SDK's Cursor Cloud Agents extension. Mounted as `cloud`, it contributes
 // cloud__launch / cloud__get / cloud__list / cloud__dump / cloud__reply /
 // cloud__cancel and the cloud__handoff skill. The factory's own tools call
 // the same launch path (launchCloudAgent), so every agent they start is

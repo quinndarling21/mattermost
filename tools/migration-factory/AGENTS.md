@@ -1,6 +1,6 @@
 # migration-factory
 
-Grok Bot Development Kit (BDK) project (`@cursor/bdk`). This file is
+Agent SDK project (`@cursor/bdk`). This file is
 for coding agents editing the project. The served agent's prompt is
 `bot/instructions.md`.
 
