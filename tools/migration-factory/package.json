@@ -5,7 +5,7 @@
   "description": "agent project: migration-factory",
   "scripts": {
     "check": "tsc --noEmit",
-    "dev": "bdk dev"
+    "dev": "agent-sdk dev"
   },
   "dependencies": {
     "@cursor/bdk": "^0.2.14",

@@ -7,10 +7,10 @@ for coding agents editing the project. The served agent's prompt is
 ## Loop
 
 ```bash
-bdk validate --dir .
-bdk info --dir . --json
-bdk run --dir . --message "..."
-bdk eval --dir .
+npx agent-sdk validate --dir .
+npx agent-sdk info --dir . --json
+npx agent-sdk run --dir . --message "..."
+npx agent-sdk eval --dir .
 npm run check
 ```
 
@@ -36,5 +36,5 @@ Run the CLI under Node, never Bun.
 
 - Package loop: `node_modules/@cursor/bdk/AGENTS.md`
 - Skills: `node_modules/@cursor/bdk/skills/` (`create-agent`, `deploy`, `evals`, `hillclimb`, `debug`)
-- Docs: `npx @cursor/bdk docs`
+- Docs: `npx agent-sdk docs`
 - LLM docs index: `node_modules/@cursor/bdk/dist/docs/llms.txt`

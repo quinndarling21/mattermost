@@ -42,20 +42,20 @@ Requires Node 22.13+ and `CURSOR_API_KEY` (or `bdk login`).
 ```bash
 cd tools/migration-factory
 npm install
-npx bdk validate --dir .
-npx bdk info --dir .
+npx agent-sdk validate --dir .
+npx agent-sdk info --dir .
 
 # serve with the local playground (sessions, tool calls, traces)
-npx bdk dev --dir . --port 3000
+npx agent-sdk dev --dir . --port 3000
 
 # fan out all three modules (one cloud agent + one PR each)
-npx bdk run --url http://127.0.0.1:3000/migration-factory \
+npx agent-sdk run --url http://127.0.0.1:3000/migration-factory \
   --message "Run the Enzyme to RTL migration: fan out all modules." --text
 
 # Jest-gate preflight / CI-fix loop
-npx bdk run --url http://127.0.0.1:3000/migration-factory --message "Run the Jest-gate preflight."
-npx bdk run --url http://127.0.0.1:3000/migration-factory \
+npx agent-sdk run --url http://127.0.0.1:3000/migration-factory --message "Run the Jest-gate preflight."
+npx agent-sdk run --url http://127.0.0.1:3000/migration-factory \
   --message "CI failed on https://github.com/quinndarling21/mattermost/pull/N: <job + log excerpt>. Launch the CI fix."
 ```
 
-Deterministic tool call without a model turn: `npx bdk call list_modules --dir .`
+Deterministic tool call without a model turn: `npx agent-sdk call list_modules --dir .`
