@@ -1,6 +1,6 @@
 # migration-factory (Agent SDK bot)
 
-An [Agent SDK](https://cursor.com/docs/agent-sdk) (`@cursor/bdk` 0.2.14)
+An [Agent SDK](https://cursor.com/docs/agent-sdk) (`@cursor/bdk` 0.2.29)
 project: agents defined as code, a folder of Markdown and TypeScript.
 
 It takes the Enzyme -> React Testing Library migration, splits it into modules,
@@ -37,7 +37,7 @@ Every agent in the flow (the orchestrator turn and every cloud agent) runs
 
 ## Run it
 
-Requires Node 22.13+ and `CURSOR_API_KEY` (or `bdk login`).
+Requires Node 22.13+ and `CURSOR_API_KEY` (or `agent-sdk login`).
 
 ```bash
 cd tools/migration-factory

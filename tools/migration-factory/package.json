@@ -8,7 +8,7 @@
     "dev": "agent-sdk dev"
   },
   "dependencies": {
-    "@cursor/bdk": "^0.2.14",
+    "@cursor/bdk": "0.2.29",
     "zod": "^3.25.0"
   },
   "devDependencies": {
