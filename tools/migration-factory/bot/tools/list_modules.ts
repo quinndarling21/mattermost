@@ -1,4 +1,4 @@
-import { defineTool } from "@cursor/bdk/tools";
+import { defineTool } from "@grok/agent-sdk/tools";
 import { z } from "zod";
 import { MODULES } from "../lib/modules.js";
 import { MODEL_LABEL } from "../lib/model.js";

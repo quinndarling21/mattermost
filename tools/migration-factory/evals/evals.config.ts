@@ -1,4 +1,4 @@
-import { defineEvalConfig } from "@cursor/bdk/evals";
+import { defineEvalConfig } from "@grok/agent-sdk/evals";
 
 export default defineEvalConfig({
   maxConcurrency: 5,

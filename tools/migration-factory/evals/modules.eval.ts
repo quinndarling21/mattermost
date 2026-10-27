@@ -1,4 +1,4 @@
-import { defineEval } from "@cursor/bdk/evals";
+import { defineEval } from "@grok/agent-sdk/evals";
 
 // Deterministic-ish smoke check that does NOT launch cloud agents: the
 // orchestrator must discover all three modules via list_modules.

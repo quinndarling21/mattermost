@@ -1,4 +1,4 @@
-import { defineAgent } from "@cursor/bdk";
+import { defineAgent } from "@grok/agent-sdk";
 import { GROK_47_HIGH_FAST } from "./lib/model.js";
 
 export default defineAgent({

@@ -1,6 +1,6 @@
 # migration-factory (Agent SDK bot)
 
-An [Agent SDK](https://cursor.com/docs/agent-sdk) (`@cursor/bdk` 0.2.29)
+An [Agent SDK](https://cursor.com/docs/agent-sdk) (`@grok/agent-sdk` 0.2.29)
 project: agents defined as code, a folder of Markdown and TypeScript.
 
 It takes the Enzyme -> React Testing Library migration, splits it into modules,
@@ -21,7 +21,7 @@ and hands each module to its **own Cursor Cloud Agent** through the Agent SDK's
 bot/
   agent.ts                        # defineAgent: model = Grok 4.7 High Fast, read-only harness tools
   instructions.md                 # orchestrator prompt (fan-out rules)
-  extensions/cloud.ts             # mounts @cursor/bdk/extensions/cursor-cloud-agents as `cloud`
+  extensions/cloud.ts             # mounts @grok/agent-sdk/extensions/cursor-cloud-agents as `cloud`
   lib/model.ts                    # grok-4.7 {reasoning_effort: high, fast: true, context: 256k}
   lib/modules.ts                  # the three modules + the per-module agent brief (STYLE_GUIDE rules)
   lib/tasks.ts                    # Jest-gate preflight brief + CI-fix brief

@@ -1,4 +1,4 @@
-import type { ModelSetting } from "@cursor/bdk";
+import type { ModelSetting } from "@grok/agent-sdk";
 
 /**
  * Every agent in the factory (the orchestrator turn and every cloud agent it

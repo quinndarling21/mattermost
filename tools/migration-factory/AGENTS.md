@@ -1,6 +1,6 @@
 # migration-factory
 
-Agent SDK project (`@cursor/bdk`). This file is
+Agent SDK project (`@grok/agent-sdk`). This file is
 for coding agents editing the project. The served agent's prompt is
 `bot/instructions.md`.
 
@@ -29,12 +29,12 @@ Run the CLI under Node, never Bun.
 - Grow host TypeScript for formatting, classification, or reply composition.
   That stays in instructions/skills. Host code owns auth, idempotency,
   evidence seeding, and side-effect gates.
-- Add npm deps on a first cut. Stick to what `@cursor/bdk` already ships.
+- Add npm deps on a first cut. Stick to what `@grok/agent-sdk` already ships.
 - Point `serve` at a parent folder during bring-up. It mounts every sibling.
 
 ## Pointers
 
-- Package loop: `node_modules/@cursor/bdk/AGENTS.md`
-- Skills: `node_modules/@cursor/bdk/skills/` (`create-agent`, `deploy`, `evals`, `hillclimb`, `debug`)
+- Package loop: `node_modules/@grok/agent-sdk/AGENTS.md`
+- Skills: `node_modules/@grok/agent-sdk/skills/` (`create-agent`, `deploy`, `evals`, `hillclimb`, `debug`)
 - Docs: `npx agent-sdk docs`
-- LLM docs index: `node_modules/@cursor/bdk/dist/docs/llms.txt`
+- LLM docs index: `node_modules/@grok/agent-sdk/dist/docs/llms.txt`

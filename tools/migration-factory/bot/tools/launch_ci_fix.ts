@@ -1,5 +1,5 @@
-import { defineTool } from "@cursor/bdk/tools";
-import { launchCloudAgent } from "@cursor/bdk/extensions/cursor-cloud-agents";
+import { defineTool } from "@grok/agent-sdk/tools";
+import { launchCloudAgent } from "@grok/agent-sdk/extensions/cursor-cloud-agents";
 import { z } from "zod";
 import { ciFixBrief } from "../lib/tasks.js";
 import { GROK_47_HIGH_FAST, MODEL_LABEL } from "../lib/model.js";
