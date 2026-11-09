@@ -148,7 +148,7 @@ func redirectURIMatchesGlobRecur(uri, pattern string, ui, pi int) bool {
 			if redirectURIMatchesGlobRecur(uri, pattern, ui, pi+1) {
 				return true
 			}
-			for ui < len(uri) {
+			for ui < len(uri) && uri[ui] != '/' {
 				ui++
 				if redirectURIMatchesGlobRecur(uri, pattern, ui, pi+1) {
 					return true

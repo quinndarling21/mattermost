@@ -137,6 +137,31 @@ func TestRedirectURIMatchesGlob(t *testing.T) {
 	})
 }
 
+func TestRedirectURIMatchesGlobSingleStarDoesNotCrossSlash(t *testing.T) {
+	tests := []struct {
+		name    string
+		uri     string
+		pattern string
+		want    bool
+	}{
+		{"attacker host before subdomain-looking path", "https://attacker.evil/x.example.com/callback", "https://*.example.com/callback", false},
+		{"attacker host with multiple path segments", "https://attacker.evil/a/b.example.com/callback", "https://*.example.com/callback", false},
+		{"path wildcard spanning segments", "https://example.com/a/b", "https://example.com/*", false},
+		{"port wildcard spanning into path", "http://localhost:1/evil/cb", "http://localhost:*/cb", false},
+		{"legitimate subdomain", "https://app.example.com/callback", "https://*.example.com/callback", true},
+		{"legitimate single path segment", "https://example.com/segment", "https://example.com/*", true},
+		{"legitimate port", "http://localhost:8065/cb", "http://localhost:*/cb", true},
+		{"double star still spans segments", "https://example.com/a/b/c", "https://example.com/**", true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, RedirectURIMatchesGlob(tc.uri, tc.pattern))
+			require.Equal(t, tc.want, RedirectURIMatchesAllowlist(tc.uri, []string{tc.pattern}))
+		})
+	}
+}
+
 func TestIsValidDCRRedirectURIPattern(t *testing.T) {
 	require.True(t, IsValidDCRRedirectURIPattern("https://example.com/**"))
 	require.True(t, IsValidDCRRedirectURIPattern("http://localhost:3000/cb"))
