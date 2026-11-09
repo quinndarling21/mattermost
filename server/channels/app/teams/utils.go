@@ -44,7 +44,7 @@ func IsEmailAddressAllowed(email string, allowedDomains []string) bool {
 		}
 		matched := false
 		for _, d := range domains {
-			if strings.HasSuffix(email, "@"+d) {
+			if strings.HasSuffix(email, d) {
 				matched = true
 				break
 			}

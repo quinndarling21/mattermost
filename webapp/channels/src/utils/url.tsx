@@ -85,7 +85,7 @@ export function isUrlSafe(url: string): boolean {
         unescaped = unescape(url);
     }
 
-    unescaped = unescaped.replace(/[^\w:]/g, '').toLowerCase();
+    unescaped = unescaped.trim().toLowerCase();
 
     return !unescaped.startsWith('javascript:') && // eslint-disable-line no-script-url
         !unescaped.startsWith('vbscript:') &&

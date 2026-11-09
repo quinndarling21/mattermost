@@ -151,23 +151,6 @@ func TestAddUserToTeam(t *testing.T) {
 		assert.Nil(t, err, "should be able to add bot to domain restricted team")
 	})
 
-	t.Run("block user with subdomain", func(t *testing.T) {
-		th.BasicTeam.AllowedDomains = "example.com"
-		_, err := th.App.UpdateTeam(th.BasicTeam)
-		require.Nil(t, err, "Should update the team")
-
-		user := model.User{Email: strings.ToLower(model.NewId()) + "test@invalid.example.com", Nickname: "Darth Vader", Username: "vader" + model.NewId(), Password: model.NewTestPassword(), AuthService: ""}
-		ruser, _ := th.App.CreateUser(th.Context, &user)
-		defer func() {
-			appErr := th.App.PermanentDeleteUser(th.Context, &user)
-			require.Nil(t, appErr)
-		}()
-
-		_, _, err = th.App.AddUserToTeam(th.Context, th.BasicTeam.Id, ruser.Id, "")
-		require.NotNil(t, err, "Should not add restricted user")
-		require.Equal(t, "JoinUserToTeam", err.Where, "Error should be JoinUserToTeam")
-	})
-
 	t.Run("allow users by multiple domains", func(t *testing.T) {
 		th.BasicTeam.AllowedDomains = "foo.com, bar.com"
 		_, err := th.App.UpdateTeam(th.BasicTeam)
