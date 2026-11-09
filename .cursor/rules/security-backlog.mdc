@@ -1,0 +1,28 @@
+---
+description: Where the security vulnerability backlog lives and how remediation work flows from Jira to a pull request
+alwaysApply: true
+---
+
+# Security backlog
+
+- The security vulnerability backlog is in Jira project `MM` on `https://quinnsworkspace-610b13be.atlassian.net`, grouped under the "Security vulnerability backlog" epic.
+- Find open vulnerabilities with JQL: `project = MM AND labels = security AND status = "To Do" ORDER BY priority DESC`.
+- Ticket lifecycle: **To Do** → **In Progress** (validated, work started) → **In Review** (PR open) → **Done**. A ticket that turns out not to be a vulnerability goes to **Done** with the label `not-a-vulnerability` and a comment explaining the evidence.
+
+## Branches and pull requests
+
+- `demo/security-backlog` is the baseline branch. Every fix branches from it and every PR targets it.
+- Fix branches are named `security/<KEY>-<short-slug>`, for example `security/MM-12-open-redirect`.
+- Open PRs with `gh pr create --repo quinndarling21/mattermost --base demo/security-backlog`. Never target `master` or upstream `mattermost/mattermost`.
+- PR titles use `[<KEY>] Security: <short description>`.
+
+## Remediation skills
+
+Work one ticket at a time, in this order:
+
+1. Validate the ticket (confirm it is a real, reachable vulnerability).
+2. `security-vuln-test-coverage`: write a regression test and prove it fails.
+3. `security-vuln-fix`: fix the code and prove the test passes.
+4. `security-vuln-pr`: commit, open the PR, update Jira.
+
+Test evidence for each ticket is recorded in `.cursor/security-evidence/<KEY>.json` (gitignored).

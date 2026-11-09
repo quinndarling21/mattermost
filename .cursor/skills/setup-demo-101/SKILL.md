@@ -91,6 +91,7 @@ Use this skill from the repository root.
 ## Notes
 
 - Before starting a new long-running app command, inspect existing terminals and reuse a healthy running stack when possible.
+- A running server is only healthy if Postgres is running too; the ping endpoint still answers `OK` when the database is down, and every login then fails. When reusing a server, check `docker ps --format '{{.Names}}' | grep -qx mattermost-postgres`, and if it is missing run `docker start mattermost-postgres mattermost-redis`.
 - If `docker info` fails, report Docker as unavailable instead of trying to work around it.
 - A healthy server responds at `http://127.0.0.1:8065/api/v4/system/ping`.
 - The local documentation site responds at `http://127.0.0.1:3001`.

@@ -31,5 +31,22 @@ if printf '%s' "$command" | grep -Eq 'git[[:space:]]+push.*(--force([^-]|$)|-f([
     "This command force-pushes, which can overwrite remote history. Confirm the branch and intent before approving."
 fi
 
+# Rule (mattermost-pull-request skill, security-backlog.mdc): PRs from this
+# fork default to upstream mattermost/mattermost unless --repo is explicit.
+if printf '%s' "$command" | grep -Eq 'gh[[:space:]]+pr[[:space:]]+create'; then
+  if ! printf '%s' "$command" | grep -Eq '(--repo|-R)[[:space:]=]+quinndarling21/mattermost([[:space:]]|$)'; then
+    emit "deny" \
+      "Blocked: PRs must target the quinndarling21/mattermost fork." \
+      "gh pr create must include \`--repo quinndarling21/mattermost\`. Without it, gh opens the PR against upstream mattermost/mattermost. Rerun with the explicit --repo flag."
+  fi
+
+  branch=$(git branch --show-current 2>/dev/null)
+  if [[ "$branch" == security/* ]] && ! printf '%s' "$command" | grep -Eq '(--base|-B)[[:space:]=]+demo/security-backlog([[:space:]]|$)'; then
+    emit "deny" \
+      "Blocked: security fix PRs must target demo/security-backlog." \
+      "Branch $branch is a security fix branch. Its PR must use \`--base demo/security-backlog\` so the diff contains only the fix. Rerun with that base."
+  fi
+fi
+
 # Everything else is allowed.
 emit "allow" "" ""
