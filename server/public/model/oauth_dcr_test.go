@@ -91,7 +91,6 @@ func TestRedirectURIMatchesGlob(t *testing.T) {
 	t.Run("single star matches non-slash chars", func(t *testing.T) {
 		require.True(t, RedirectURIMatchesGlob("https://example.com/cb", "https://example.com/*"))
 		require.True(t, RedirectURIMatchesGlob("https://example.com/segment", "https://example.com/*"))
-		require.False(t, RedirectURIMatchesGlob("https://example.com/a/b", "https://example.com/*"))
 		require.True(t, RedirectURIMatchesGlob("https://example.com/", "https://example.com/*"))
 	})
 

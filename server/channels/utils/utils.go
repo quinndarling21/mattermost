@@ -199,8 +199,8 @@ func ValidateWebAuthRedirectUrl(config *model.Config, redirectURL string) error 
 		return errors.New("SiteURL is not configured")
 	}
 
-	// Allow relative URLs - they're internal paths
-	if u.Scheme == "" {
+	// Allow relative URLs (no scheme/host) - they're internal paths
+	if u.Scheme == "" && u.Host == "" {
 		return nil
 	}
 	siteURL, err := url.Parse(*config.ServiceSettings.SiteURL)
