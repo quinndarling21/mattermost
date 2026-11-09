@@ -43,10 +43,11 @@ Run from the repository root. This undoes everything a demo run creates. It does
 
    `git status --short` should print nothing. `.cursor/hooks.json` is tracked, so step 2 already restored it.
 
-4. Reset the Jira tickets with the Atlassian MCP (site `quinnsworkspace-610b13be.atlassian.net`):
+4. Reset the Jira tickets with the Atlassian MCP (site `quinnsworkspace-610b13be.atlassian.net`, cloudId `bd7dc254-ec63-4026-9f13-d97c51fb68ad`):
    - Find them with JQL `project = MM AND labels = security`.
    - Transition each one to **To Do**.
-   - Remove the `not-a-vulnerability` label if present.
-   - Delete comments added during demo runs. Keep the description untouched. If the MCP cannot delete comments, list the ticket keys that still have comments so the user can clean them up.
+   - Remove the `not-a-vulnerability` label if present (set `labels` to the list without it).
+   - Keep the description untouched.
+   - The Atlassian MCP cannot delete comments. Use `listJiraIssueComments` and list every ticket key that still has comments, with a link, so the user can delete them in the Jira UI before the demo.
 
 5. Report: PRs closed, branches deleted, artifacts removed, and each ticket's status.

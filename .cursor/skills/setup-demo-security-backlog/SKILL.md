@@ -60,7 +60,7 @@ Run from the repository root. Read `DEMO-SECURITY-BACKLOG.md` for what the demo 
 6. Warm the Go build cache and Jest so the live test runs take seconds:
 
    ```bash
-   (cd server && go test ./channels/utils ./channels/app/teams ./channels/app/users -run 'TestNothing' -count=1)
+   (cd server && go test ./public/model ./channels/app/teams ./channels/app/users -run 'TestNothing' -count=1)
    (cd webapp/channels && npx jest src/utils/url.test.tsx)
    ```
 

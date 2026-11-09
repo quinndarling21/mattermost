@@ -37,7 +37,7 @@ The backlog lives in Jira project `MM` under the **Security vulnerability backlo
 
 | Ticket | Summary | Priority |
 | --- | --- | --- |
-| [MM-4](https://quinnsworkspace-610b13be.atlassian.net/browse/MM-4) | Open redirect after OAuth login via protocol-relative redirect_to | Highest |
+| [MM-4](https://quinnsworkspace-610b13be.atlassian.net/browse/MM-4) | OAuth redirect URI allowlist bypassed by single-wildcard matching | Highest |
 | [MM-5](https://quinnsworkspace-610b13be.atlassian.net/browse/MM-5) | Team allowed-domain restriction bypassed with lookalike email domains | High |
 | [MM-6](https://quinnsworkspace-610b13be.atlassian.net/browse/MM-6) | Stored XSS via javascript: link in message attachment title_link | High |
 | [MM-7](https://quinnsworkspace-610b13be.atlassian.net/browse/MM-7) | Account creation domain restriction uses suffix matching (CheckEmailDomain) | Medium |
@@ -81,10 +81,10 @@ Include short bad/good code examples in Go and TypeScript using generic cases (p
 /create-skill Create a project skill called security-vuln-validate in .cursor/skills/. It is the first step for any Jira security ticket in project MM, before anyone writes tests or code. Allow automatic invocation.
 
 The skill should:
-1. Fetch the ticket with the Atlassian MCP and extract the reported file and function, vulnerability class and CWE, attacker-controlled input, and claimed impact.
+1. Fetch the ticket with the Atlassian MCP (cloudId bd7dc254-ec63-4026-9f13-d97c51fb68ad) and extract the reported file and function, vulnerability class and CWE, attacker-controlled input, and claimed impact.
 2. Read the reported code and its callers, and trace the attacker-controlled input to the vulnerable check or sink.
 3. Build a concrete exploit input and work through what the current code does with it. Check reachability and whether another layer already blocks it.
-4. Decide a verdict: CONFIRMED (you can name an input and the line that accepts it), NOT_A_VULNERABILITY (the input is blocked or the path is unreachable), or NEEDS_INFO. Never confirm from pattern-matching alone.
+4. Decide a verdict: CONFIRMED (you can name an input and the line that accepts it), NOT_A_VULNERABILITY (the input is blocked or the path is unreachable), or NEEDS_INFO. Never confirm from pattern-matching alone. If the check is weaker than intended but a later layer blocks the input, it is NOT_A_VULNERABILITY, and the comment should recommend a hardening follow-up naming the weak line.
 5. Update Jira. CONFIRMED: comment with evidence and move to In Progress. NOT_A_VULNERABILITY: comment with evidence, add the label not-a-vulnerability, and move to Done. NEEDS_INFO: comment with questions and leave it in To Do.
 
 End with a fixed output block (VERDICT, Ticket, Location, Class with CWE, Exploit input, Current behavior, Expected safe behavior, Evidence) that the security-vuln-test-coverage skill consumes.
@@ -111,7 +111,7 @@ Make the script executable and test it with a fake evidence file before finishin
 ```text
 /create-subagent Create a project subagent called vuln-remediator in .cursor/agents/ that remediates one Jira security ticket end to end. Make its name and description clearly different from the existing security-reviewer subagent.
 
-- Input: a ticket key, or otherwise the first result of: project = MM AND labels = security AND status = "To Do" ORDER BY priority DESC.
+- Input: a ticket key, or otherwise the first result of: project = MM AND labels = security AND status = "To Do" ORDER BY priority DESC (Atlassian MCP, cloudId bd7dc254-ec63-4026-9f13-d97c51fb68ad).
 - Start from an up-to-date demo/security-backlog branch. Stop if there are uncommitted changes outside .cursor/ (changes inside .cursor/ are expected and must never be committed with a fix).
 - Follow .cursor/skills/security-vuln-validate/SKILL.md. Stop and report unless the verdict is CONFIRMED.
 - Follow .cursor/skills/security-vuln-test-coverage/SKILL.md. Stop if the new test does not fail.
@@ -119,7 +119,7 @@ Make the script executable and test it with a fake evidence file before finishin
 - Follow .cursor/skills/security-vuln-pr/SKILL.md to open the PR and move the ticket to In Review.
 - If a hook blocks a command, fix the underlying problem and retry; never work around a hook.
 
-Final report: ticket and verdict, root cause in one or two sentences, regression test before/after, PR URL and Jira status, and anything deliberately left out of scope.
+Final report: ticket and verdict, root cause in one or two sentences, regression test before/after, PR URL and Jira status, and anything deliberately left out of scope. If it stopped at validation, report the verdict, Jira status, and any hardening follow-up instead of the test and PR lines.
 ```
 
 ## Run the demo

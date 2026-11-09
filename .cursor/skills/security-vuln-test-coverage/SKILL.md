@@ -11,7 +11,9 @@ The goal is a test that fails today because of the vulnerability and will pass o
 
 ## Workflow
 
-1. Start from a clean baseline and create the fix branch:
+Run every command from the repository root. The shell keeps its working directory between commands, so return to the root after any `cd`.
+
+1. Create the fix branch from the baseline. Skip the checkout and pull if you are already on a freshly pulled `demo/security-backlog`:
 
    ```bash
    git checkout demo/security-backlog

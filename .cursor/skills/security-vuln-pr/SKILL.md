@@ -9,9 +9,9 @@ Input: a Jira ticket key whose evidence file `.cursor/security-evidence/<KEY>.js
 
 ## Workflow
 
-1. Confirm the current branch matches the evidence `branch` and that `git status` only shows the fix and its test. Do not commit the evidence file (it is gitignored).
+1. Confirm the current branch matches the evidence `branch`. `git status` may also show changes under `.cursor/`; those are never part of a fix.
 
-2. Commit:
+2. Commit only the named files. Never use `git add -A` or `git add .`:
 
    ```bash
    git add <test file> <fixed source files>
@@ -51,7 +51,7 @@ Input: a Jira ticket key whose evidence file `.cursor/security-evidence/<KEY>.js
 
    Do not include working exploit payloads beyond what the test already contains.
 
-5. Update Jira (site `quinnsworkspace-610b13be.atlassian.net`) with the Atlassian MCP:
+5. Update Jira with the Atlassian MCP (site `quinnsworkspace-610b13be.atlassian.net`, cloudId `bd7dc254-ec63-4026-9f13-d97c51fb68ad`):
    - Add a comment with the PR URL, the regression test name, and the before/after results.
    - Transition the ticket to **In Review** (`transitionJiraIssue`, transition name `In Review`).
 
