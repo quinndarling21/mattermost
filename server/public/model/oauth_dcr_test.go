@@ -137,6 +137,59 @@ func TestRedirectURIMatchesGlob(t *testing.T) {
 	})
 }
 
+func TestRedirectURIMatchesGlobSingleStarDoesNotCrossSlash(t *testing.T) {
+	testCases := []struct {
+		name    string
+		uri     string
+		pattern string
+		matches bool
+	}{
+		{
+			name:    "host wildcard rejects attacker host with path suffix",
+			uri:     "https://attacker.evil/x.example.com/callback",
+			pattern: "https://*.example.com/callback",
+			matches: false,
+		},
+		{
+			name:    "host wildcard rejects attacker host with multiple path segments",
+			uri:     "https://attacker.evil/a/b.example.com/callback",
+			pattern: "https://*.example.com/callback",
+			matches: false,
+		},
+		{
+			name:    "path wildcard rejects nested path segments",
+			uri:     "https://example.com/a/b",
+			pattern: "https://example.com/*",
+			matches: false,
+		},
+		{
+			name:    "host wildcard allows subdomain",
+			uri:     "https://app.example.com/callback",
+			pattern: "https://*.example.com/callback",
+			matches: true,
+		},
+		{
+			name:    "path wildcard allows single segment",
+			uri:     "https://example.com/callback",
+			pattern: "https://example.com/*",
+			matches: true,
+		},
+		{
+			name:    "double star still crosses slashes",
+			uri:     "https://example.com/a/b",
+			pattern: "https://example.com/**",
+			matches: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.matches, RedirectURIMatchesGlob(tc.uri, tc.pattern))
+			require.Equal(t, tc.matches, RedirectURIMatchesAllowlist(tc.uri, []string{tc.pattern}))
+		})
+	}
+}
+
 func TestIsValidDCRRedirectURIPattern(t *testing.T) {
 	require.True(t, IsValidDCRRedirectURIPattern("https://example.com/**"))
 	require.True(t, IsValidDCRRedirectURIPattern("http://localhost:3000/cb"))
