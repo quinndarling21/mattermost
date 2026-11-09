@@ -112,7 +112,7 @@ Make the script executable and test it with a fake evidence file before finishin
 /create-subagent Create a project subagent called vuln-remediator in .cursor/agents/ that remediates one Jira security ticket end to end. Make its name and description clearly different from the existing security-reviewer subagent.
 
 - Input: a ticket key, or otherwise the first result of: project = MM AND labels = security AND status = "To Do" ORDER BY priority DESC.
-- Start from a clean, up-to-date demo/security-backlog branch; stop if the working tree is dirty.
+- Start from an up-to-date demo/security-backlog branch. Stop if there are uncommitted changes outside .cursor/ (changes inside .cursor/ are expected and must never be committed with a fix).
 - Follow .cursor/skills/security-vuln-validate/SKILL.md. Stop and report unless the verdict is CONFIRMED.
 - Follow .cursor/skills/security-vuln-test-coverage/SKILL.md. Stop if the new test does not fail.
 - Follow .cursor/skills/security-vuln-fix/SKILL.md. Never edit a test to make it pass.
