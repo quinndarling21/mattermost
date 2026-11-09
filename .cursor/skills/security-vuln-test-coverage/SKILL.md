@@ -41,6 +41,10 @@ Run every command from the repository root. The shell keeps its working director
    | Go server | `cd server && go test ./<package path> -run '<TestName>' -count=1` |
    | Webapp | `cd webapp/channels && npx jest <path/to/file.test.tsx> -t '<test name>'` |
 
+   Go package paths are relative to `server/`. Code under `server/public/` is a separate module but works through `server/go.work`, for example `cd server && go test ./public/model ...`.
+
+   Run the command exactly as shown, with nothing chained after it, so its exit code is the test result. A non-zero exit with the assertion on the exploit input in the output is the expected failure.
+
    If the test passes, the vulnerability is not reproduced. Stop and report that back instead of continuing.
 
 5. Record the evidence so later steps and hooks can re-run the same test:

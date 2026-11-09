@@ -53,9 +53,12 @@ Run from the repository root. Read `DEMO-SECURITY-BACKLOG.md` for what the demo 
 
    ```bash
    gh auth status
+   git config user.email
    ```
 
-5. Check the Jira backlog with the Atlassian MCP. Run JQL `project = MM AND labels = security ORDER BY key ASC` and confirm there are four tickets, all in **To Do**, with no `not-a-vulnerability` label. If not, run `reset-demo-security-backlog`.
+   If `git config user.email` prints nothing, ask the user for a name and email and set them with `git config user.name` / `git config user.email`. Otherwise every demo commit prints an "identity set automatically" warning.
+
+5. Check the Jira backlog with the Atlassian MCP. Run JQL `project = MM AND labels = security ORDER BY key ASC` and confirm there are four tickets, all in **To Do**, with no `not-a-vulnerability` label. If not, run `reset-demo-security-backlog`. Also check each ticket has no comments (`listJiraIssueComments`); the MCP cannot delete them, so list leftovers for the user to delete in the Jira UI.
 
 6. Warm the Go build cache and Jest so the live test runs take seconds:
 

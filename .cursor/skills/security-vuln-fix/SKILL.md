@@ -7,6 +7,8 @@ description: Implement the minimal fix for a confirmed security vulnerability an
 
 Input: a Jira ticket key with a recorded failing test in `.cursor/security-evidence/<KEY>.json`.
 
+Run every command from the repository root. The shell keeps its working directory between commands, so return to the root after any `cd`. Run test commands with nothing chained after them, so the exit code is the test result.
+
 ## Workflow
 
 1. Read the evidence file and confirm you are on its `branch`. Re-run `test_command` once and confirm it still fails.
@@ -39,10 +41,10 @@ Input: a Jira ticket key with a recorded failing test in `.cursor/security-evide
    - Fails on the baseline too: it is pre-existing. Note it in the report and leave it alone.
    - Passes on the baseline: your fix caused it. Fix the application code and repeat. Never change a test to make it pass.
 
-5. Update the evidence file with the passing run:
+5. Update the evidence file with the passing run. The fix is not committed yet; `security-vuln-pr` commits it.
 
    ```json
-   "green": {"head_commit": "<git rev-parse HEAD>", "result": "pass", "package_command": "<command from step 4>"}
+   "green": {"result": "pass", "package_command": "<command from step 4>"}
    ```
 
 ## Output

@@ -81,7 +81,7 @@ Include short bad/good code examples in Go and TypeScript using generic cases (p
 /create-skill Create a project skill called security-vuln-validate in .cursor/skills/. It is the first step for any Jira security ticket in project MM, before anyone writes tests or code. Allow automatic invocation.
 
 The skill should:
-1. Fetch the ticket with the Atlassian MCP (cloudId bd7dc254-ec63-4026-9f13-d97c51fb68ad) and extract the reported file and function, vulnerability class and CWE, attacker-controlled input, and claimed impact.
+1. Fetch the ticket with the Atlassian MCP (cloudId bd7dc254-ec63-4026-9f13-d97c51fb68ad) and extract the reported file and function, vulnerability class and CWE, attacker-controlled input, and claimed impact. Read existing comments too, as context rather than proof.
 2. Read the reported code and its callers, and trace the attacker-controlled input to the vulnerable check or sink.
 3. Build a concrete exploit input and work through what the current code does with it. Check reachability and whether another layer already blocks it.
 4. Decide a verdict: CONFIRMED (you can name an input and the line that accepts it), NOT_A_VULNERABILITY (the input is blocked or the path is unreachable), or NEEDS_INFO. Never confirm from pattern-matching alone. If the check is weaker than intended but a later layer blocks the input, it is NOT_A_VULNERABILITY, and the comment should recommend a hardening follow-up naming the weak line.
